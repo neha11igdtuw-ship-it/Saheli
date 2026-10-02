@@ -1,0 +1,14 @@
+
+EMERGENCY SOS ALERT
+===================
+To: neha125btcse25@igdtuw.ac.in
+From: neha
+Location: Current Location
+Map: https://www.google.com/maps?q=28.5114368,77.08672
+Time: 12:11 PM, November 03, 2025
+
+ACTION REQUIRED:
+- Call neha immediately
+- If no response, contact police (100)
+- Check the map location
+            

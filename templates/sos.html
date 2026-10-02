@@ -1,0 +1,476 @@
+{% extends "base.html" %}
+
+{% block title %}SOS Alert - Saheli{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+        text-align: center;
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .emergency-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .sos-button {
+        background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
+        border: 1px solid rgba(180, 83, 9, 0.35);
+        color: #0b1220;
+    }
+
+    .sos-button:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(15, 23, 42, 0.18);
+    }
+
+    .sos-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .sos-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .sos-description {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .features-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+    }
+
+    .features-card h2 {
+        color: #0b1220;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: start;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f1f5f9;
+        border-radius: 12px;
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+    }
+
+    .feature-content h3 {
+        color: #0b1220;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .feature-content p {
+        color: #475569;
+        font-size: 0.9rem;
+    }
+
+    .alerts-history {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+    }
+
+    .alerts-history h2 {
+        color: #0b1220;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-item {
+        padding: 1rem;
+        background: #f1f5f9;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border-left: 5px solid #0f766e;
+    }
+
+    .alert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .alert-type {
+        font-weight: 700;
+        color: #0b1220;
+    }
+
+    .alert-date {
+        font-size: 0.85rem;
+        color: #475569;
+    }
+
+    .alert-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .alert-status.active {
+        background: #b45309;
+        color: #ffffff;
+    }
+
+    .alert-status.resolved {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #475569;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>🚨 Emergency SOS</h1>
+        <p>Rapid alert system to notify your trusted contacts with your location.</p>
+    </div>
+
+    <div class="emergency-actions">
+        <button class="sos-button" onclick="triggerSOS('manual')">
+            <div class="sos-icon">🚨</div>
+            <div class="sos-title">Emergency SOS</div>
+            <div class="sos-description">Alert all trusted contacts NOW</div>
+        </button>
+
+        <button class="sos-button" onclick="callEmergencyContact()">
+            <div class="sos-icon">☎️</div>
+            <div class="sos-title">Call Trusted Contact</div>
+            <div class="sos-description">Direct call to your primary trusted contact</div>
+        </button>
+
+        <button class="sos-button" onclick="showFakeCallOptions()">
+            <div class="sos-icon">📞</div>
+            <div class="sos-title">Fake Call (Escape)</div>
+            <div class="sos-description">Pretend to receive a call</div>
+        </button>
+
+        <button class="sos-button" onclick="triggerSOS('voice')">
+            <div class="sos-icon">🎤</div>
+            <div class="sos-title">Voice SOS</div>
+            <div class="sos-description">Voice-activated alert</div>
+        </button>
+
+        <button class="sos-button" onclick="triggerSOS('gesture')">
+            <div class="sos-icon">🤳</div>
+            <div class="sos-title">Gesture SOS</div>
+            <div class="sos-description">Shake to activate</div>
+        </button>
+
+        <button class="sos-button" onclick="triggerSOS('offline')">
+            <div class="sos-icon">📱</div>
+            <div class="sos-title">Offline SOS</div>
+            <div class="sos-description">SMS-based alert</div>
+        </button>
+    </div>
+
+    <div class="features-card">
+        <h2>SOS Features</h2>
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-icon">📍</div>
+                <div class="feature-content">
+                    <h3>Live Location Sharing</h3>
+                    <p>Your real-time location is automatically shared with your trusted circle</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">☎️</div>
+                <div class="feature-content">
+                    <h3>Call Trusted Contact (REAL)</h3>
+                    <p>Directly calls your trusted contact’s phone number (real call).</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📞</div>
+                <div class="feature-content">
+                    <h3>Fake Call (Escape Tool)</h3>
+                    <p>Shows fake incoming call screen to help you escape dangerous situations - NOT a real call!</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🌐</div>
+                <div class="feature-content">
+                    <h3>Offline Mode</h3>
+                    <p>Works even with poor connectivity using SMS</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="alerts-history">
+        <h2>📊 Recent Alerts</h2>
+        {% if recent_alerts %}
+            {% for alert in recent_alerts %}
+                <div class="alert-item">
+                    <div class="alert-header">
+                        <span class="alert-type">{{ alert.alert_type.title() }} SOS</span>
+                        <span class="alert-status {% if alert.is_resolved %}resolved{% else %}active{% endif %}">
+                            {% if alert.is_resolved %}✓ Resolved{% else %}🚨 Active{% endif %}
+                        </span>
+                    </div>
+                    <div class="alert-date">
+                        {{ alert.triggered_at.strftime('%B %d, %Y at %I:%M %p') }}
+                    </div>
+                    {% if alert.location_address %}
+                        <div style="color: #475569; font-size: 0.9rem; margin-top: 0.5rem;">
+                            📍 {{ alert.location_address }}
+                        </div>
+                    {% endif %}
+                    {% if not alert.is_resolved %}
+                        <form method="POST" action="{{ url_for('resolve_sos', alert_id=alert.id) }}" style="margin-top: 1rem;">
+                            <button type="submit" style="padding: 0.5rem 1rem; background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600;">
+                                Mark as Resolved
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🕘</div>
+                <h3 style="color: #0b1220; margin-bottom: 0.5rem;">No Alerts Yet</h3>
+                <p>You haven't triggered any SOS alerts.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function triggerSOS(alertType) {
+        const confirmation = confirm(`🚨 Trigger ${alertType.toUpperCase()} SOS?\n\nThis will alert all your trusted contacts!`);
+        
+        if (!confirmation) return;
+
+        // Get current location if available
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                sendSOSAlert(alertType, position.coords.latitude, position.coords.longitude);
+            }, function(error) {
+                sendSOSAlert(alertType, null, null);
+            });
+        } else {
+            sendSOSAlert(alertType, null, null);
+        }
+    }
+
+    function sendSOSAlert(alertType, latitude, longitude) {
+        const formData = new FormData();
+        formData.append('alert_type', alertType);
+        formData.append('latitude', latitude);
+        formData.append('longitude', longitude);
+        formData.append('location_address', 'Current Location');
+
+        fetch('{{ url_for("trigger_sos") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ SOS alert sent successfully to your trusted contacts.\n\nHelp is on the way.');
+                location.reload();
+            } else {
+                alert('❌ Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('❌ Error sending SOS. Please try again.');
+            console.error('Error:', error);
+        });
+    }
+
+    // Gesture detection (shake to SOS)
+    if (window.DeviceMotionEvent) {
+        let lastX = 0, lastY = 0, lastZ = 0;
+        let shakeThreshold = 15;
+
+        window.addEventListener('devicemotion', function(event) {
+            const acceleration = event.accelerationIncludingGravity;
+            const deltaX = Math.abs(acceleration.x - lastX);
+            const deltaY = Math.abs(acceleration.y - lastY);
+            const deltaZ = Math.abs(acceleration.z - lastZ);
+
+            if (deltaX + deltaY + deltaZ > shakeThreshold) {
+                // Shake detected!
+                const autoTrigger = confirm('🤳 Shake detected!\n\nTrigger Emergency SOS?');
+                if (autoTrigger) {
+                    triggerSOS('gesture');
+                }
+            }
+
+            lastX = acceleration.x;
+            lastY = acceleration.y;
+            lastZ = acceleration.z;
+        });
+    }
+
+    // Call emergency contact function
+    function callEmergencyContact() {
+        // Get phone numbers from trusted contacts (convert to plain objects)
+        const contacts = [
+            {% for contact in user.trusted_contacts %}
+            {
+                name: "{{ contact.name }}",
+                phone_number: "{{ contact.phone_number }}",
+                email: "{{ contact.email }}",
+                is_primary: {{ 'true' if contact.is_primary else 'false' }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+        
+        if (!contacts || contacts.length === 0) {
+            alert('❌ No trusted contacts added!\n\nPlease add trusted contacts with phone numbers first.');
+            window.location.href = '/trusted-circle';
+            return;
+        }
+
+        // Find primary contact or first contact with phone
+        let contactToCall = contacts.find(c => c.is_primary && c.phone_number) || 
+                           contacts.find(c => c.phone_number);
+
+        if (!contactToCall) {
+            alert('❌ No trusted contacts with phone numbers found!');
+            return;
+        }
+
+        // Show confirmation dialog
+        const callConfirm = confirm(
+            `☎️ CALL ${contactToCall.name.toUpperCase()}?\n\n` +
+            `Phone: ${contactToCall.phone_number}\n\n` +
+            `This will ACTUALLY CALL your trusted contact.\n` +
+            `Your phone dialer will open.`
+        );
+
+        if (callConfirm) {
+            // Best-effort: notify via backend email (does not block the call)
+            try {
+                const fd = new FormData();
+                fd.append('phone_number', contactToCall.phone_number);
+
+                // sendBeacon is resilient to navigation; fallback to fetch keepalive
+                const ok = navigator.sendBeacon && navigator.sendBeacon('/notify-call', fd);
+                if (!ok) {
+                    fetch('/notify-call', { method: 'POST', body: fd, keepalive: true })
+                        .catch(() => {});
+                }
+            } catch (e) {
+                // Ignore notification errors; call should still proceed
+            }
+
+            // Use tel: protocol to initiate REAL call
+            window.location.href = `tel:${contactToCall.phone_number}`;
+        }
+    }
+
+    // Show fake call options
+    function showFakeCallOptions() {
+        const options = [
+            'Mom 👩',
+            'Dad 👨', 
+            'Boss 💼',
+            'Friend 👥',
+            'Doctor 🏥',
+            'Custom Name'
+        ];
+
+        const choice = prompt(
+            '📞 FAKE CALL (Escape Tool)\n\n' +
+            'Who should "call" you?\n' +
+            'Choose a number or type a name:\n\n' +
+            '1. Mom\n' +
+            '2. Dad\n' +
+            '3. Boss\n' +
+            '4. Friend\n' +
+            '5. Doctor\n' +
+            '6. Custom Name\n\n' +
+            'Enter 1-6 or type a name:'
+        );
+
+        if (!choice) return;
+
+        let callerName = 'Mom';
+        
+        switch(choice.trim()) {
+            case '1': callerName = 'Mom'; break;
+            case '2': callerName = 'Dad'; break;
+            case '3': callerName = 'Boss'; break;
+            case '4': callerName = 'Friend'; break;
+            case '5': callerName = 'Dr. Sharma'; break;
+            case '6': 
+                callerName = prompt('Enter caller name:') || 'Mom';
+                break;
+            default:
+                callerName = choice;
+        }
+
+        // Generate realistic phone number
+        window.location.href = `/fake-call?name=${encodeURIComponent(callerName)}`;
+    }
+
+</script>
+{% endblock %}
+

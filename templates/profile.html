@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Saheli{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        color: #0b1220;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+    }
+
+    .profile-card h2 {
+        color: #0b1220;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 15px;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.25);
+    }
+
+    .toggle-switch {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #f1f5f9;
+        border-radius: 15px;
+        margin-bottom: 1rem;
+    }
+
+    .toggle-info h3 {
+        color: #0b1220;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .toggle-info p {
+        color: #475569;
+        font-size: 0.9rem;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background: #0f766e;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    .btn-update {
+        padding: 0.75rem 2rem;
+        background: #0f766e;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
+    }
+
+    .btn-update:hover {
+        background: #0a5f59;
+        transform: translateY(-2px);
+    }
+
+    .danger-zone {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid rgba(185, 28, 28, 0.35);
+    }
+
+    .danger-zone h2 {
+        color: #ef4444;
+        margin-bottom: 1rem;
+    }
+
+    .btn-danger {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>⚙️ Profile & Settings</h1>
+        <p>Manage your account and safety preferences.</p>
+    </div>
+
+    <div class="profile-card">
+        <h2>👤 Personal Information</h2>
+        <form method="POST" action="{{ url_for('update_profile') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" value="{{ user.username }}" disabled>
+                <small style="color: #475569; font-size: 0.85rem;">Username cannot be changed</small>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ user.email }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone_number">Phone Number</label>
+                <input type="tel" id="phone_number" name="phone_number" value="{{ user.phone_number if user.phone_number else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="emergency_contact">Emergency Contact</label>
+                <input type="tel" id="emergency_contact" name="emergency_contact" value="{{ user.emergency_contact if user.emergency_contact else '' }}">
+            </div>
+
+            <button type="submit" class="btn-update">Update Profile</button>
+        </form>
+    </div>
+
+    <div class="profile-card">
+        <h2>🔧 Safety Settings</h2>
+        
+        <div class="toggle-switch">
+            <div class="toggle-info">
+                <h3>Adaptive Safety Mode</h3>
+                <p>Automatically activate tracking when entering unsafe zones</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="adaptive-mode-toggle" 
+                       {% if user.adaptive_mode_enabled %}checked{% endif %}
+                       onchange="toggleAdaptiveMode()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div style="padding: 1rem; background: #f1f5f9; border-radius: 15px;">
+            <p style="color: #475569; font-size: 0.9rem;">
+                <strong>Tip:</strong> When Adaptive Mode is enabled, Saheli will automatically track your location 
+                and send alerts when you enter areas with low safety scores.
+            </p>
+        </div>
+    </div>
+
+    <div class="profile-card">
+        <h2>📊 Account Stats</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div style="text-align: center; padding: 1.5rem; background: #f1f5f9; border-radius: 15px;">
+                <div style="font-size: 2rem; color: #0f766e; font-weight: 700; margin-bottom: 0.5rem;">
+                    {{ user.created_at.strftime('%B %Y') }}
+                </div>
+                <div style="color: #475569; font-weight: 600;">Member Since</div>
+            </div>
+            <div style="text-align: center; padding: 1.5rem; background: #f1f5f9; border-radius: 15px;">
+                <div style="font-size: 2rem; color: #0f766e; font-weight: 700; margin-bottom: 0.5rem;">
+                    {{ user.trusted_contacts|length }}
+                </div>
+                <div style="color: #475569; font-weight: 600;">Trusted Contacts</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="danger-zone">
+        <h2>⚠️ Danger Zone</h2>
+        <p style="color: #475569; margin-bottom: 1rem;">
+            Actions in this section are irreversible. Please be careful!
+        </p>
+        <button class="btn-danger" onclick="alert('This feature will be available soon!')">
+            Delete Account
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleAdaptiveMode() {
+        fetch('{{ url_for("toggle_adaptive_mode") }}', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const status = data.enabled ? 'enabled' : 'disabled';
+                alert(`✅ Adaptive Safety Mode ${status}.`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ Error updating settings');
+        });
+    }
+</script>
+{% endblock %}
+

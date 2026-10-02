@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Saheli{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+        padding: 3rem;
+        width: 100%;
+        max-width: 450px;
+        animation: fadeInUp 0.5s ease-out;
+        border: 1px solid #cbd5e1;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-card::before {
+        content: '';
+    }
+
+    .auth-card::after {
+        content: '';
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .auth-card h1 {
+        color: #0b1220;
+        margin-bottom: 0.5rem;
+        font-size: 2.2rem;
+        text-align: center;
+        text-shadow: none;
+    }
+
+    .auth-card h1::before {
+        content: '';
+    }
+
+    .auth-card h1::after {
+        content: '';
+    }
+
+    .auth-card .subtitle {
+        color: #475569;
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 1rem;
+        font-style: normal;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #475569;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.25);
+        background: white;
+    }
+
+    .form-group input::placeholder {
+        color: #9ca3af;
+    }
+
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #666;
+    }
+
+    .remember-me input[type="checkbox"] {
+        width: auto;
+        cursor: pointer;
+    }
+
+    .forgot-password {
+        color: #0f766e;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .forgot-password:hover {
+        text-decoration: underline;
+        color: #0a5f59;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 1rem;
+        background: #0f766e;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
+        text-shadow: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16);
+        background: #0a5f59;
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .auth-footer a {
+        color: #0f766e;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+        color: #0a5f59;
+    }
+
+    .safety-features {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .safety-features h3 {
+        color: #0b1220;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .feature-item span {
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <h1>Welcome Back</h1>
+    <p class="subtitle">Sign in to access your safety tools.</p>
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <div class="form-group">
+            <label for="username_or_email">Username or Email</label>
+            <input type="text" id="username_or_email" name="username_or_email" 
+                   placeholder="Enter your username or email" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" 
+                   placeholder="Enter your password" required>
+        </div>
+
+        <div class="form-options">
+            <label class="remember-me">
+                <input type="checkbox" name="remember_me">
+                <span>Remember me</span>
+            </label>
+            <a href="#" class="forgot-password">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-primary">Login</button>
+    </form>
+
+    <div class="auth-footer">
+        Don't have an account? <a href="{{ url_for('signup') }}">Sign up now</a>
+    </div>
+
+    <div class="safety-features" aria-label="Safety features">
+        <h3>Safety Features</h3>
+        <div class="features-grid">
+            <div class="feature-item">
+                <span>🛡️</span>
+                <span>Emergency SOS</span>
+            </div>
+            <div class="feature-item">
+                <span>📍</span>
+                <span>Live Location</span>
+            </div>
+            <div class="feature-item">
+                <span>👯‍♀️</span>
+                <span>Trusted Contacts</span>
+            </div>
+            <div class="feature-item">
+                <span>🔔</span>
+                <span>Alert System</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add any login-specific JavaScript here
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const username = document.getElementById('username_or_email').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!username || !password) {
+            e.preventDefault();
+            alert('Please fill in all fields');
+            return false;
+        }
+    });
+</script>
+{% endblock %}
+

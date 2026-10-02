@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+
+{% block title %}Community - Saheli{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        color: #0b1220;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .submit-report-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+    }
+
+    .submit-report-card h2 {
+        color: #0b1220;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 15px;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.25);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .report-type-selector {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .report-type-option {
+        padding: 1rem;
+        background: #f1f5f9;
+        border: 2px solid transparent;
+        border-radius: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .report-type-option:hover {
+        border-color: rgba(20, 184, 166, 0.7);
+        transform: translateY(-2px);
+    }
+
+    .report-type-option input[type="radio"] {
+        display: none;
+    }
+
+    .report-type-option input[type="radio"]:checked + label {
+        background: #0f766e;
+        color: white;
+        border-radius: 12px;
+        padding: 0.5rem;
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 0.5rem;
+        font-size: 2rem;
+        cursor: pointer;
+    }
+
+    .rating-star {
+        transition: all 0.2s ease;
+    }
+
+    .rating-star:hover,
+    .rating-star.selected {
+        transform: scale(1.2);
+    }
+
+    .btn-submit {
+        padding: 0.75rem 2rem;
+        background: #0f766e;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
+    }
+
+    .btn-submit:hover {
+        background: #0a5f59;
+        transform: translateY(-2px);
+    }
+
+    .reports-list {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+    }
+
+    .reports-list h2 {
+        color: #0b1220;
+        margin-bottom: 1.5rem;
+    }
+
+    .report-item {
+        padding: 1.5rem;
+        background: #f1f5f9;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border-left: 5px solid #0f766e;
+    }
+
+    .report-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+
+    .report-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #0b1220;
+        margin-bottom: 0.25rem;
+    }
+
+    .report-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .report-badge.safe {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+    }
+
+    .report-badge.unsafe {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+
+    .report-badge.incident {
+        background: rgba(251, 191, 36, 0.2);
+        color: #f59e0b;
+    }
+
+    .report-meta {
+        font-size: 0.85rem;
+        color: #475569;
+        margin-bottom: 1rem;
+    }
+
+    .report-description {
+        color: #475569;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .report-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .rating-display {
+        color: #0f766e;
+        font-size: 1.2rem;
+    }
+
+    .helpful-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(20, 184, 166, 0.10);
+        color: #0f766e;
+        border: 1px solid rgba(20, 184, 166, 0.6);
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .helpful-btn:hover {
+        background: #0f766e;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>💬 Community Reports</h1>
+        <p>Share experiences to help others make safer choices.</p>
+    </div>
+
+    <div class="submit-report-card">
+        <h2>Submit Safety Report</h2>
+        <form method="POST" action="{{ url_for('submit_report') }}">
+            <div class="form-group">
+                <label>Report Type</label>
+                <div class="report-type-selector">
+                    <div class="report-type-option">
+                        <input type="radio" name="report_type" value="safe" id="type_safe" required>
+                        <label for="type_safe">💚 Safe Area</label>
+                    </div>
+                    <div class="report-type-option">
+                        <input type="radio" name="report_type" value="unsafe" id="type_unsafe">
+                        <label for="type_unsafe">❌ Unsafe Area</label>
+                    </div>
+                    <div class="report-type-option">
+                        <input type="radio" name="report_type" value="incident" id="type_incident">
+                        <label for="type_incident">⚠️ Incident</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="area_name">Area Name <span style="color: #0f766e;">*</span></label>
+                <input type="text" id="area_name" name="area_name" placeholder="e.g., Connaught Place, Delhi" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" placeholder="Share details that could help others stay safe..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Safety Rating (1-5 stars)</label>
+                <div class="rating-stars" id="rating-stars">
+                    <span class="rating-star" data-rating="1">⭐</span>
+                    <span class="rating-star" data-rating="2">⭐</span>
+                    <span class="rating-star" data-rating="3">⭐</span>
+                    <span class="rating-star" data-rating="4">⭐</span>
+                    <span class="rating-star" data-rating="5">⭐</span>
+                </div>
+                <input type="hidden" name="safety_rating" id="safety_rating" value="5">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="latitude">Latitude (optional)</label>
+                    <input type="number" step="any" id="latitude" name="latitude" placeholder="28.6139">
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude (optional)</label>
+                    <input type="number" step="any" id="longitude" name="longitude" placeholder="77.2090">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Submit Report</button>
+        </form>
+    </div>
+
+    <div class="reports-list">
+        <h2>📊 Recent Reports</h2>
+        {% if reports %}
+            {% for report in reports %}
+                <div class="report-item">
+                    <div class="report-header">
+                        <div>
+                            <div class="report-title">{{ report.area_name }}</div>
+                            <div class="report-meta">
+                                By {{ report.user.username }} • {{ report.reported_at.strftime('%B %d, %Y at %I:%M %p') }}
+                            </div>
+                        </div>
+                        <span class="report-badge {{ report.report_type }}">
+                            {% if report.report_type == 'safe' %}💚 Safe
+                            {% elif report.report_type == 'unsafe' %}❌ Unsafe
+                            {% else %}⚠️ Incident
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if report.description %}
+                        <div class="report-description">
+                            {{ report.description }}
+                        </div>
+                    {% endif %}
+
+                    <div class="report-footer">
+                        <div class="rating-display">
+                            {% if report.safety_rating %}
+                                {% for i in range(report.safety_rating) %}⭐{% endfor %}
+                            {% endif %}
+                        </div>
+                        <button class="helpful-btn" onclick="markHelpful({{ report.id }})">
+                            👍 Helpful ({{ report.helpful_count }})
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 2rem; color: #475569;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">💬</div>
+                <p>No reports yet. Be the first to share.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Rating stars functionality
+    const stars = document.querySelectorAll('.rating-star');
+    const ratingInput = document.getElementById('safety_rating');
+    let selectedRating = 5;
+
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            selectedRating = this.dataset.rating;
+            ratingInput.value = selectedRating;
+            
+            stars.forEach(s => s.classList.remove('selected'));
+            
+            for (let i = 0; i < selectedRating; i++) {
+                stars[i].classList.add('selected');
+            }
+        });
+    });
+
+    // Mark as helpful
+    function markHelpful(reportId) {
+        fetch(`{{ url_for('mark_helpful', report_id=0) }}`.replace('0', reportId), {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ Marked as helpful. Thank you for your feedback.');
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Report type selector visual feedback
+    document.querySelectorAll('.report-type-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            document.querySelectorAll('.report-type-option').forEach(opt => {
+                opt.style.borderColor = 'transparent';
+            });
+            this.style.borderColor = '#14b8a6';
+        });
+    });
+</script>
+{% endblock %}
+

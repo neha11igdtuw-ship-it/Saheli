@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Saheli{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .settings-header {
+        background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .settings-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+    }
+
+    .settings-card h2 {
+        color: #0b1220;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.25);
+    }
+
+    .form-group small {
+        display: block;
+        margin-top: 0.5rem;
+        color: #666;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .btn-primary {
+        background: #0f766e;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.16);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #828a91 100%);
+        color: white;
+        margin-left: 1rem;
+    }
+
+    .btn-test {
+        background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+        color: white;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-configured {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-not-configured {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .help-box {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 1rem 0;
+    }
+
+    .help-box strong {
+        color: #856404;
+    }
+
+    .config-status {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .status-item {
+        padding: 1rem;
+        background: #f1f5f9;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+    .status-item h3 {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+    #test-result {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 15px;
+        display: none;
+    }
+
+    #test-result.success {
+        background: #d4edda;
+        color: #155724;
+        border: 2px solid #c3e6cb;
+        display: block;
+    }
+
+    #test-result.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 2px solid #f5c6cb;
+        display: block;
+    }
+
+    #brevo-test-result {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 15px;
+        display: none;
+    }
+
+    #brevo-test-result.success {
+        background: #d4edda;
+        color: #155724;
+        border: 2px solid #c3e6cb;
+        display: block;
+    }
+
+    #brevo-test-result.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 2px solid #f5c6cb;
+        display: block;
+    }
+
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .loading.active {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="settings-header">
+        <h1>⚙️ App Settings</h1>
+        <p>Configure SOS alerts, email & SMS notifications</p>
+    </div>
+
+    <!-- Configuration Status -->
+    <div class="config-status">
+        <div class="status-item">
+            <h3>📧 Email Alerts</h3>
+            <span class="status-badge {% if email_configured %}status-configured{% else %}status-not-configured{% endif %}">
+                {{ '✅ Configured' if email_configured else '❌ Not Setup' }}
+            </span>
+        </div>
+        <div class="status-item">
+            <h3>✉️ Email API (Brevo)</h3>
+            <span class="status-badge {% if brevo_configured %}status-configured{% else %}status-not-configured{% endif %}">
+                {{ '✅ Configured' if brevo_configured else '❌ Not Setup' }}
+            </span>
+        </div>
+        <div class="status-item">
+            <h3>📱 SMS Alerts</h3>
+            <span class="status-badge {% if sms_configured %}status-configured{% else %}status-not-configured{% endif %}">
+                {{ '✅ Configured' if sms_configured else '❌ Not Setup' }}
+            </span>
+        </div>
+        <div class="status-item">
+            <h3>👥 Trusted Contacts</h3>
+            <span class="status-badge status-configured">
+                {{ contact_count }} contacts
+            </span>
+        </div>
+    </div>
+
+    <!-- Email Configuration -->
+    <div class="settings-card">
+        <h2>📧 Email Configuration (Gmail SMTP)</h2>
+        
+        <div class="help-box">
+            <strong>💡 How to get Gmail App Password:</strong><br>
+            1. Visit: <a href="https://myaccount.google.com/apppasswords" target="_blank">myaccount.google.com/apppasswords</a><br>
+            2. Select "Mail" and "Other" (Saheli App)<br>
+            3. Copy the 16-character password<br>
+            4. Paste it below
+        </div>
+
+        <form id="email-config-form">
+            <div class="form-group">
+                <label for="smtp_username">📧 Gmail Address</label>
+                <input type="email" id="smtp_username" name="smtp_username" 
+                       placeholder="your-email@gmail.com" 
+                       value="{{ current_email }}" required>
+                <small>Your Gmail address (e.g., myemail@gmail.com)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="smtp_password">🔑 Gmail App Password</label>
+                <input type="password" id="smtp_password" name="smtp_password" 
+                       placeholder="abcdefghijklmnop"
+                       value="{{ '••••••••••••••••' if email_configured else '' }}">
+                <small>16-character App Password from Google (no spaces)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="test_email">📬 Test Email Address (Optional)</label>
+                <input type="email" id="test_email" name="test_email" 
+                       placeholder="test-recipient@example.com">
+                <small>Send a test email to verify it works</small>
+            </div>
+
+            <div id="test-result"></div>
+
+            <div class="loading" id="loading">
+                <p>⏳ Testing email configuration...</p>
+            </div>
+
+            <button type="button" class="btn btn-test" onclick="testEmail()">
+                🧪 Test Email
+            </button>
+            <button type="submit" class="btn btn-primary">
+                💾 Save Configuration
+            </button>
+        </form>
+    </div>
+
+    <!-- Email API Configuration (Recommended) -->
+    <div class="settings-card">
+        <h2>✉️ Email API (Brevo) — Recommended</h2>
+
+        <div class="help-box">
+            <strong>Why Brevo?</strong><br>
+            Your network is blocking Gmail SMTP ports (465/587). Brevo sends email over HTTPS (443), so it works reliably.<br><br>
+            Steps:
+            <ol style="margin: 0.5rem 0 0 1.25rem;">
+                <li>Create a free Brevo account</li>
+                <li>Generate an API key (SMTP & API → API Keys)</li>
+                <li>Verify your sender email in Brevo</li>
+            </ol>
+        </div>
+
+        <form id="brevo-config-form">
+            <div class="form-group">
+                <label for="brevo_sender_email">Sender Email</label>
+                <input type="email" id="brevo_sender_email" name="brevo_sender_email"
+                       placeholder="your-verified-sender@example.com"
+                       value="{{ current_brevo_sender }}">
+                <small>This must be verified in Brevo.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="brevo_sender_name">Sender Name</label>
+                <input type="text" id="brevo_sender_name" name="brevo_sender_name"
+                       placeholder="Saheli"
+                       value="{{ current_brevo_sender_name }}">
+            </div>
+
+            <div class="form-group">
+                <label for="brevo_api_key">Brevo API Key</label>
+                <input type="password" id="brevo_api_key" name="brevo_api_key"
+                       placeholder="xkeysib-..."
+                       value="">
+                <small>Keep this secret. For demo only, it will be stored in `.env`.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="brevo_test_email">Test Recipient Email (Optional)</label>
+                <input type="email" id="brevo_test_email" name="brevo_test_email"
+                       placeholder="recipient@example.com">
+            </div>
+
+            <div id="brevo-test-result"></div>
+
+            <div class="loading" id="brevo-loading">
+                <p>⏳ Testing Brevo configuration...</p>
+            </div>
+
+            <button type="button" class="btn btn-test" onclick="testBrevo()">
+                🧪 Test Brevo Email
+            </button>
+            <button type="submit" class="btn btn-primary">
+                💾 Save Brevo Configuration
+            </button>
+        </form>
+    </div>
+
+    <!-- SMS Configuration (Optional) -->
+    <div class="settings-card">
+        <h2>📱 SMS Configuration (Twilio - Optional)</h2>
+        
+        <div class="help-box">
+            <strong>💡 Get FREE Twilio Account:</strong><br>
+            1. Visit: <a href="https://www.twilio.com/try-twilio" target="_blank">www.twilio.com/try-twilio</a><br>
+            2. Sign up (get $15 FREE credit = ~500 SMS)<br>
+            3. Get Account SID, Auth Token, and Phone Number<br>
+            4. Enter them below
+        </div>
+
+        <form id="sms-config-form">
+            <div class="form-group">
+                <label for="twilio_sid">🆔 Account SID</label>
+                <input type="text" id="twilio_sid" name="twilio_sid" 
+                       placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                       value="{{ current_twilio_sid }}">
+            </div>
+
+            <div class="form-group">
+                <label for="twilio_token">🔐 Auth Token</label>
+                <input type="password" id="twilio_token" name="twilio_token" 
+                       placeholder="your_auth_token_here"
+                       value="{{ '••••••••••••••••' if sms_configured else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="twilio_phone">📞 Twilio Phone Number</label>
+                <input type="text" id="twilio_phone" name="twilio_phone" 
+                       placeholder="+1234567890"
+                       value="{{ current_twilio_phone }}">
+                <small>Format: +1234567890 (with country code)</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                💾 Save SMS Configuration
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="clearSMS()">
+                🗑️ Clear SMS Config
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Email Configuration Form
+document.getElementById('email-config-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    try {
+        const response = await fetch('/settings/save-email', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ Email configuration saved successfully!\n\nPlease restart the app for changes to take effect.');
+            location.reload();
+        } else {
+            alert('❌ Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('❌ Error saving configuration: ' + error);
+    }
+});
+
+// Test Email Function
+async function testEmail() {
+    const username = document.getElementById('smtp_username').value;
+    const password = document.getElementById('smtp_password').value;
+    const testEmail = document.getElementById('test_email').value || username;
+    
+    if (!username || !password) {
+        alert('⚠️ Please enter both email and password first!');
+        return;
+    }
+    
+    const loading = document.getElementById('loading');
+    const resultDiv = document.getElementById('test-result');
+    
+    loading.classList.add('active');
+    resultDiv.style.display = 'none';
+    
+    try {
+        const response = await fetch('/settings/test-email', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                smtp_username: username,
+                smtp_password: password,
+                test_email: testEmail
+            })
+        });
+        
+        const result = await response.json();
+        
+        loading.classList.remove('active');
+        resultDiv.className = result.success ? 'success' : 'error';
+        resultDiv.textContent = result.message;
+        resultDiv.style.display = 'block';
+        
+        if (result.success) {
+            setTimeout(() => {
+                if (confirm('✅ Email test successful!\n\nDo you want to save these settings?')) {
+                    document.getElementById('email-config-form').requestSubmit();
+                }
+            }, 1000);
+        }
+    } catch (error) {
+        loading.classList.remove('active');
+        resultDiv.className = 'error';
+        resultDiv.textContent = '❌ Error testing email: ' + error;
+        resultDiv.style.display = 'block';
+    }
+}
+
+// SMS Configuration Form
+document.getElementById('sms-config-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    try {
+        const response = await fetch('/settings/save-sms', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ SMS configuration saved successfully!\n\nPlease restart the app for changes to take effect.');
+            location.reload();
+        } else {
+            alert('❌ Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('❌ Error saving configuration: ' + error);
+    }
+});
+
+// Brevo Configuration Form
+document.getElementById('brevo-config-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+
+    try {
+        const response = await fetch('/settings/save-brevo', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                brevo_sender_email: data.brevo_sender_email,
+                brevo_sender_name: data.brevo_sender_name,
+                brevo_api_key: data.brevo_api_key
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('✅ Brevo configuration saved!\n\nPlease restart the app for changes to take effect.');
+            location.reload();
+        } else {
+            alert('❌ Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('❌ Error saving Brevo configuration: ' + error);
+    }
+});
+
+// Test Brevo Function
+async function testBrevo() {
+    const apiKey = document.getElementById('brevo_api_key').value;
+    const senderEmail = document.getElementById('brevo_sender_email').value;
+    const senderName = document.getElementById('brevo_sender_name').value || 'Saheli';
+    const testEmail = document.getElementById('brevo_test_email').value || senderEmail;
+
+    if (!apiKey || !senderEmail) {
+        alert('⚠️ Please enter Brevo sender email and API key first!');
+        return;
+    }
+
+    const loading = document.getElementById('brevo-loading');
+    const resultDiv = document.getElementById('brevo-test-result');
+
+    loading.classList.add('active');
+    resultDiv.style.display = 'none';
+
+    try {
+        const response = await fetch('/settings/test-brevo', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                brevo_api_key: apiKey,
+                brevo_sender_email: senderEmail,
+                brevo_sender_name: senderName,
+                test_email: testEmail
+            })
+        });
+
+        const result = await response.json();
+
+        loading.classList.remove('active');
+        resultDiv.className = result.success ? 'success' : 'error';
+        resultDiv.textContent = result.message;
+        resultDiv.style.display = 'block';
+
+        if (result.success) {
+            setTimeout(() => {
+                if (confirm('✅ Brevo test successful!\n\nDo you want to save these settings?')) {
+                    document.getElementById('brevo-config-form').requestSubmit();
+                }
+            }, 800);
+        }
+    } catch (error) {
+        loading.classList.remove('active');
+        resultDiv.className = 'error';
+        resultDiv.textContent = '❌ Error testing Brevo: ' + error;
+        resultDiv.style.display = 'block';
+    }
+}
+
+function clearSMS() {
+    if (confirm('Clear SMS configuration?')) {
+        document.getElementById('twilio_sid').value = '';
+        document.getElementById('twilio_token').value = '';
+        document.getElementById('twilio_phone').value = '';
+    }
+}
+</script>
+{% endblock %}
+

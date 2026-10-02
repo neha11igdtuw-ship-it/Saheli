@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}Trusted Circle - Saheli{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        color: #0b1220;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        color: #475569;
+        font-size: 1.1rem;
+    }
+
+    .add-contact-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+    }
+
+    .add-contact-card h2 {
+        color: #0b1220;
+        margin-bottom: 1.5rem;
+    }
+
+    .contacts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .contact-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.10);
+        border: 1px solid #cbd5e1;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.14);
+    }
+
+    .contact-card.primary {
+        border: 2px solid rgba(20, 184, 166, 0.7);
+    }
+
+    .contact-card.primary::before {
+        content: 'Primary';
+        position: absolute;
+        top: -10px;
+        right: 15px;
+        background: #0f766e;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .contact-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0b1220;
+        margin-bottom: 0.5rem;
+    }
+
+    .contact-relationship {
+        display: inline-block;
+        background: rgba(20, 184, 166, 0.12);
+        color: #0f766e;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .contact-details {
+        margin: 1rem 0;
+    }
+
+    .contact-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        color: #475569;
+    }
+
+    .contact-detail-item strong {
+        color: #0b1220;
+    }
+
+    .contact-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .btn-delete {
+        flex: 1;
+        padding: 0.5rem;
+        background: #b91c1c;
+        color: white;
+        border: none;
+        border-radius: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        background: #991b1b;
+        transform: translateY(-2px);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.25);
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        margin: 0;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .btn-add {
+        padding: 0.75rem 2rem;
+        background: #0f766e;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
+    }
+
+    .btn-add:hover {
+        background: #0a5f59;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #475569;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>Trusted Circle</h1>
+        <p>People you trust who can be notified quickly in an emergency.</p>
+    </div>
+
+    <div class="add-contact-card">
+        <h2>Add a Trusted Contact</h2>
+        <form method="POST" action="{{ url_for('add_trusted_contact') }}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">Name <span style="color: #0f766e;">*</span></label>
+                    <input type="text" id="name" name="name" placeholder="Contact name" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number <span style="color: #0f766e;">*</span></label>
+                    <input type="tel" id="phone" name="phone" placeholder="+91 9876543210" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="contact@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="relationship">Relationship</label>
+                    <select id="relationship" name="relationship">
+                        <option value="">Select relationship</option>
+                        <option value="Mom">Mom</option>
+                        <option value="Dad">Dad</option>
+                        <option value="Sister">Sister</option>
+                        <option value="Brother">Brother</option>
+                        <option value="Best Friend">Best Friend</option>
+                        <option value="Partner">Partner</option>
+                        <option value="Roommate">Roommate</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="is_primary" name="is_primary">
+                <label for="is_primary">⭐ Set as Primary Contact</label>
+            </div>
+
+            <button type="submit" class="btn-add">Add to Trusted Circle</button>
+        </form>
+    </div>
+
+    {% if contacts %}
+        <div class="contacts-grid">
+            {% for contact in contacts %}
+                <div class="contact-card {% if contact.is_primary %}primary{% endif %}">
+                    <div class="contact-name">{{ contact.name }}</div>
+                    {% if contact.relationship %}
+                        <span class="contact-relationship">{{ contact.relationship }}</span>
+                    {% endif %}
+                    
+                    <div class="contact-details">
+                        <div class="contact-detail-item">
+                            <span>📱</span>
+                            <span><strong>Phone:</strong> {{ contact.phone_number }}</span>
+                        </div>
+                        {% if contact.email %}
+                            <div class="contact-detail-item">
+                                <span>📧</span>
+                                <span><strong>Email:</strong> {{ contact.email }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="contact-detail-item">
+                            <span>📅</span>
+                            <span><strong>Added:</strong> {{ contact.added_at.strftime('%b %d, %Y') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="contact-actions">
+                        <form method="POST" action="{{ url_for('delete_trusted_contact', contact_id=contact.id) }}" style="flex: 1;">
+                            <button type="submit" class="btn-delete" onclick="return confirm('Remove {{ contact.name }} from trusted circle?')">
+                                Remove
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="add-contact-card">
+            <div class="empty-state">
+                <div class="empty-state-icon">👯‍♀️</div>
+                <h3 style="color: #0b1220; margin-bottom: 0.5rem;">No Contacts Yet</h3>
+                <p>Add trusted contacts so you can notify them quickly in an emergency.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

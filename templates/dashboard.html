@@ -1,0 +1,410 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Saheli{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .welcome-card {
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        animation: fadeInUp 0.5s ease-out;
+        border: 1px solid #cbd5e1;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-card::before {
+        content: '';
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .welcome-card h1 {
+        color: #0b1220;
+        margin-bottom: 0.5rem;
+        font-size: 2rem;
+        text-shadow: none;
+    }
+
+    .welcome-card p {
+        color: #475569;
+        font-size: 1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
+        border: 1px solid #cbd5e1;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0f766e;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: #475569;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .user-info-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        animation: fadeInUp 0.6s ease-out;
+        border: 1px solid #cbd5e1;
+    }
+
+    .user-info-card h2 {
+        color: #0b1220;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        border-bottom: 2px solid #cbd5e1;
+        padding-bottom: 0.5rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .info-item label {
+        color: #475569;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .info-item .value {
+        color: #0f766e;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .action-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.7s ease-out;
+        border: 1px solid #cbd5e1;
+    }
+
+    .action-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 40px rgba(15, 23, 42, 0.14);
+        border-color: rgba(20, 184, 166, 0.6);
+    }
+
+    .action-card.emergency {
+        background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+        color: #0b1220;
+        border: 1px solid rgba(180, 83, 9, 0.35);
+    }
+
+    .action-card.emergency:hover {
+        background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+    }
+
+    .action-card .icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .action-card h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.3rem;
+        color: inherit;
+    }
+
+    .action-card:not(.emergency) h3 {
+        color: #0b1220;
+    }
+
+    .action-card p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        color: inherit;
+    }
+
+    .action-card:not(.emergency) p {
+        color: #475569;
+    }
+
+    .emergency-contacts {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        animation: fadeInUp 0.8s ease-out;
+        border: 1px solid #cbd5e1;
+    }
+
+    .emergency-contacts h2 {
+        color: #0b1220;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        border-bottom: 2px solid #cbd5e1;
+        padding-bottom: 0.5rem;
+    }
+
+    .contact-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .contact-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f1f5f9;
+        border-radius: 12px;
+        border-left: 5px solid #0f766e;
+        transition: all 0.3s ease;
+    }
+
+    .contact-item:hover {
+        background: #e2e8f0;
+        transform: translateX(5px);
+    }
+
+    .contact-item .name {
+        font-weight: 600;
+        color: #0b1220;
+    }
+
+    .contact-item .number {
+        color: #0f172a;
+        font-family: monospace;
+        font-weight: 600;
+    }
+
+    .btn-secondary {
+        padding: 0.75rem 1.5rem;
+        background: #0f766e;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        display: inline-block;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
+    }
+
+    .btn-secondary:hover {
+        background: #0a5f59;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="welcome-card">
+        <h1>Welcome, {{ user.username }}.</h1>
+        <p>Your safety is our priority. Use the tools below to stay prepared and aware.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👯‍♀️</div>
+            <div class="stat-value">{{ trusted_count }}</div>
+            <div class="stat-label">Trusted Contacts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🚨</div>
+            <div class="stat-value">{{ active_alerts }}</div>
+            <div class="stat-label">Active Alerts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🧭</div>
+            <div class="stat-value">{{ '✓' if user.adaptive_mode_enabled else '✗' }}</div>
+            <div class="stat-label">Adaptive Mode</div>
+        </div>
+    </div>
+
+    <div class="user-info-card">
+        <h2>Your Profile Information</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Username</label>
+                <div class="value">{{ user.username }}</div>
+            </div>
+            <div class="info-item">
+                <label>Email</label>
+                <div class="value">{{ user.email }}</div>
+            </div>
+            <div class="info-item">
+                <label>Phone Number</label>
+                <div class="value">{{ user.phone_number if user.phone_number else 'Not provided' }}</div>
+            </div>
+            <div class="info-item">
+                <label>Member Since</label>
+                <div class="value">{{ user.created_at.strftime('%B %d, %Y') }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <div class="action-card emergency" onclick="window.location.href='{{ url_for('sos_page') }}'">
+            <div class="icon">🚨</div>
+            <h3>Emergency SOS</h3>
+            <p>Send a rapid alert to your trusted contacts</p>
+        </div>
+
+        <div class="action-card" onclick="window.location.href='{{ url_for('safety_score_page') }}'">
+            <div class="icon">📊</div>
+            <h3>Safety Score</h3>
+            <p>Check area safety in real-time</p>
+        </div>
+
+        <div class="action-card" onclick="window.location.href='{{ url_for('trusted_circle') }}'">
+            <div class="icon">👯‍♀️</div>
+            <h3>Trusted Circle</h3>
+            <p>Manage your trusted contacts</p>
+        </div>
+
+        <div class="action-card" onclick="window.location.href='{{ url_for('community_page') }}'">
+            <div class="icon">💬</div>
+            <h3>Community</h3>
+            <p>Share & read safety reports</p>
+        </div>
+
+        <div class="action-card" onclick="window.location.href='{{ url_for('safety_beacons_page') }}'">
+            <div class="icon">🏪</div>
+            <h3>Safety Beacons</h3>
+            <p>Find nearby safe spots</p>
+        </div>
+
+        <div class="action-card" onclick="window.location.href='{{ url_for('settings') }}'">
+            <div class="icon">⚙️</div>
+            <h3>Settings</h3>
+            <p>Configure email & SMS</p>
+        </div>
+
+        <div class="action-card" onclick="window.location.href='{{ url_for('profile') }}'">
+            <div class="icon">👤</div>
+            <h3>Profile</h3>
+            <p>Manage your account</p>
+        </div>
+    </div>
+
+    <div class="emergency-contacts">
+        <h2>Emergency Contacts</h2>
+        <div class="contact-list">
+            {% if user.emergency_contact %}
+                <div class="contact-item">
+                    <div class="name">Emergency Contact</div>
+                    <div class="number">{{ user.emergency_contact }}</div>
+                </div>
+            {% endif %}
+            <div class="contact-item">
+                <div class="name">Police Emergency</div>
+                <div class="number">100</div>
+            </div>
+            <div class="contact-item">
+                <div class="name">Women Helpline</div>
+                <div class="number">1091</div>
+            </div>
+            <div class="contact-item">
+                <div class="name">National Commission for Women</div>
+                <div class="number">7827-170-170</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function activateEmergency() {
+        if (confirm('⚠️ Are you sure you want to activate Emergency SOS? This will alert all your emergency contacts.')) {
+            // In a real implementation, this would trigger actual emergency protocols
+            alert('🚨 Emergency alert sent to all your contacts!\n\n(This is a demo - in production, real alerts would be sent)');
+        }
+    }
+
+    // Add keyboard shortcut for emergency (Press E key twice quickly)
+    let eKeyPressCount = 0;
+    let eKeyTimeout;
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'e' || event.key === 'E') {
+            eKeyPressCount++;
+            
+            if (eKeyPressCount === 2) {
+                activateEmergency();
+                eKeyPressCount = 0;
+                clearTimeout(eKeyTimeout);
+            }
+            
+            eKeyTimeout = setTimeout(() => {
+                eKeyPressCount = 0;
+            }, 500);
+        }
+    });
+</script>
+{% endblock %}
+

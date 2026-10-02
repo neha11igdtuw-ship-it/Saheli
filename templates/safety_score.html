@@ -1,0 +1,1552 @@
+{% extends "base.html" %}
+
+{% block title %}Safety Score - Saheli{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    #map {
+        width: 100%;
+        height: 400px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        margin-bottom: 1.5rem;
+        border: 1px solid #cbd5e1;
+        z-index: 1;
+        display: none;
+    }
+
+    #map.show {
+        display: block;
+    }
+
+    .map-container {
+        display: none;
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    .map-container.show {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .map-instructions {
+        background: #f1f5f9;
+        padding: 1rem;
+        border-radius: 15px;
+        margin-bottom: 1rem;
+        text-align: center;
+        color: #0b1220;
+        font-weight: 600;
+    }
+
+    .btn-toggle-map {
+        padding: 0.75rem 1.5rem;
+        background: #0f766e;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .btn-toggle-map:hover {
+        background: #0a5f59;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16);
+    }
+
+    .page-header {
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        color: #0b1220;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        color: #475569;
+        font-size: 1.1rem;
+    }
+
+    .check-safety-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+    }
+
+    .check-safety-card h2 {
+        color: #0b1220;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 15px;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.25);
+    }
+
+    .btn-check {
+        padding: 0.75rem 2rem;
+        background: #0f766e;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
+    }
+
+    .btn-check:hover {
+        background: #0a5f59;
+        transform: translateY(-2px);
+    }
+
+    .result-card {
+        display: none;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .safety-score-display {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .score-circle {
+        width: 200px;
+        height: 200px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        font-weight: 700;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .score-circle.safe {
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    }
+
+    .score-circle.moderate {
+        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    }
+
+    .score-circle.unsafe {
+        background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .metric-card {
+        background: #f1f5f9;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f766e;
+        margin-bottom: 0.25rem;
+    }
+
+    .metric-label {
+        color: #475569;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .zones-list {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border: 1px solid #cbd5e1;
+    }
+
+    .zones-list h2 {
+        color: #0b1220;
+        margin-bottom: 1.5rem;
+    }
+
+    .zone-item {
+        padding: 1rem;
+        background: #f1f5f9;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .zone-info h3 {
+        color: #0b1220;
+        margin-bottom: 0.25rem;
+    }
+
+    .zone-details {
+        font-size: 0.85rem;
+        color: #475569;
+    }
+
+    .zone-score {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0f766e;
+    }
+
+    .ai-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-left: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>📊 AI Safety Score</h1>
+        <p>Uses contextual signals, community feedback, and public crime statistics (NCRB India).</p>
+    </div>
+
+    <div class="check-safety-card">
+        <h2>Check Area Safety <span class="ai-badge">AI-Powered</span></h2>
+        <p style="color: #475569; margin-bottom: 1.5rem;">
+            Our AI analyzes lighting, crowd density, crime data, and real-time factors to predict safety levels
+        </p>
+        
+        <button type="button" class="btn-toggle-map" onclick="toggleMap()">
+            <span id="map-icon">🗺️</span>
+            <span id="map-text">Show Map to Select Location</span>
+        </button>
+
+        <div id="map-container" class="map-container">
+            <div class="map-instructions">
+                🗺️ Click anywhere on the map to select a location.
+            </div>
+            <div id="map"></div>
+        </div>
+        
+        <form id="safety-check-form" onsubmit="checkSafety(event)">
+            <div class="form-group">
+                <label for="area_name">Area Name</label>
+                <input type="text" id="area_name" name="area_name" placeholder="Click on map or use current location to auto-fill" required>
+            </div>
+            
+            <!-- Hidden fields for coordinates -->
+            <input type="hidden" id="latitude" name="latitude">
+            <input type="hidden" id="longitude" name="longitude">
+
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button type="button" onclick="getCurrentLocation()" style="flex: 1; min-width: 200px; padding: 0.75rem 1.5rem; background: rgba(20, 184, 166, 0.12); color: #0f766e; border: 1px solid rgba(20, 184, 166, 0.6); border-radius: 15px; cursor: pointer; font-weight: 700; transition: all 0.3s ease;" onmouseover="this.style.background='#0f766e'; this.style.color='white';" onmouseout="this.style.background='rgba(20, 184, 166, 0.12)'; this.style.color='#0f766e';">
+                    📍 Use My Current Location
+                </button>
+                
+                <button type="button" onclick="testLocation()" style="flex: 1; min-width: 200px; padding: 0.75rem 1.5rem; background: rgba(180, 83, 9, 0.10); color: #b45309; border: 1px solid rgba(180, 83, 9, 0.45); border-radius: 15px; cursor: pointer; font-weight: 700; transition: all 0.3s ease;" onmouseover="this.style.background='#b45309'; this.style.color='white';" onmouseout="this.style.background='rgba(180, 83, 9, 0.10)'; this.style.color='#b45309';">
+                    🔍 Test My Location
+                </button>
+            </div>
+            
+            <div style="text-align: center; margin-top: 0.5rem;">
+                <button type="button" onclick="toggleManualEntry()" style="padding: 0.5rem 1rem; background: transparent; color: #0f766e; border: 1px dashed rgba(20, 184, 166, 0.9); border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 700;">
+                    ⌨️ Or Enter Coordinates Manually
+                </button>
+            </div>
+            
+            <div id="manual-entry" style="display: none; margin-top: 1rem; padding: 1.5rem; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 15px;">
+                <h4 style="color: #0b1220; margin-bottom: 1rem;">📝 Manual Coordinate Entry</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label style="color: #475569; font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Latitude</label>
+                        <input type="number" step="any" id="manual-lat" placeholder="28.6139" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 10px;">
+                    </div>
+                    <div>
+                        <label style="color: #475569; font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Longitude</label>
+                        <input type="number" step="any" id="manual-lng" placeholder="77.2090" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 10px;">
+                    </div>
+                </div>
+                <button type="button" onclick="useManualCoordinates()" style="width: 100%; padding: 0.75rem; background: #0f766e; color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">
+                    ✓ Use These Coordinates
+                </button>
+                <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #475569;">
+                    <strong>Tip:</strong> Open Google Maps, right-click your location, and copy coordinates
+                </p>
+            </div>
+
+            <div id="location-preview" style="display: none; margin-top: 1rem; padding: 1rem; background: #f1f5f9; border-radius: 15px; text-align: center;">
+                <div style="color: #0b1220; font-weight: 700; margin-bottom: 0.5rem;">✓ Location Selected</div>
+                <div id="location-details" style="color: #475569; font-size: 0.9rem;"></div>
+            </div>
+
+            <button type="submit" class="btn-check" style="margin-top: 1rem;">Check Safety Score 🔍</button>
+        </form>
+    </div>
+
+    <div id="result-card" class="result-card">
+        <div class="safety-score-display">
+            <div id="score-circle" class="score-circle safe">
+                <span id="score-value">--</span>
+            </div>
+            <h2 style="color: #0b1220; margin-bottom: 0.5rem;" id="safety-message">Analyzing...</h2>
+            <p style="color: #475569;" id="area-name-display">--</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">💡</div>
+                <div class="metric-value" id="lighting-score">--</div>
+                <div class="metric-label">Lighting Score</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">👥</div>
+                <div class="metric-value" id="crowd-density">--</div>
+                <div class="metric-label">Crowd Density</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">🚨</div>
+                <div class="metric-value" id="crime-rate">--</div>
+                <div class="metric-label">Crime Rate</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; padding: 1rem; background: #f1f5f9; border-radius: 15px; text-align: center;">
+            <p style="color: #475569; font-size: 0.9rem;">
+                <strong>Tip:</strong> Safety scores update based on time of day and recent community activity.
+            </p>
+        </div>
+    </div>
+
+    <div class="zones-list">
+        <h2>📍 Recent Safety Zones</h2>
+        {% if safety_zones %}
+            {% for zone in safety_zones %}
+                <div class="zone-item">
+                    <div class="zone-info">
+                        <h3>{{ zone.area_name }}</h3>
+                        <div class="zone-details">
+                            💡 Lighting: {{ zone.lighting_score|round(1) if zone.lighting_score else 'N/A' }} | 
+                            👥 Crowd: {{ zone.crowd_density|title if zone.crowd_density else 'N/A' }} | 
+                            🚨 Crime: {{ zone.crime_rate|title if zone.crime_rate else 'N/A' }}
+                        </div>
+                        <div class="zone-details" style="margin-top: 0.25rem;">
+                            Updated: {{ zone.last_updated.strftime('%b %d, %I:%M %p') }}
+                        </div>
+                    </div>
+                    <div class="zone-score">{{ zone.safety_score|round(0)|int }}</div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 2rem; color: #475569;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
+                <p>No safety zones checked yet. Check your first area above.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Initialize the map
+    let map;
+    let marker;
+    let mapInitialized = false;
+    let mapVisible = false;
+    let currentLat = 28.6139; // Default to Delhi, India
+    let currentLng = 77.2090;
+
+    function toggleMap() {
+        const mapContainer = document.getElementById('map-container');
+        const mapElement = document.getElementById('map');
+        const mapText = document.getElementById('map-text');
+        const mapIcon = document.getElementById('map-icon');
+        
+        mapVisible = !mapVisible;
+        
+        if (mapVisible) {
+            mapContainer.classList.add('show');
+            mapElement.classList.add('show');
+            mapText.textContent = 'Hide Map';
+            mapIcon.textContent = '❌';
+            
+            // Initialize map only once
+            if (!mapInitialized) {
+                setTimeout(() => {
+                    initMap();
+                    mapInitialized = true;
+                }, 100);
+            } else {
+                // Invalidate size to fix any display issues
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
+            }
+        } else {
+            mapContainer.classList.remove('show');
+            mapElement.classList.remove('show');
+            mapText.textContent = 'Show Map to Select Location';
+            mapIcon.textContent = '🗺️';
+        }
+    }
+
+    function initMap() {
+        // Create map centered on India
+        map = L.map('map').setView([currentLat, currentLng], 13);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Add a pink marker
+        const pinkIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="font-size: 2rem;">📍</div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30]
+        });
+
+        // Add initial marker
+        marker = L.marker([currentLat, currentLng], { icon: pinkIcon }).addTo(map);
+
+        // Click event on map
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            // Update marker position
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker([lat, lng], { icon: pinkIcon }).addTo(map);
+            
+            // Update hidden form fields
+            document.getElementById('latitude').value = lat.toFixed(6);
+            document.getElementById('longitude').value = lng.toFixed(6);
+            
+            // Show location preview
+            showLocationPreview(lat, lng);
+            
+            // Get location name using reverse geocoding
+            getLocationName(lat, lng);
+            
+            // Show confirmation on map
+            marker.bindPopup(`<b>Selected Location</b><br>${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
+        });
+
+        // Don't set initial values, let user choose
+    }
+
+    function showLocationPreview(lat, lng) {
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        details.innerHTML = `📍 Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}<br>Getting location name...`;
+        preview.style.display = 'block';
+    }
+
+    function getLocationName(lat, lng) {
+        // Use Nominatim (OpenStreetMap) reverse geocoding
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.display_name) {
+                    const areaName = data.address.suburb || data.address.neighbourhood || 
+                                   data.address.city || data.address.town || 
+                                   data.address.village || data.display_name;
+                    document.getElementById('area_name').value = areaName;
+                    
+                    // Update preview
+                    const details = document.getElementById('location-details');
+                    details.innerHTML = `📍 ${areaName}`;
+                }
+            })
+            .catch(error => {
+                console.log('Could not get location name:', error);
+                const details = document.getElementById('location-details');
+                details.innerHTML = `📍 Location selected successfully!`;
+            });
+    }
+
+    function toggleManualEntry() {
+        const manualEntry = document.getElementById('manual-entry');
+        if (manualEntry.style.display === 'none') {
+            manualEntry.style.display = 'block';
+        } else {
+            manualEntry.style.display = 'none';
+        }
+    }
+    
+    function useManualCoordinates() {
+        const lat = parseFloat(document.getElementById('manual-lat').value);
+        const lng = parseFloat(document.getElementById('manual-lng').value);
+        
+        if (!lat || !lng) {
+            alert('❌ Please enter both latitude and longitude!');
+            return;
+        }
+        
+        if (lat < -90 || lat > 90) {
+            alert('❌ Latitude must be between -90 and 90!');
+            return;
+        }
+        
+        if (lng < -180 || lng > 180) {
+            alert('❌ Longitude must be between -180 and 180!');
+            return;
+        }
+        
+        // Update hidden fields
+        document.getElementById('latitude').value = lat.toFixed(6);
+        document.getElementById('longitude').value = lng.toFixed(6);
+        
+        // Show preview
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        details.innerHTML = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}<br><small>✓ Manual entry</small>`;
+        preview.style.display = 'block';
+        
+        // Update map if open
+        if (mapInitialized) {
+            map.setView([lat, lng], 15);
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            const pinkIcon = L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="font-size: 2rem;">📍</div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 30]
+            });
+            marker = L.marker([lat, lng], { icon: pinkIcon }).addTo(map);
+            marker.bindPopup('<b>Manual Location</b>').openPopup();
+        }
+        
+        // Get location name
+        getLocationName(lat, lng);
+        
+        // Hide manual entry
+        document.getElementById('manual-entry').style.display = 'none';
+        
+        alert('✅ Coordinates set successfully.');
+    }
+    
+    function testLocation() {
+        // Diagnostic tool to test what location data the browser provides
+        if (!navigator.geolocation) {
+            alert('❌ Your browser does NOT support geolocation!\n\nPlease use the map or manual entry.');
+            return;
+        }
+        
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        details.innerHTML = '🔍 Testing location services...<br>This will show you what data your device provides.';
+        preview.style.display = 'block';
+        
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        };
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                // Got location - show all details
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+                const altitude = position.coords.altitude;
+                const altitudeAccuracy = position.coords.altitudeAccuracy;
+                const heading = position.coords.heading;
+                const speed = position.coords.speed;
+                const timestamp = new Date(position.timestamp);
+                
+                let report = '📍 LOCATION TEST RESULTS\n\n';
+                report += `✓ Latitude: ${lat.toFixed(8)}\n`;
+                report += `✓ Longitude: ${lng.toFixed(8)}\n`;
+                report += `✓ Accuracy: ±${Math.round(accuracy)} meters\n`;
+                report += `✓ Timestamp: ${timestamp.toLocaleTimeString()}\n`;
+                
+                if (altitude !== null) {
+                    report += `✓ Altitude: ${Math.round(altitude)} meters\n`;
+                }
+                if (speed !== null) {
+                    report += `✓ Speed: ${Math.round(speed * 3.6)} km/h\n`;
+                }
+                
+                report += `\n📊 QUALITY CHECK:\n`;
+                if (accuracy < 50) {
+                    report += `✅ Excellent accuracy!\n`;
+                    report += `Your GPS is working perfectly.\n`;
+                } else if (accuracy < 100) {
+                    report += `✓ Good accuracy.\n`;
+                    report += `Acceptable for safety checks.\n`;
+                } else if (accuracy < 500) {
+                    report += `⚠️ Low accuracy.\n`;
+                    report += `Using WiFi/Cell tower location.\n`;
+                    report += `Try moving near a window.\n`;
+                } else {
+                    report += `❌ Very low accuracy.\n`;
+                    report += `GPS signal is weak.\n`;
+                    report += `Use map or manual entry instead.\n`;
+                }
+                
+                report += `\n💡 TIPS:\n`;
+                report += `• For best results, be near a window\n`;
+                report += `• Enable GPS on your device\n`;
+                report += `• Wait 5-10 seconds for GPS lock\n`;
+                report += `• Check if Google Maps works correctly\n`;
+                
+                alert(report);
+                
+                details.innerHTML = `🔍 Test complete!<br>` +
+                    `Latitude: ${lat.toFixed(6)}<br>` +
+                    `Longitude: ${lng.toFixed(6)}<br>` +
+                    `Accuracy: ±${Math.round(accuracy)}m<br>` +
+                    `<small>${accuracy < 100 ? '✅ Location looks good!' : '⚠️ Consider using map instead'}</small>`;
+                
+                // Ask if they want to use this location
+                setTimeout(() => {
+                    if (confirm('Do you want to use this location for safety check?')) {
+                        document.getElementById('latitude').value = lat.toFixed(6);
+                        document.getElementById('longitude').value = lng.toFixed(6);
+                        getLocationName(lat, lng);
+                        
+                        // Show on map
+                        if (mapInitialized) {
+                            map.setView([lat, lng], 17);
+                            if (marker) {
+                                map.removeLayer(marker);
+                            }
+                            const pinkIcon = L.divIcon({
+                                className: 'custom-marker',
+                                html: '<div style="font-size: 2rem;">📍</div>',
+                                iconSize: [30, 30],
+                                iconAnchor: [15, 30]
+                            });
+                            marker = L.marker([lat, lng], { icon: pinkIcon }).addTo(map);
+                            
+                            // Add accuracy circle
+                            L.circle([lat, lng], {
+                                radius: accuracy,
+                                color: '#0f766e',
+                                fillColor: '#99f6e4',
+                                fillOpacity: 0.2,
+                                weight: 2
+                            }).addTo(map);
+                        }
+                    }
+                }, 500);
+            },
+            function(error) {
+                let errorReport = '❌ LOCATION TEST FAILED\n\n';
+                
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorReport += '🚫 Permission Denied\n\n';
+                        errorReport += 'How to fix:\n';
+                        errorReport += '1. Click the 🔒 lock icon in address bar\n';
+                        errorReport += '2. Find "Location" setting\n';
+                        errorReport += '3. Change to "Allow"\n';
+                        errorReport += '4. Refresh page and try again\n';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorReport += '📡 Location Unavailable\n\n';
+                        errorReport += 'Possible reasons:\n';
+                        errorReport += '• GPS is disabled on your device\n';
+                        errorReport += '• No GPS hardware available\n';
+                        errorReport += '• Poor signal (basement/indoors)\n\n';
+                        errorReport += 'Solution: Use the map to select location\n';
+                        break;
+                    case error.TIMEOUT:
+                        errorReport += '⏱️ Request Timeout\n\n';
+                        errorReport += 'GPS is taking too long to respond.\n\n';
+                        errorReport += 'Try:\n';
+                        errorReport += '• Move near a window or outside\n';
+                        errorReport += '• Wait longer for GPS to lock\n';
+                        errorReport += '• Use the map instead\n';
+                        break;
+                }
+                
+                errorReport += '\n💡 Alternative: Use the map to click your location!';
+                
+                alert(errorReport);
+                
+                details.innerHTML = '❌ Location test failed<br><small>Use map or manual entry instead</small>';
+            },
+            options
+        );
+    }
+
+    // GPS retry tracking
+    let gpsAttempts = 0;
+    let bestLocation = null;
+    const MAX_GPS_ATTEMPTS = 5;
+    const MAX_ACCURACY_ALLOWED = 500; // 500 meters maximum
+
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            // Show loading
+            const preview = document.getElementById('location-preview');
+            const details = document.getElementById('location-details');
+            
+            gpsAttempts = 0;
+            bestLocation = null;
+            
+            details.innerHTML = '📍 <strong>Activating GPS...</strong><br><small>⚠️ Please allow location access<br>⏱️ Getting accurate location (max 500m accuracy required)</small>';
+            preview.style.display = 'block';
+            
+            tryGetAccurateLocation();
+        } else {
+            alert('❌ Geolocation is not supported by your browser.\n\nPlease use the map to select your location manually.');
+        }
+    }
+
+    function tryGetAccurateLocation() {
+        gpsAttempts++;
+        
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        
+        details.innerHTML = `📡 <strong>GPS Attempt ${gpsAttempts}/${MAX_GPS_ATTEMPTS}</strong><br><small>⏱️ Waiting for accurate signal...<br>🎯 Target: ≤500m accuracy</small>`;
+        
+        // ULTRA HIGH ACCURACY OPTIONS - Force actual GPS hardware
+        const options = {
+            enableHighAccuracy: true,     // CRITICAL: Force GPS hardware (not WiFi/Cell)
+            timeout: 20000,               // 20 seconds per attempt
+            maximumAge: 0                 // MUST be fresh - no cached location
+        };
+        
+        navigator.geolocation.getCurrentPosition(
+            // Success callback
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+                const timestamp = new Date(position.timestamp);
+                
+                console.log(`GPS Attempt ${gpsAttempts}:`, {
+                    latitude: lat,
+                    longitude: lng,
+                    accuracy: accuracy.toFixed(2) + 'm',
+                    timestamp: timestamp
+                });
+                
+                // Store if this is the best location so far
+                if (!bestLocation || accuracy < bestLocation.accuracy) {
+                    bestLocation = {
+                        latitude: lat,
+                        longitude: lng,
+                        accuracy: accuracy,
+                        timestamp: timestamp
+                    };
+                    console.log(`✅ New best accuracy: ${accuracy.toFixed(2)}m`);
+                }
+                
+                // ✅ ACCEPT if accuracy is within 500m limit
+                if (accuracy <= MAX_ACCURACY_ALLOWED) {
+                    console.log(`🎯 Excellent! Accuracy ${accuracy.toFixed(2)}m is within 500m limit`);
+                    acceptLocation(lat, lng, accuracy, timestamp);
+                    return;
+                }
+                
+                // ❌ REJECT if accuracy is too poor (> 500m)
+                console.log(`⚠️ Accuracy ${accuracy.toFixed(2)}m exceeds 500m limit`);
+                
+                // Try again if we have attempts left
+                if (gpsAttempts < MAX_GPS_ATTEMPTS) {
+                    details.innerHTML = `⚠️ <strong>Accuracy: ${Math.round(accuracy)}m (need ≤500m)</strong><br><small>🔄 Retrying... (${gpsAttempts}/${MAX_GPS_ATTEMPTS})<br>💡 Move near a window or outdoors</small>`;
+                    
+                    // Wait 2 seconds before retry
+                    setTimeout(() => {
+                        tryGetAccurateLocation();
+                    }, 2000);
+                } else {
+                    // Max attempts reached - offer options
+                    handleMaxAttemptsReached();
+                }
+            },
+            // Error callback
+            function(error) {
+                console.error('GPS Error:', error);
+                handleGPSError(error);
+            },
+            options
+        );
+    }
+
+    function acceptLocation(lat, lng, accuracy, timestamp) {
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        
+        // Check accuracy quality for display
+        let qualityStatus = '';
+        let qualityEmoji = '';
+        
+        if (accuracy < 20) {
+            qualityStatus = 'Perfect GPS accuracy!';
+            qualityEmoji = '🎯';
+        } else if (accuracy < 50) {
+            qualityStatus = 'Excellent GPS accuracy!';
+            qualityEmoji = '✅';
+        } else if (accuracy < 100) {
+            qualityStatus = 'Good GPS accuracy';
+            qualityEmoji = '👍';
+        } else if (accuracy < 300) {
+            qualityStatus = 'Acceptable accuracy';
+            qualityEmoji = '✓';
+        } else {
+            qualityStatus = 'Moderate accuracy';
+            qualityEmoji = '⚠️';
+        }
+                    
+                    // Show detailed info
+                    details.innerHTML = `
+                        📍 GPS Location Detected<br>
+                        <strong>Coordinates:</strong> ${lat.toFixed(8)}, ${lng.toFixed(8)}<br>
+                        <strong>Accuracy:</strong> ±${Math.round(accuracy)} meters<br>
+                        <strong>Status:</strong> ${qualityStatus}<br>
+                        <small>Getting address name...</small>
+                    `;
+                    
+                    // Show on map first if initialized
+                    if (mapInitialized) {
+                        // Show map if not visible
+                        if (!mapVisible) {
+                            toggleMap();
+                        }
+                        
+                        setTimeout(() => {
+                            map.setView([lat, lng], 17); // Zoom close for verification
+                            
+                            // Remove old marker
+                            if (marker) {
+                                map.removeLayer(marker);
+                            }
+                            
+                            // Add marker
+                            const pinkIcon = L.divIcon({
+                                className: 'custom-marker',
+                                html: '<div style="font-size: 2rem; animation: pulse 1s infinite;">📍</div>',
+                                iconSize: [30, 30],
+                                iconAnchor: [15, 30]
+                            });
+                            
+                            marker = L.marker([lat, lng], { icon: pinkIcon }).addTo(map);
+                            
+                            // Add accuracy circle
+                            const accuracyCircle = L.circle([lat, lng], {
+                                radius: accuracy,
+                                color: accuracy < 100 ? '#047857' : '#b45309',
+                                fillColor: accuracy < 100 ? '#6ee7b7' : '#fde68a',
+                                fillOpacity: 0.15,
+                                weight: 2
+                            }).addTo(map);
+                            
+                            marker.bindPopup(`
+                                <b>Your GPS Location 📍</b><br>
+                                Lat: ${lat.toFixed(6)}<br>
+                                Lng: ${lng.toFixed(6)}<br>
+                                Accuracy: ±${Math.round(accuracy)}m
+                            `).openPopup();
+                        }, 100);
+                    }
+                    
+                    // Get address name
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let locationName = 'Unknown Location';
+                            
+                            if (data.display_name) {
+                                // Try to get the most specific location
+                                const addr = data.address;
+                                locationName = addr.road || addr.neighbourhood || addr.suburb || 
+                                             addr.city || addr.town || addr.village || data.display_name;
+                                
+                                // Show full address in console for debugging
+                                console.log('Full Address:', data.display_name);
+                                console.log('Address Components:', data.address);
+                            }
+                            
+                            // Build confirmation message
+                            let confirmMessage = '📍 GPS LOCATION DETECTED\n\n';
+                            confirmMessage += `Coordinates:\n`;
+                            confirmMessage += `Latitude: ${lat.toFixed(8)}\n`;
+                            confirmMessage += `Longitude: ${lng.toFixed(8)}\n\n`;
+                            confirmMessage += `Accuracy: ±${Math.round(accuracy)} meters\n`;
+                            confirmMessage += `${qualityStatus}\n\n`;
+                            confirmMessage += `Detected Location:\n${locationName}\n\n`;
+                            
+                            if (accuracy < 100) {
+                                confirmMessage += `This looks accurate! ✅\n\n`;
+                            } else {
+                                confirmMessage += `⚠️ Low accuracy - Check the map!\n\n`;
+                            }
+                            
+                            confirmMessage += `Is this your correct location?\n\n`;
+                            confirmMessage += `• Click OK to use this location\n`;
+                            confirmMessage += `• Click Cancel to select on map instead`;
+                            
+                            // Update preview
+                            details.innerHTML = `
+                                📍 <strong>${locationName}</strong><br>
+                                ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
+                                Accuracy: ±${Math.round(accuracy)}m ${qualityStatus}<br>
+                                <small>⬇️ Check the map and confirm below</small>
+                            `;
+                            
+                            // Ask for confirmation (or auto-accept if very accurate)
+                            setTimeout(() => {
+                                const useLocation = shouldAsk ? confirm(confirmMessage) : true;
+                                
+                                if (useLocation) {
+                                    // User confirmed - use this location
+                                    document.getElementById('latitude').value = lat.toFixed(8);
+                                    document.getElementById('longitude').value = lng.toFixed(8);
+                                    document.getElementById('area_name').value = locationName;
+                                    
+                                    details.innerHTML = `
+                                        ✅ <strong>Location Confirmed!</strong><br>
+                                        📍 ${locationName}<br>
+                                        ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
+                                        <small>Accuracy: ±${Math.round(accuracy)}m</small>
+                                    `;
+                                    
+                                    if (!shouldAsk) {
+                                        // Auto-accepted, show brief notification
+                                        alert(`✅ Location set successfully!\n\n${locationName}\n\nAccuracy: ±${Math.round(accuracy)}m`);
+                                    }
+                                } else {
+                                    // User declined
+                                    details.innerHTML = `
+                                        ❌ Location not confirmed<br>
+                                        <small>Please use the map or manual entry</small>
+                                    `;
+                                    alert('👉 Please click on the map to select your exact location!\n\nThe map is now showing your GPS position. Click on your actual location.');
+                                }
+                            }, 1000);
+                        })
+                        .catch(error => {
+                            console.log('Reverse geocoding failed:', error);
+                            
+                            // Still use coordinates but without area name
+                            let confirmMessage = '📍 GPS LOCATION DETECTED\n\n';
+                            confirmMessage += `Coordinates:\n`;
+                            confirmMessage += `Latitude: ${lat.toFixed(8)}\n`;
+                            confirmMessage += `Longitude: ${lng.toFixed(8)}\n\n`;
+                            confirmMessage += `Accuracy: ±${Math.round(accuracy)} meters\n`;
+                            confirmMessage += `${qualityStatus}\n\n`;
+                            confirmMessage += `(Could not get area name)\n\n`;
+                            confirmMessage += `Use these coordinates?`;
+                            
+                            if (confirm(confirmMessage)) {
+                                document.getElementById('latitude').value = lat.toFixed(8);
+                                document.getElementById('longitude').value = lng.toFixed(8);
+                                details.innerHTML = `✅ Location set<br>${lat.toFixed(6)}, ${lng.toFixed(6)}<br>±${Math.round(accuracy)}m`;
+                            }
+                        });
+    }
+
+    function handleMaxAttemptsReached() {
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        
+        if (bestLocation && bestLocation.accuracy <= 1000) {
+            // We have a location, but it's not perfect - try to improve it
+            details.innerHTML = `🔄 <strong>Trying advanced methods...</strong><br><small>Using WiFi/Cell tower triangulation</small>`;
+            
+            // Try continuous tracking for better accuracy
+            tryWatchPosition();
+        } else {
+            // No good location at all - offer alternatives
+            details.innerHTML = '🔄 <strong>Trying alternative methods...</strong><br><small>WiFi/IP-based location</small>';
+            
+            // Try IP-based geolocation as last resort
+            tryIPGeolocation();
+        }
+    }
+
+    // Advanced: Use watchPosition for continuous tracking (better accuracy)
+    let watchId = null;
+    let watchAttempts = 0;
+    const MAX_WATCH_ATTEMPTS = 10;
+
+    function tryWatchPosition() {
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        
+        console.log('🔄 Starting continuous GPS tracking for better accuracy...');
+        
+        details.innerHTML = `📡 <strong>Continuous GPS Tracking</strong><br><small>Waiting for accurate signal... (${watchAttempts}/${MAX_WATCH_ATTEMPTS})</small>`;
+        
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        };
+        
+        watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                watchAttempts++;
+                const accuracy = position.coords.accuracy;
+                
+                console.log(`📡 Watch update ${watchAttempts}: ${accuracy.toFixed(2)}m`);
+                
+                // Update best location if this is better
+                if (!bestLocation || accuracy < bestLocation.accuracy) {
+                    bestLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: accuracy,
+                        timestamp: position.timestamp
+                    };
+                    console.log(`✅ New best: ${accuracy.toFixed(2)}m`);
+                }
+                
+                details.innerHTML = `📡 <strong>Tracking...</strong> (${watchAttempts}/${MAX_WATCH_ATTEMPTS})<br><small>Best so far: ±${Math.round(bestLocation.accuracy)}m</small>`;
+                
+                // Accept if we get good accuracy
+                if (accuracy <= MAX_ACCURACY_ALLOWED) {
+                    console.log(`🎯 Success! Accuracy ${accuracy.toFixed(2)}m`);
+                    navigator.geolocation.clearWatch(watchId);
+                    acceptLocation(
+                        position.coords.latitude,
+                        position.coords.longitude,
+                        accuracy,
+                        position.timestamp
+                    );
+                    return;
+                }
+                
+                // Stop after max attempts
+                if (watchAttempts >= MAX_WATCH_ATTEMPTS) {
+                    navigator.geolocation.clearWatch(watchId);
+                    
+                    if (bestLocation.accuracy <= 1000) {
+                        // Offer best available
+                        const useBest = confirm(
+                            `⚠️ BEST ACCURACY ACHIEVED\n\n` +
+                            `After continuous tracking:\n` +
+                            `±${Math.round(bestLocation.accuracy)} meters\n\n` +
+                            `This is the most accurate location available.\n\n` +
+                            `OPTIONS:\n` +
+                            `• Click OK to use this location\n` +
+                            `• Click Cancel to select on map\n\n` +
+                            `💡 For better accuracy, move outdoors.`
+                        );
+                        
+                        if (useBest) {
+                            acceptLocation(
+                                bestLocation.latitude,
+                                bestLocation.longitude,
+                                bestLocation.accuracy,
+                                bestLocation.timestamp
+                            );
+                        } else {
+                            details.innerHTML = '❌ Please use map to select location';
+                            if (!mapVisible) {
+                                toggleMap();
+                            }
+                        }
+                    } else {
+                        // Try IP geolocation
+                        tryIPGeolocation();
+                    }
+                }
+            },
+            (error) => {
+                console.error('Watch position error:', error);
+                navigator.geolocation.clearWatch(watchId);
+                tryIPGeolocation();
+            },
+            options
+        );
+    }
+
+    // Fallback: WiFi/Cell tower geolocation (Google Geolocation API - MOST ACCURATE!)
+    function tryIPGeolocation() {
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        
+        details.innerHTML = '🌐 <strong>Using WiFi/Cell Tower location...</strong><br><small>Getting precise indoor location</small>';
+        
+        // Try Google Geolocation API first (MOST ACCURATE - uses WiFi networks!)
+        const googleApiKey = '{{ GOOGLE_MAPS_API_KEY if GOOGLE_MAPS_API_KEY else "" }}';
+        
+        if (googleApiKey) {
+            tryGoogleGeolocation(googleApiKey);
+        } else {
+            // Fallback to IP-based methods
+            tryIPBasedGeolocation();
+        }
+    }
+
+    // Google Geolocation API - Uses WiFi access points for accurate indoor positioning
+    function tryGoogleGeolocation(apiKey) {
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        
+        console.log('🔍 Trying Google Geolocation API (WiFi-based)...');
+        
+        details.innerHTML = '📡 <strong>Scanning WiFi networks...</strong><br><small>Getting accurate indoor location</small>';
+        
+        // Google Geolocation API - automatically detects nearby WiFi and cell towers
+        const requestData = {
+            considerIp: true,  // Use IP as fallback
+            // Browser will automatically include WiFi and cell tower data
+        };
+        
+        fetch(`https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.location && data.location.lat && data.location.lng) {
+                const lat = data.location.lat;
+                const lng = data.location.lng;
+                const accuracy = data.accuracy || 100; // Google returns accuracy in meters
+                
+                console.log('✅ Google Geolocation:', { lat, lng, accuracy: accuracy + 'm' });
+                
+                // Get address name
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`)
+                    .then(response => response.json())
+                    .then(addressData => {
+                        let locationName = 'Unknown Location';
+                        if (addressData.display_name) {
+                            const addr = addressData.address;
+                            locationName = addr.road || addr.neighbourhood || addr.suburb || 
+                                         addr.city || addr.town || addressData.display_name;
+                        }
+                        
+                        let accuracyLevel = '';
+                        let shouldAsk = true;
+                        
+                        if (accuracy <= 50) {
+                            accuracyLevel = '✅ Excellent accuracy (WiFi-based)';
+                            shouldAsk = false;
+                        } else if (accuracy <= 200) {
+                            accuracyLevel = '👍 Good accuracy (WiFi/Cell tower)';
+                            shouldAsk = false;
+                        } else if (accuracy <= 500) {
+                            accuracyLevel = '✓ Acceptable accuracy';
+                            shouldAsk = true;
+                        } else {
+                            accuracyLevel = '⚠️ Moderate accuracy';
+                            shouldAsk = true;
+                        }
+                        
+                        const message = shouldAsk ? confirm(
+                            `📍 WIFI/CELL TOWER LOCATION\n\n` +
+                            `Location: ${locationName}\n` +
+                            `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n\n` +
+                            `Accuracy: ±${Math.round(accuracy)} meters\n` +
+                            `${accuracyLevel}\n\n` +
+                            `This uses nearby WiFi networks and cell towers.\n\n` +
+                            `• Click OK to use this location\n` +
+                            `• Click Cancel to select on map manually`
+                        ) : true;
+                        
+                        if (message) {
+                            acceptLocation(lat, lng, accuracy, Date.now());
+                        } else {
+                            showMapFallback();
+                        }
+                    })
+                    .catch(error => {
+                        console.log('Reverse geocoding failed, using coordinates only');
+                        
+                        const message = confirm(
+                            `📍 WIFI/CELL TOWER LOCATION\n\n` +
+                            `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n` +
+                            `Accuracy: ±${Math.round(accuracy)} meters\n\n` +
+                            `Use this location?`
+                        );
+                        
+                        if (message) {
+                            acceptLocation(lat, lng, accuracy, Date.now());
+                        } else {
+                            showMapFallback();
+                        }
+                    });
+            } else if (data.error) {
+                console.error('Google Geolocation error:', data.error);
+                alert(
+                    `⚠️ Google Geolocation API Error\n\n` +
+                    `${data.error.message}\n\n` +
+                    `Trying alternative methods...`
+                );
+                tryIPBasedGeolocation();
+            } else {
+                console.log('Google Geolocation returned no location');
+                tryIPBasedGeolocation();
+            }
+        })
+        .catch(error => {
+            console.error('Google Geolocation API failed:', error);
+            tryIPBasedGeolocation();
+        });
+    }
+
+    // IP-based geolocation (less accurate fallback)
+    function tryIPBasedGeolocation() {
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        
+        details.innerHTML = '🌐 <strong>Using IP-based location...</strong><br><small>Getting approximate location</small>';
+        
+        // Try IPGeolocation API
+        const ipgeoApiKey = '{{ IPGEOLOCATION_API_KEY if IPGEOLOCATION_API_KEY else "" }}';
+        
+        if (ipgeoApiKey) {
+            fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${ipgeoApiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.latitude && data.longitude) {
+                        const lat = parseFloat(data.latitude);
+                        const lng = parseFloat(data.longitude);
+                        const locationName = `${data.city}, ${data.state_prov}, ${data.country_name}`;
+                        
+                        console.log('📍 IP Geolocation:', { lat, lng, location: locationName });
+                        
+                        const useIP = confirm(
+                            `📍 IP-BASED LOCATION\n\n` +
+                            `Location: ${locationName}\n` +
+                            `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n\n` +
+                            `⚠️ Accuracy: City-level (~1-5km)\n\n` +
+                            `This is approximate but better than nothing.\n\n` +
+                            `• Click OK to use this location\n` +
+                            `• Click Cancel to select on map manually`
+                        );
+                        
+                        if (useIP) {
+                            acceptLocation(lat, lng, 2000, Date.now()); // Assume 2km accuracy
+                        } else {
+                            showMapFallback();
+                        }
+                    } else {
+                        tryIPAPIFallback();
+                    }
+                })
+                .catch(error => {
+                    console.error('IPGeolocation API failed:', error);
+                    tryIPAPIFallback();
+                });
+        } else {
+            tryIPAPIFallback();
+        }
+    }
+
+    function tryIPAPIFallback() {
+        // Fallback to ipapi.co
+        fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.latitude && data.longitude) {
+                    const lat = data.latitude;
+                    const lng = data.longitude;
+                    const locationName = `${data.city}, ${data.region}, ${data.country_name}`;
+                    
+                    console.log('📍 IP Location (ipapi.co):', { lat, lng, location: locationName });
+                    
+                    const useIP = confirm(
+                        `📍 WIFI/IP-BASED LOCATION\n\n` +
+                        `Location: ${locationName}\n` +
+                        `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n\n` +
+                        `⚠️ Accuracy: City-level (~1-5km)\n\n` +
+                        `This is approximate but better than nothing.\n\n` +
+                        `• Click OK to use this location\n` +
+                        `• Click Cancel to select on map manually`
+                    );
+                    
+                    if (useIP) {
+                        acceptLocation(lat, lng, 3000, Date.now()); // Assume 3km accuracy
+                    } else {
+                        showMapFallback();
+                    }
+                } else {
+                    showMapFallback();
+                }
+            })
+            .catch(error => {
+                console.error('IP location failed:', error);
+                showMapFallback();
+            });
+    }
+
+    function showMapFallback() {
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        
+        alert(
+            `❌ ALL AUTOMATIC METHODS FAILED\n\n` +
+            `Could not get your location automatically.\n\n` +
+            `📍 Please use the MAP to select your location manually.\n\n` +
+            `The map will open now.`
+        );
+        
+        details.innerHTML = '❌ Please use map to select location';
+        preview.style.display = 'none';
+        
+        if (!mapVisible) {
+            toggleMap();
+        }
+    }
+
+    function handleGPSError(error) {
+        const preview = document.getElementById('location-preview');
+        const details = document.getElementById('location-details');
+        
+        let errorMessage = '';
+        let errorDetails = '';
+        
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                errorMessage = '❌ LOCATION PERMISSION DENIED';
+                errorDetails = 
+                    'You denied location access.\n\n' +
+                    'TO FIX:\n' +
+                    '1. Click the 🔒 icon in address bar\n' +
+                    '2. Allow location access\n' +
+                    '3. Refresh the page\n\n' +
+                    'OR use the map to select location manually.';
+                break;
+                
+            case error.POSITION_UNAVAILABLE:
+                errorMessage = '❌ GPS UNAVAILABLE';
+                errorDetails =
+                    'Location information is unavailable.\n\n' +
+                    'POSSIBLE FIXES:\n' +
+                    '• Enable GPS in device settings\n' +
+                    '• Check if other apps can get location\n' +
+                    '• Try refreshing the page\n' +
+                    '• Use the map to select manually';
+                break;
+                
+            case error.TIMEOUT:
+                errorMessage = '⏱️ GPS TIMEOUT';
+                errorDetails =
+                    'Location request timed out.\n\n' +
+                    'POSSIBLE FIXES:\n' +
+                    '• Move near a window or outdoors\n' +
+                    '• Wait a moment and try again\n' +
+                    '• Use the map to select manually';
+                
+                // Retry if we have attempts left
+                if (gpsAttempts < MAX_GPS_ATTEMPTS) {
+                    details.innerHTML = `⏱️ <strong>Timeout - Retrying...</strong><br><small>(${gpsAttempts}/${MAX_GPS_ATTEMPTS})</small>`;
+                    setTimeout(() => {
+                        tryGetAccurateLocation();
+                    }, 2000);
+                    return; // Don't show error alert yet
+                }
+                break;
+                
+            default:
+                errorMessage = '❌ GPS ERROR';
+                errorDetails = 'An unknown error occurred.\n\nPlease use the map to select your location.';
+        }
+        
+        alert(errorMessage + '\n\n' + errorDetails);
+        details.innerHTML = errorMessage.replace('❌', '').replace('⏱️', '');
+        preview.style.display = 'none';
+        
+        // Open map for manual selection
+        if (!mapVisible) {
+            toggleMap();
+        }
+    }
+    
+    function tryIPBasedLocation() {
+        // Fallback: Use IP-based geolocation (less accurate ~city level)
+        fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.latitude && data.longitude) {
+                    const shouldUse = confirm(
+                        '📍 GPS not available.\n\n' +
+                        'Use approximate location based on IP?\n' +
+                        '(Less accurate - shows your city/area)\n\n' +
+                        'Click OK to use, or Cancel to select on map.'
+                    );
+                    
+                    if (shouldUse) {
+                        const lat = data.latitude;
+                        const lng = data.longitude;
+                        
+                        document.getElementById('latitude').value = lat.toFixed(6);
+                        document.getElementById('longitude').value = lng.toFixed(6);
+                        document.getElementById('area_name').value = data.city + ', ' + data.region;
+                        
+                        const preview = document.getElementById('location-preview');
+                        const details = document.getElementById('location-details');
+                        details.innerHTML = `📍 ${data.city}, ${data.region}<br><small>⚠️ Approximate location (IP-based)</small>`;
+                        preview.style.display = 'block';
+                        
+                        if (mapInitialized) {
+                            map.setView([lat, lng], 13);
+                            if (marker) {
+                                map.removeLayer(marker);
+                            }
+                            const pinkIcon = L.divIcon({
+                                className: 'custom-marker',
+                                html: '<div style="font-size: 2rem;">📍</div>',
+                                iconSize: [30, 30],
+                                iconAnchor: [15, 30]
+                            });
+                            marker = L.marker([lat, lng], { icon: pinkIcon }).addTo(map);
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.log('IP location also failed:', error);
+            });
+    }
+
+    function checkSafety(event) {
+        event.preventDefault();
+        
+        // Check if location is selected
+        const lat = document.getElementById('latitude').value;
+        const lng = document.getElementById('longitude').value;
+        
+        if (!lat || !lng) {
+            alert('❌ Please select a location first!\n\n• Click "Show Map" and select on map, OR\n• Click "Use My Current Location" 📍');
+            return;
+        }
+        
+        const formData = new FormData(event.target);
+        
+        fetch('{{ url_for("check_safety") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displaySafetyResult(data, formData.get('area_name'));
+            } else {
+                alert('❌ Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('❌ Error checking safety. Please try again.');
+            console.error('Error:', error);
+        });
+    }
+
+    function displaySafetyResult(data, areaName) {
+        const resultCard = document.getElementById('result-card');
+        const scoreCircle = document.getElementById('score-circle');
+        const scoreValue = document.getElementById('score-value');
+        const safetyMessage = document.getElementById('safety-message');
+        const areaNameDisplay = document.getElementById('area-name-display');
+        
+        // Set score
+        scoreValue.textContent = Math.round(data.safety_score);
+        areaNameDisplay.textContent = areaName;
+        
+        // Set metrics
+        document.getElementById('lighting-score').textContent = Math.round(data.lighting_score);
+        document.getElementById('crowd-density').textContent = data.crowd_density.toUpperCase();
+        document.getElementById('crime-rate').textContent = data.crime_rate.toUpperCase();
+        
+        // Set color and message based on safety level
+        scoreCircle.className = 'score-circle ' + data.safety_level;
+        safetyMessage.textContent = data.message;
+        
+        // Show result
+        resultCard.style.display = 'block';
+        resultCard.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+{% endblock %}
+
