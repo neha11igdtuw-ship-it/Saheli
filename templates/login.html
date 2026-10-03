@@ -1,96 +1,289 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Saheli{% endblock %}
+{% block title %}Sign in to Saheli{% endblock %}
 
 {% block extra_css %}
 <style>
-    .auth-card {
-        background: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
-        padding: 3rem;
-        width: 100%;
-        max-width: 450px;
-        animation: fadeInUp 0.5s ease-out;
-        border: 1px solid #cbd5e1;
+    .navbar, footer { display: none; }
+
+    body {
+        background: #fff;
+    }
+
+    main.container {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+        flex: 1;
+    }
+
+    .auth-shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 900px) {
+        .auth-shell { grid-template-columns: 1fr; }
+        .auth-visual { display: none; }
+    }
+
+    /* Left panel */
+    .auth-visual {
         position: relative;
         overflow: hidden;
+        background: linear-gradient(160deg, #5c2a3a 0%, #8a3b3f 45%, #b9544a 100%);
+        color: #fdf3ee;
+        padding: 3rem 3.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
-    .auth-card::before {
+    .auth-visual::before {
         content: '';
+        position: absolute;
+        inset: -20% -10% auto auto;
+        width: 420px;
+        height: 420px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.18);
     }
 
-    .auth-card::after {
+    .auth-visual::after {
         content: '';
+        position: absolute;
+        left: -140px;
+        bottom: -160px;
+        width: 340px;
+        height: 340px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.10), transparent 70%);
+        border: 1px solid rgba(255, 255, 255, 0.14);
     }
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .brand-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .brand-badge {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+    }
+
+    .brand-row .brand-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+    }
+
+    .brand-row .brand-text strong {
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+    }
+
+    .brand-row .brand-text span {
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(253, 243, 238, 0.75);
+    }
+
+    .visual-body {
+        position: relative;
+        z-index: 1;
+        max-width: 420px;
+    }
+
+    .visual-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 1.75rem;
+    }
+
+    .visual-pill .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #f3c969;
+    }
+
+    .visual-body h1 {
+        font-size: 2.6rem;
+        line-height: 1.15;
+        font-weight: 800;
+        margin: 0 0 1rem 0;
+        font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .visual-body h1 em {
+        font-style: italic;
+        color: #f3c969;
+    }
+
+    .visual-body p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: rgba(253, 243, 238, 0.88);
+        margin: 0;
+    }
+
+    .visual-features {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2.5rem;
+    }
+
+    .visual-feature {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    .visual-feature .feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+
+    .visual-feature strong {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
+
+    .visual-feature span {
+        font-size: 0.82rem;
+        color: rgba(253, 243, 238, 0.75);
+    }
+
+    .visual-footnote {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        color: rgba(253, 243, 238, 0.7);
+    }
+
+    /* Right panel */
+    .auth-form-side {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        background: #fdf6f2;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .auth-eyebrow {
+        color: #b9544a;
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin-bottom: 0.75rem;
     }
 
     .auth-card h1 {
-        color: #0b1220;
-        margin-bottom: 0.5rem;
-        font-size: 2.2rem;
-        text-align: center;
-        text-shadow: none;
-    }
-
-    .auth-card h1::before {
-        content: '';
-    }
-
-    .auth-card h1::after {
-        content: '';
+        color: #2b1a1c;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.9rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-weight: 800;
+        text-align: left;
     }
 
     .auth-card .subtitle {
-        color: #475569;
-        text-align: center;
+        color: #6b5a57;
+        text-align: left;
         margin-bottom: 2rem;
-        font-size: 1rem;
-        font-style: normal;
+        font-size: 0.95rem;
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.25rem;
     }
 
     .form-group label {
         display: block;
-        margin-bottom: 0.5rem;
-        color: #475569;
-        font-weight: 600;
-        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+        color: #4a3a38;
+        font-weight: 650;
+        font-size: 0.88rem;
+    }
+
+    .form-group .input-wrap {
+        position: relative;
     }
 
     .form-group input {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid #cbd5e1;
+        padding: 0.8rem 1rem;
+        border: 1px solid #e7d6cf;
         border-radius: 12px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
+        font-size: 0.96rem;
+        transition: all 0.2s ease;
         background: #ffffff;
+        color: #2b1a1c;
     }
 
     .form-group input:focus {
         outline: none;
-        border-color: #14b8a6;
-        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.25);
-        background: white;
+        border-color: #b9544a;
+        box-shadow: 0 0 0 4px rgba(185, 84, 74, 0.15);
     }
 
     .form-group input::placeholder {
-        color: #9ca3af;
+        color: #b6a39d;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 0.9rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #9c8a86;
+        font-size: 0.95rem;
+        padding: 0;
     }
 
     .form-options {
@@ -98,161 +291,198 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 1.5rem;
-        font-size: 0.9rem;
+        font-size: 0.88rem;
     }
 
     .remember-me {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        color: #666;
+        color: #6b5a57;
     }
 
     .remember-me input[type="checkbox"] {
         width: auto;
         cursor: pointer;
+        accent-color: #b9544a;
     }
 
     .forgot-password {
-        color: #0f766e;
+        color: #b9544a;
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 650;
     }
 
     .forgot-password:hover {
         text-decoration: underline;
-        color: #0a5f59;
     }
 
     .btn-primary {
         width: 100%;
-        padding: 1rem;
-        background: #0f766e;
+        padding: 0.9rem;
+        background: #b9544a;
         color: white;
         border: none;
         border-radius: 12px;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 700;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
-        text-shadow: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }
 
     .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16);
-        background: #0a5f59;
+        background: #a2473e;
+        transform: translateY(-1px);
     }
 
-    .btn-primary:active {
-        transform: translateY(0);
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 1.75rem 0;
+        color: #9c8a86;
+        font-size: 0.82rem;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e7d6cf;
+    }
+
+    .btn-outline {
+        width: 100%;
+        padding: 0.85rem;
+        background: transparent;
+        color: #2b1a1c;
+        border: 1px solid #e7d6cf;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline:hover {
+        background: #fff;
+        border-color: #d8c2b9;
+        text-decoration: none;
+    }
+
+    .privacy-note {
+        display: flex;
+        gap: 0.65rem;
+        margin-top: 1.75rem;
+        padding: 1rem 1.1rem;
+        background: #f6e9e3;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        color: #6b5a57;
+        line-height: 1.5;
+    }
+
+    .privacy-note .icon {
+        flex-shrink: 0;
     }
 
     .auth-footer {
         text-align: center;
         margin-top: 1.5rem;
-        color: #666;
-        font-size: 0.95rem;
-    }
-
-    .auth-footer a {
-        color: #0f766e;
-        text-decoration: none;
-        font-weight: 700;
-    }
-
-    .auth-footer a:hover {
-        text-decoration: underline;
-        color: #0a5f59;
-    }
-
-    .safety-features {
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .safety-features h3 {
-        color: #0b1220;
-        font-size: 1rem;
-        margin-bottom: 1rem;
-        text-align: center;
-    }
-
-    .features-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-
-    .feature-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.85rem;
-        color: #475569;
-        font-weight: 600;
-    }
-
-    .feature-item span {
-        font-size: 1.2rem;
+        color: #9c8a86;
+        font-size: 0.78rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="auth-card">
-    <h1>Welcome Back</h1>
-    <p class="subtitle">Sign in to access your safety tools.</p>
-
-    <form method="POST" action="{{ url_for('login') }}">
-        <div class="form-group">
-            <label for="username_or_email">Username or Email</label>
-            <input type="text" id="username_or_email" name="username_or_email" 
-                   placeholder="Enter your username or email" required autofocus>
+<div class="auth-shell">
+    <div class="auth-visual">
+        <div class="brand-row">
+            <span class="brand-badge" aria-hidden="true">🛡️</span>
+            <div class="brand-text">
+                <strong>Saheli</strong>
+                <span>Personal Safety</span>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" 
-                   placeholder="Enter your password" required>
+        <div class="visual-body">
+            <div class="visual-pill"><span class="dot"></span> Your safety, on your terms</div>
+            <h1>Go a little farther with <em>more ease</em>.</h1>
+            <p>Check the safety of your route, keep your trusted circle close, and reach help in one tap &mdash; wherever you're headed.</p>
+
+            <div class="visual-features">
+                <div class="visual-feature">
+                    <span class="feature-icon" aria-hidden="true">📍</span>
+                    <div>
+                        <strong>Know what's around you</strong>
+                        <span>Area safety scores and nearby safe spots</span>
+                    </div>
+                </div>
+                <div class="visual-feature">
+                    <span class="feature-icon" aria-hidden="true">👯‍♀️</span>
+                    <div>
+                        <strong>Keep your people close</strong>
+                        <span>Alert your trusted circle in seconds</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="form-options">
-            <label class="remember-me">
-                <input type="checkbox" name="remember_me">
-                <span>Remember me</span>
-            </label>
-            <a href="#" class="forgot-password">Forgot password?</a>
-        </div>
-
-        <button type="submit" class="btn-primary">Login</button>
-    </form>
-
-    <div class="auth-footer">
-        Don't have an account? <a href="{{ url_for('signup') }}">Sign up now</a>
+        <div class="visual-footnote">🔒 Your location is yours to share</div>
     </div>
 
-    <div class="safety-features" aria-label="Safety features">
-        <h3>Safety Features</h3>
-        <div class="features-grid">
-            <div class="feature-item">
-                <span>🛡️</span>
-                <span>Emergency SOS</span>
+    <div class="auth-form-side">
+        <div class="auth-card">
+            <div class="auth-eyebrow">Welcome back</div>
+            <h1>Sign in to Saheli</h1>
+            <p class="subtitle">Pick up where you left off. Your circle is here.</p>
+
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="form-group">
+                    <label for="username_or_email">Email or username</label>
+                    <input type="text" id="username_or_email" name="username_or_email"
+                           placeholder="you@example.com" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <input type="password" id="password" name="password"
+                               placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">👁️</button>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember_me" checked>
+                        <span>Remember me on this device</span>
+                    </label>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-primary">Sign in →</button>
+            </form>
+
+            <div class="auth-divider">New to Saheli?</div>
+
+            <a href="{{ url_for('signup') }}" class="btn-outline">Create your account</a>
+
+            <div class="privacy-note">
+                <span class="icon">🛡️</span>
+                <span>Your safety information stays private. You choose what to share, and with whom.</span>
             </div>
-            <div class="feature-item">
-                <span>📍</span>
-                <span>Live Location</span>
-            </div>
-            <div class="feature-item">
-                <span>👯‍♀️</span>
-                <span>Trusted Contacts</span>
-            </div>
-            <div class="feature-item">
-                <span>🔔</span>
-                <span>Alert System</span>
-            </div>
+
+            <div class="auth-footer">Saheli &middot; A safety companion &middot; Private by design</div>
         </div>
     </div>
 </div>
@@ -260,7 +490,6 @@
 
 {% block extra_js %}
 <script>
-    // Add any login-specific JavaScript here
     document.querySelector('form').addEventListener('submit', function(e) {
         const username = document.getElementById('username_or_email').value.trim();
         const password = document.getElementById('password').value;
@@ -271,6 +500,14 @@
             return false;
         }
     });
+
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    toggleBtn.addEventListener('click', function() {
+        const isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+        toggleBtn.textContent = isHidden ? '🙈' : '👁️';
+        toggleBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    });
 </script>
 {% endblock %}
-

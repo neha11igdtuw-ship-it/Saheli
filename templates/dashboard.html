@@ -1,405 +1,699 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Saheli{% endblock %}
+{% block title %}Overview - Saheli{% endblock %}
 
 {% block extra_css %}
 <style>
-    .dashboard-container {
-        width: 100%;
-        max-width: 1200px;
-        margin: 0 auto;
+    .navbar, footer { display: none; }
+
+    body { background: #eef3f1; }
+
+    main.container {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+        flex: 1;
     }
 
-    .welcome-card {
-        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
-        border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        animation: fadeInUp 0.5s ease-out;
-        border: 1px solid #cbd5e1;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .welcome-card::before {
-        content: '';
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .welcome-card h1 {
-        color: #0b1220;
-        margin-bottom: 0.5rem;
-        font-size: 2rem;
-        text-shadow: none;
-    }
-
-    .welcome-card p {
-        color: #475569;
-        font-size: 1rem;
-    }
-
-    .stats-grid {
+    .app-shell {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+        grid-template-columns: 260px 1fr;
+        min-height: 100vh;
     }
 
-    .stat-card {
+    @media (max-width: 900px) {
+        .app-shell { grid-template-columns: 1fr; }
+        .app-sidebar { display: none; }
+    }
+
+    /* Sidebar */
+    .app-sidebar {
+        background: #16302b;
+        color: #d9e6e2;
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem 1.1rem;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
+
+    .sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.25rem 0.4rem 1.5rem 0.4rem;
+    }
+
+    .sidebar-brand .brand-badge {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        flex-shrink: 0;
+    }
+
+    .sidebar-brand .brand-text strong {
+        display: block;
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .sidebar-brand .brand-text span {
+        font-size: 0.62rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(217, 230, 226, 0.55);
+    }
+
+    .sidebar-section-label {
+        font-size: 0.65rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(217, 230, 226, 0.45);
+        padding: 0 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.65rem 0.7rem;
+        border-radius: 10px;
+        color: rgba(217, 230, 226, 0.85);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .sidebar-nav a .nav-icon { font-size: 1rem; width: 1.2rem; text-align: center; }
+
+    .sidebar-nav a:hover {
+        background: rgba(255, 255, 255, 0.06);
+        text-decoration: none;
+        color: #ffffff;
+    }
+
+    .sidebar-nav a.active {
         background: #ffffff;
+        color: #16302b;
+    }
+
+    .sidebar-spacer { flex: 1; }
+
+    .sidebar-help-card {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+
+    .sidebar-help-card .help-icon { font-size: 1.3rem; margin-bottom: 0.5rem; }
+
+    .sidebar-help-card strong {
+        display: block;
+        color: #ffffff;
+        font-size: 0.85rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .sidebar-help-card span {
+        font-size: 0.78rem;
+        color: rgba(217, 230, 226, 0.65);
+        line-height: 1.4;
+    }
+
+    .sidebar-profile {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.75rem 0.5rem 0.25rem 0.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        margin-top: 0.5rem;
+    }
+
+    .sidebar-profile .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #b9544a;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .sidebar-profile .who { line-height: 1.25; overflow: hidden; }
+    .sidebar-profile .who strong { display: block; color: #fff; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-profile .who span { font-size: 0.72rem; color: rgba(217, 230, 226, 0.55); }
+    .sidebar-profile a.logout { margin-left: auto; color: rgba(217, 230, 226, 0.6); font-size: 0.78rem; text-decoration: none; }
+    .sidebar-profile a.logout:hover { color: #fff; text-decoration: underline; }
+
+    /* Main content */
+    .app-main {
+        padding: 1.75rem 2.25rem 2.5rem 2.25rem;
+    }
+
+    .main-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        color: #5b6b66;
+    }
+
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        background: #e3efe9;
+        color: #176448;
+        font-size: 0.78rem;
+        font-weight: 650;
+    }
+
+    .status-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #1f9d6c; }
+
+    .topbar-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: #fff;
+        border: 1px solid #dde7e3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .greeting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .greeting-row h1 {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 1.8rem;
+        color: #152420;
+        margin: 0 0 0.3rem 0;
+    }
+
+    .greeting-row p { margin: 0; color: #5b6b66; font-size: 0.95rem; }
+
+    .btn-ghost {
+        padding: 0.6rem 1rem;
+        border-radius: 10px;
+        border: 1px solid #dde7e3;
+        background: #fff;
+        color: #152420;
+        font-size: 0.85rem;
+        font-weight: 650;
+        cursor: pointer;
+    }
+
+    .ready-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fff;
+        border: 1px solid #dde7e3;
+        border-radius: 14px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .ready-banner .left { display: flex; align-items: center; gap: 0.75rem; }
+    .ready-banner .check { color: #1f9d6c; font-size: 1.2rem; }
+    .ready-banner strong { display: block; color: #152420; font-size: 0.95rem; }
+    .ready-banner span { font-size: 0.82rem; color: #5b6b66; }
+    .ready-banner .count { font-size: 0.82rem; font-weight: 650; color: #176448; }
+
+    .dash-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 1100px) {
+        .dash-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+        background: #fff;
+        border: 1px solid #dde7e3;
         border-radius: 16px;
         padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
-        border: 1px solid #cbd5e1;
-        animation: fadeInUp 0.5s ease-out;
     }
 
-    .stat-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #0f766e;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-        color: #475569;
-        font-size: 0.9rem;
-        font-weight: 600;
-    }
-
-    .user-info-card {
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        animation: fadeInUp 0.6s ease-out;
-        border: 1px solid #cbd5e1;
-    }
-
-    .user-info-card h2 {
-        color: #0b1220;
-        margin-bottom: 1.5rem;
-        font-size: 1.5rem;
-        border-bottom: 2px solid #cbd5e1;
-        padding-bottom: 0.5rem;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .info-item label {
-        color: #475569;
-        font-size: 0.9rem;
-        font-weight: 600;
-    }
-
-    .info-item .value {
-        color: #0f766e;
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-
-    .quick-actions {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .action-card {
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        animation: fadeInUp 0.7s ease-out;
-        border: 1px solid #cbd5e1;
-    }
-
-    .action-card:hover {
-        transform: translateY(-5px) scale(1.02);
-        box-shadow: 0 15px 40px rgba(15, 23, 42, 0.14);
-        border-color: rgba(20, 184, 166, 0.6);
-    }
-
-    .action-card.emergency {
-        background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
-        color: #0b1220;
-        border: 1px solid rgba(180, 83, 9, 0.35);
-    }
-
-    .action-card.emergency:hover {
-        background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
-    }
-
-    .action-card .icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-
-    .action-card h3 {
-        margin-bottom: 0.5rem;
-        font-size: 1.3rem;
-        color: inherit;
-    }
-
-    .action-card:not(.emergency) h3 {
-        color: #0b1220;
-    }
-
-    .action-card p {
-        font-size: 0.9rem;
-        opacity: 0.9;
-        color: inherit;
-    }
-
-    .action-card:not(.emergency) p {
-        color: #475569;
-    }
-
-    .emergency-contacts {
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        animation: fadeInUp 0.8s ease-out;
-        border: 1px solid #cbd5e1;
-    }
-
-    .emergency-contacts h2 {
-        color: #0b1220;
-        margin-bottom: 1.5rem;
-        font-size: 1.5rem;
-        border-bottom: 2px solid #cbd5e1;
-        padding-bottom: 0.5rem;
-    }
-
-    .contact-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .contact-item {
+    .card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem;
-        background: #f1f5f9;
-        border-radius: 12px;
-        border-left: 5px solid #0f766e;
-        transition: all 0.3s ease;
+        margin-bottom: 1rem;
     }
 
-    .contact-item:hover {
-        background: #e2e8f0;
-        transform: translateX(5px);
-    }
-
-    .contact-item .name {
-        font-weight: 600;
-        color: #0b1220;
-    }
-
-    .contact-item .number {
-        color: #0f172a;
-        font-family: monospace;
-        font-weight: 600;
-    }
-
-    .btn-secondary {
-        padding: 0.75rem 1.5rem;
-        background: #0f766e;
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-size: 0.95rem;
+    .card-header .eyebrow {
+        font-size: 0.68rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #8a9b96;
         font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 1rem;
-        display: inline-block;
-        text-decoration: none;
-        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
     }
 
-    .btn-secondary:hover {
-        background: #0a5f59;
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16);
+    .card-header .tag { font-size: 0.78rem; color: #8a9b96; }
+
+    .score-row { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1rem; }
+
+    .score-ring {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: conic-gradient(#1f9d6c calc(var(--pct, 70) * 1%), #e3efe9 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
     }
+
+    .score-ring span {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: #152420;
+        font-size: 1.05rem;
+    }
+
+    .score-copy strong { display: block; font-size: 1.05rem; color: #152420; }
+    .score-copy span { font-size: 0.85rem; color: #5b6b66; }
+
+    .score-tip {
+        display: flex;
+        gap: 0.6rem;
+        background: #f3f7f5;
+        border-radius: 10px;
+        padding: 0.75rem 0.9rem;
+        font-size: 0.85rem;
+        color: #44544f;
+        margin-bottom: 1rem;
+    }
+
+    .link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.65rem 1rem;
+        background: #16302b;
+        color: #fff;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 650;
+    }
+
+    .link-btn:hover { background: #0f231f; text-decoration: none; }
+
+    .circle-list { display: flex; gap: 0.4rem; margin-bottom: 0.75rem; }
+
+    .circle-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #fce8e6;
+        color: #b9544a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px #e7d6cf;
+    }
+
+    .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.85rem 0;
+        border-top: 1px solid #eef2f0;
+    }
+
+    .toggle-row .label { display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; color: #152420; font-weight: 600; }
+    .toggle-row .label span.sub { display: block; font-size: 0.76rem; color: #8a9b96; font-weight: 400; }
+
+    .switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch .slider {
+        position: absolute; cursor: pointer; inset: 0;
+        background: #cfe0da; border-radius: 999px; transition: 0.2s;
+    }
+    .switch .slider::before {
+        content: ''; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px;
+        background: #fff; border-radius: 50%; transition: 0.2s;
+    }
+    .switch input:checked + .slider { background: #1f9d6c; }
+    .switch input:checked + .slider::before { transform: translateX(18px); }
+
+    .mini-note { font-size: 0.78rem; color: #8a9b96; margin-top: 0.5rem; }
+
+    .activity-list { display: flex; flex-direction: column; gap: 0; }
+
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eef2f0;
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-item .ico {
+        width: 30px; height: 30px; border-radius: 8px;
+        background: #f3f7f5; display: flex; align-items: center; justify-content: center;
+        font-size: 0.85rem; flex-shrink: 0;
+    }
+
+    .activity-item strong { display: block; font-size: 0.86rem; color: #152420; }
+    .activity-item span.meta { font-size: 0.78rem; color: #8a9b96; }
+    .activity-item .time { margin-left: auto; font-size: 0.75rem; color: #8a9b96; white-space: nowrap; }
+
+    .places-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    @media (max-width: 600px) { .places-grid { grid-template-columns: 1fr; } }
+
+    .place-item {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.75rem;
+        background: #f6f9f8;
+        border-radius: 12px;
+    }
+
+    .place-item .ico { font-size: 1.2rem; }
+    .place-item strong { display: block; font-size: 0.85rem; color: #152420; }
+    .place-item span { font-size: 0.76rem; color: #8a9b96; }
+    .place-item .dist { margin-left: auto; font-size: 0.75rem; color: #5b6b66; font-weight: 650; white-space: nowrap; }
+
+    .sos-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        background: linear-gradient(135deg, #fdf0ee, #fde4e0);
+        border: 1px solid #f3c6bd;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .sos-banner .left { display: flex; align-items: center; gap: 0.9rem; }
+    .sos-banner .ico { font-size: 1.6rem; }
+    .sos-banner strong { display: block; color: #6b2a24; font-size: 1rem; }
+    .sos-banner span { font-size: 0.85rem; color: #8a4e45; }
+
+    .btn-sos {
+        padding: 0.75rem 1.3rem;
+        background: #b9544a;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .btn-sos:hover { background: #a2473e; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <div class="welcome-card">
-        <h1>Welcome, {{ user.username }}.</h1>
-        <p>Your safety is our priority. Use the tools below to stay prepared and aware.</p>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">👯‍♀️</div>
-            <div class="stat-value">{{ trusted_count }}</div>
-            <div class="stat-label">Trusted Contacts</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">🚨</div>
-            <div class="stat-value">{{ active_alerts }}</div>
-            <div class="stat-label">Active Alerts</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">🧭</div>
-            <div class="stat-value">{{ '✓' if user.adaptive_mode_enabled else '✗' }}</div>
-            <div class="stat-label">Adaptive Mode</div>
-        </div>
-    </div>
-
-    <div class="user-info-card">
-        <h2>Your Profile Information</h2>
-        <div class="info-grid">
-            <div class="info-item">
-                <label>Username</label>
-                <div class="value">{{ user.username }}</div>
-            </div>
-            <div class="info-item">
-                <label>Email</label>
-                <div class="value">{{ user.email }}</div>
-            </div>
-            <div class="info-item">
-                <label>Phone Number</label>
-                <div class="value">{{ user.phone_number if user.phone_number else 'Not provided' }}</div>
-            </div>
-            <div class="info-item">
-                <label>Member Since</label>
-                <div class="value">{{ user.created_at.strftime('%B %d, %Y') }}</div>
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <div class="sidebar-brand">
+            <span class="brand-badge" aria-hidden="true">🛡️</span>
+            <div class="brand-text">
+                <strong>Saheli</strong>
+                <span>Personal Safety</span>
             </div>
         </div>
-    </div>
 
-    <div class="quick-actions">
-        <div class="action-card emergency" onclick="window.location.href='{{ url_for('sos_page') }}'">
-            <div class="icon">🚨</div>
-            <h3>Emergency SOS</h3>
-            <p>Send a rapid alert to your trusted contacts</p>
+        <div class="sidebar-section-label">Your space</div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard') }}" class="active"><span class="nav-icon">🏠</span> Overview</a>
+            <a href="{{ url_for('safety_score_page') }}"><span class="nav-icon">📊</span> Safety score</a>
+            <a href="{{ url_for('safety_beacons_page') }}"><span class="nav-icon">📍</span> Safe places</a>
+            <a href="{{ url_for('trusted_circle') }}"><span class="nav-icon">👯‍♀️</span> Trusted circle</a>
+            <a href="{{ url_for('community_page') }}"><span class="nav-icon">💬</span> Community</a>
+            <a href="{{ url_for('settings') }}"><span class="nav-icon">⚙️</span> Settings</a>
+        </nav>
+
+        <div class="sidebar-spacer"></div>
+
+        <div class="sidebar-help-card">
+            <div class="help-icon">🆘</div>
+            <strong>Here when you need us</strong>
+            <span>Your trusted circle can be reached in one tap, anytime.</span>
         </div>
 
-        <div class="action-card" onclick="window.location.href='{{ url_for('safety_score_page') }}'">
-            <div class="icon">📊</div>
-            <h3>Safety Score</h3>
-            <p>Check area safety in real-time</p>
+        <div class="sidebar-profile">
+            <div class="avatar">{{ user.username[0]|upper }}</div>
+            <div class="who">
+                <strong>{{ user.username }}</strong>
+                <span>Saheli member</span>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        </div>
+    </aside>
+
+    <main class="app-main">
+        <div class="main-topbar">
+            <span>{{ user.created_at.strftime('%A, %B %d') if user.created_at else '' }}</span>
+            <div class="topbar-actions">
+                <span class="status-chip"><span class="dot"></span> Safety tools ready</span>
+                <button class="icon-btn" title="Notifications" type="button">🔔</button>
+                <a class="icon-btn" title="Profile" href="{{ url_for('profile') }}" style="text-decoration:none;">👤</a>
+            </div>
         </div>
 
-        <div class="action-card" onclick="window.location.href='{{ url_for('trusted_circle') }}'">
-            <div class="icon">👯‍♀️</div>
-            <h3>Trusted Circle</h3>
-            <p>Manage your trusted contacts</p>
+        <div class="greeting-row">
+            <div>
+                <h1>Good to see you, {{ user.username }}</h1>
+                <p>A little preparation can make the journey feel easier.</p>
+            </div>
+            <a href="{{ url_for('settings') }}" class="btn-ghost" style="text-decoration:none;">Personalize safety setup</a>
         </div>
 
-        <div class="action-card" onclick="window.location.href='{{ url_for('community_page') }}'">
-            <div class="icon">💬</div>
-            <h3>Community</h3>
-            <p>Share & read safety reports</p>
-        </div>
-
-        <div class="action-card" onclick="window.location.href='{{ url_for('safety_beacons_page') }}'">
-            <div class="icon">🏪</div>
-            <h3>Safety Beacons</h3>
-            <p>Find nearby safe spots</p>
-        </div>
-
-        <div class="action-card" onclick="window.location.href='{{ url_for('settings') }}'">
-            <div class="icon">⚙️</div>
-            <h3>Settings</h3>
-            <p>Configure email & SMS</p>
-        </div>
-
-        <div class="action-card" onclick="window.location.href='{{ url_for('profile') }}'">
-            <div class="icon">👤</div>
-            <h3>Profile</h3>
-            <p>Manage your account</p>
-        </div>
-    </div>
-
-    <div class="emergency-contacts">
-        <h2>Emergency Contacts</h2>
-        <div class="contact-list">
-            {% if user.emergency_contact %}
-                <div class="contact-item">
-                    <div class="name">Emergency Contact</div>
-                    <div class="number">{{ user.emergency_contact }}</div>
+        <div class="ready-banner">
+            <div class="left">
+                <span class="check">✅</span>
+                <div>
+                    <strong>You're ready for the day</strong>
+                    <span>
+                        {% if user.emergency_contact %}Emergency contact set{% else %}Add an emergency contact{% endif %}
+                        &middot; Trusted circle {{ 'reachable' if trusted_count > 0 else 'is empty' }}
+                        &middot; Adaptive mode {{ 'on' if user.adaptive_mode_enabled else 'off' }}
+                    </span>
                 </div>
-            {% endif %}
-            <div class="contact-item">
-                <div class="name">Police Emergency</div>
-                <div class="number">100</div>
             </div>
-            <div class="contact-item">
-                <div class="name">Women Helpline</div>
-                <div class="number">1091</div>
+            <span class="count">
+                {{ (1 if user.emergency_contact else 0) + (1 if trusted_count > 0 else 0) + (1 if user.adaptive_mode_enabled else 0) }} of 3 ready
+            </span>
+        </div>
+
+        <div class="dash-grid">
+            <div class="card">
+                <div class="card-header">
+                    <span class="eyebrow">Safety score</span>
+                    <span class="tag">Updated just now</span>
+                </div>
+                <div class="score-row">
+                    <div class="score-ring" style="--pct: 70;"><span>70</span></div>
+                    <div class="score-copy">
+                        <strong>Looking good</strong>
+                        <span>Based on your trusted circle, alerts and adaptive mode settings</span>
+                    </div>
+                </div>
+                <div class="score-tip">
+                    💡 Add at least one trusted contact and turn on adaptive mode to raise your score.
+                </div>
+                <a href="{{ url_for('safety_score_page') }}" class="link-btn">View safety score →</a>
             </div>
-            <div class="contact-item">
-                <div class="name">National Commission for Women</div>
-                <div class="number">7827-170-170</div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="eyebrow">Trusted circle</span>
+                    <span class="tag">{{ trusted_count }} added</span>
+                </div>
+                {% if trusted_count > 0 %}
+                <div class="circle-list">
+                    {% for i in range(trusted_count if trusted_count < 4 else 4) %}
+                    <div class="circle-avatar">👤</div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="mini-note" style="margin-top:0;">No trusted contacts yet &mdash; add someone you trust to reach in an emergency.</p>
+                {% endif %}
+
+                <div class="toggle-row" style="border-top:none; padding-top:0;">
+                    <div class="label">
+                        <span>
+                            Adaptive mode
+                            <span class="sub">Adjusts alerts to your routine automatically</span>
+                        </span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" disabled {{ 'checked' if user.adaptive_mode_enabled else '' }}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <a href="{{ url_for('trusted_circle') }}" class="link-btn" style="margin-top:0.5rem;">Manage trusted circle →</a>
             </div>
         </div>
-    </div>
+
+        <div class="dash-grid">
+            <div class="card">
+                <div class="card-header">
+                    <span class="eyebrow">Recent safety activity</span>
+                    <a href="{{ url_for('trusted_circle') }}" class="tag" style="text-decoration:none;">View all</a>
+                </div>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <span class="ico">🚨</span>
+                        <div>
+                            <strong>Active SOS alerts</strong>
+                            <span class="meta">{{ active_alerts }} alert{{ 's' if active_alerts != 1 else '' }} currently active</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <span class="ico">👯‍♀️</span>
+                        <div>
+                            <strong>Trusted circle</strong>
+                            <span class="meta">{{ trusted_count }} contact{{ 's' if trusted_count != 1 else '' }} ready to respond</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <span class="ico">📧</span>
+                        <div>
+                            <strong>Account</strong>
+                            <span class="meta">{{ user.email }}{{ ' · ' + user.phone_number if user.phone_number else '' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="eyebrow">Useful numbers</span>
+                </div>
+                <div class="places-grid">
+                    <div class="place-item">
+                        <span class="ico">🚓</span>
+                        <div>
+                            <strong>Police</strong>
+                            <span>Emergency</span>
+                        </div>
+                        <span class="dist">100</span>
+                    </div>
+                    <div class="place-item">
+                        <span class="ico">📞</span>
+                        <div>
+                            <strong>Women Helpline</strong>
+                            <span>24 hours</span>
+                        </div>
+                        <span class="dist">1091</span>
+                    </div>
+                    <div class="place-item">
+                        <span class="ico">🏛️</span>
+                        <div>
+                            <strong>NCW</strong>
+                            <span>Commission for Women</span>
+                        </div>
+                        <span class="dist">7827-170-170</span>
+                    </div>
+                    <div class="place-item">
+                        <span class="ico">📍</span>
+                        <div>
+                            <strong>Safe places</strong>
+                            <span>Find nearby spots</span>
+                        </div>
+                        <a href="{{ url_for('safety_beacons_page') }}" class="dist" style="text-decoration:none;">View →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sos-banner">
+            <div class="left">
+                <span class="ico">🆘</span>
+                <div>
+                    <strong>Need help right now?</strong>
+                    <span>SOS alerts your trusted circle and shares your live location.</span>
+                </div>
+            </div>
+            <button class="btn-sos" onclick="window.location.href='{{ url_for('sos_page') }}'">Open SOS</button>
+        </div>
+    </main>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    function activateEmergency() {
-        if (confirm('⚠️ Are you sure you want to activate Emergency SOS? This will alert all your emergency contacts.')) {
-            // In a real implementation, this would trigger actual emergency protocols
-            alert('🚨 Emergency alert sent to all your contacts!\n\n(This is a demo - in production, real alerts would be sent)');
-        }
-    }
-
-    // Add keyboard shortcut for emergency (Press E key twice quickly)
+    // Keyboard shortcut for emergency (press E twice quickly) → go to SOS page
     let eKeyPressCount = 0;
     let eKeyTimeout;
 
     document.addEventListener('keydown', function(event) {
         if (event.key === 'e' || event.key === 'E') {
             eKeyPressCount++;
-            
+
             if (eKeyPressCount === 2) {
-                activateEmergency();
+                window.location.href = "{{ url_for('sos_page') }}";
                 eKeyPressCount = 0;
                 clearTimeout(eKeyTimeout);
             }
-            
+
             eKeyTimeout = setTimeout(() => {
                 eKeyPressCount = 0;
             }, 500);
@@ -407,4 +701,3 @@
     });
 </script>
 {% endblock %}
-
