@@ -7,3 +7,4 @@ requests==2.31.0
 twilio==8.10.0
 gunicorn
 psycopg2-binary==2.9.9
+psycopg[binary]
