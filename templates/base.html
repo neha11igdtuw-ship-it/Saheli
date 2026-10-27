@@ -11,7 +11,7 @@
     <nav class="navbar">
         <div class="navbar-inner">
             <a href="{{ url_for('index') }}" class="navbar-brand" aria-label="Saheli home">
-                <span class="brand-mark" aria-hidden="true">S</span>
+                <span class="brand-mark" aria-hidden="true"><img src="{{ url_for('static', filename='icon.png') }}" alt=""></span>
                 <span>Saheli</span>
             </a>
             <div class="navbar-menu">
@@ -31,7 +31,15 @@
             <div class="flash-messages">
                 {% for category, message in messages %}
                     <div class="flash {{ category }}">
-                        {% if category == 'success' %}✓{% elif category == 'error' %}✗{% else %}ℹ{% endif %}
+                        <span class="flash-icon" aria-hidden="true">
+                            {% if category == 'success' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>
+                            {% elif category == 'error' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+                            {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 11.5v4.5"/></svg>
+                            {% endif %}
+                        </span>
                         {{ message }}
                     </div>
                 {% endfor %}

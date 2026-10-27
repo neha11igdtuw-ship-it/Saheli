@@ -10,80 +10,237 @@
         padding: 2rem;
     }
 
+    .navbar, footer { display: none; }
+
+    body { background: #f8f1ec; }
+
+    main.container {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem 1.5rem;
+    }
+
     .page-header {
-        background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+        background: linear-gradient(160deg, #3d1b26 0%, #5c2a3a 55%, #7a3540 100%);
         border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+        padding: 2.25rem 2rem;
+        margin-bottom: 1.5rem;
         text-align: center;
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #fdf3ee;
+    }
+
+    .page-header .page-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem auto;
+        animation: pulse 2s infinite;
     }
 
     .page-header h1 {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+        color: #fff;
+    }
+
+    .page-header p {
+        margin: 0;
+        color: rgba(253, 243, 238, 0.85);
     }
 
     .emergency-actions {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 1.1rem;
+        margin-bottom: 1.5rem;
     }
 
     .sos-button {
-        background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+        background: #fff;
         border-radius: 16px;
-        padding: 2rem;
+        padding: 1.75rem 1.5rem;
         text-align: center;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
-        border: 1px solid rgba(180, 83, 9, 0.35);
-        color: #0b1220;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        border: 1px solid #ece0d8;
+        color: #2b1a1c;
     }
 
     .sos-button:hover {
-        transform: translateY(-5px) scale(1.05);
-        box-shadow: 0 15px 40px rgba(15, 23, 42, 0.18);
+        transform: translateY(-3px);
+        box-shadow: 0 14px 28px rgba(92, 42, 58, 0.12);
+        border-color: #e0b8ae;
     }
 
+    .sos-button.primary {
+        background: #d8342b;
+        color: #fff;
+        border: none;
+        box-shadow: 0 10px 22px rgba(216, 52, 43, 0.28);
+    }
+
+    .sos-button.primary:hover {
+        background: #b8281f;
+        box-shadow: 0 14px 26px rgba(216, 52, 43, 0.34);
+    }
+
+    .sos-button.call112 {
+        background: #0f172a;
+        color: #fff;
+        border: none;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.32);
+        order: -1;
+    }
+
+    .sos-button.call112:hover {
+        background: #1e293b;
+        box-shadow: 0 14px 26px rgba(15, 23, 42, 0.38);
+    }
+
+    .sos-button.call112 .sos-icon {
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+    }
+
+    .sos-status-banner {
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #ece0d8;
+        background: #fff;
+    }
+
+    .sos-status-banner.pending {
+        background: #fffbeb;
+        border-color: #f3d58a;
+    }
+
+    .sos-status-banner.sent {
+        background: #e5f2ec;
+        border-color: #a9d9c4;
+    }
+
+    .sos-status-banner.failed {
+        background: #fdece5;
+        border-color: #eab8ac;
+    }
+
+    .sos-status-banner.cancelled {
+        background: #f6efe9;
+        border-color: #ece0d8;
+    }
+
+    .sos-status-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .sos-status-title {
+        font-weight: 700;
+        color: #2b1a1c;
+        font-size: 1.05rem;
+    }
+
+    .sos-status-sub {
+        color: #6b5a57;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .btn-im-safe {
+        padding: 0.65rem 1.25rem;
+        background: #1f9d6c;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .btn-im-safe:hover { background: #197f58; }
+    .btn-im-safe:disabled { background: #9c8a86; cursor: not-allowed; }
+
+    .sos-channel-results {
+        margin-top: 0.9rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.6rem;
+    }
+
+    .sos-channel {
+        background: rgba(255,255,255,0.6);
+        border-radius: 10px;
+        padding: 0.6rem 0.75rem;
+        font-size: 0.82rem;
+        color: #2b1a1c;
+    }
+
+    .sos-channel strong { display: block; font-size: 1rem; }
+
     .sos-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: #fdece5;
+        color: #b9544a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem auto;
+    }
+
+    .sos-button.primary .sos-icon {
+        background: rgba(255, 255, 255, 0.18);
+        color: #fff;
         animation: pulse 2s infinite;
     }
 
     @keyframes pulse {
         0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
+        50% { transform: scale(1.08); }
     }
 
     .sos-title {
-        font-size: 1.5rem;
+        font-size: 1.1rem;
         font-weight: 700;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.35rem;
     }
 
     .sos-description {
-        font-size: 0.9rem;
-        opacity: 0.9;
+        font-size: 0.85rem;
+        opacity: 0.85;
     }
 
     .features-card {
         background: #ffffff;
         border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        border: 1px solid #cbd5e1;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #ece0d8;
     }
 
     .features-card h2 {
-        color: #0b1220;
-        margin-bottom: 1.5rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #2b1a1c;
+        margin: 0 0 1.25rem 0;
+        font-size: 1.3rem;
     }
 
     .feature-list {
@@ -93,48 +250,57 @@
 
     .feature-item {
         display: flex;
-        align-items: start;
+        align-items: flex-start;
         gap: 1rem;
         padding: 1rem;
-        background: #f1f5f9;
+        background: #f6efe9;
         border-radius: 12px;
     }
 
     .feature-icon {
-        font-size: 2rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #fdece5;
+        color: #b9544a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         flex-shrink: 0;
     }
 
     .feature-content h3 {
-        color: #0b1220;
-        font-size: 1.1rem;
-        margin-bottom: 0.25rem;
+        color: #2b1a1c;
+        font-size: 1rem;
+        margin: 0 0 0.25rem 0;
     }
 
     .feature-content p {
-        color: #475569;
-        font-size: 0.9rem;
+        color: #6b5a57;
+        font-size: 0.88rem;
+        margin: 0;
     }
 
     .alerts-history {
         background: #ffffff;
         border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        border: 1px solid #cbd5e1;
+        padding: 1.75rem;
+        border: 1px solid #ece0d8;
     }
 
     .alerts-history h2 {
-        color: #0b1220;
-        margin-bottom: 1.5rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #2b1a1c;
+        margin: 0 0 1.25rem 0;
+        font-size: 1.3rem;
     }
 
     .alert-item {
         padding: 1rem;
-        background: #f1f5f9;
+        background: #f6efe9;
         border-radius: 12px;
         margin-bottom: 1rem;
-        border-left: 5px solid #0f766e;
+        border-left: 4px solid #b9544a;
     }
 
     .alert-header {
@@ -142,86 +308,138 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
     }
 
     .alert-type {
         font-weight: 700;
-        color: #0b1220;
+        color: #2b1a1c;
     }
 
     .alert-date {
         font-size: 0.85rem;
-        color: #475569;
+        color: #6b5a57;
     }
 
     .alert-status {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
         padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 650;
     }
 
     .alert-status.active {
-        background: #b45309;
-        color: #ffffff;
+        background: #fdece5;
+        color: #b9544a;
     }
 
     .alert-status.resolved {
-        background: rgba(16, 185, 129, 0.2);
-        color: #10b981;
+        background: #e5f2ec;
+        color: #1f7a5c;
     }
+
+    .alert-location {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #6b5a57;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn-resolve {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background: #1f9d6c;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 650;
+        font-size: 0.85rem;
+    }
+
+    .btn-resolve:hover { background: #197f58; }
 
     .empty-state {
         text-align: center;
-        padding: 3rem;
-        color: #475569;
+        padding: 2.5rem 1rem;
+        color: #6b5a57;
     }
+
+    .empty-state .empty-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #f6efe9;
+        color: #9c8a86;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem auto;
+    }
+
+    .empty-state h3 { color: #2b1a1c; margin-bottom: 0.4rem; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-container">
     <div class="page-header">
-        <h1>🚨 Emergency SOS</h1>
+        <div class="page-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.4"/><path d="M12 3v5.3M12 15.7V21M3 12h5.3M15.7 12H21"/></svg>
+        </div>
+        <h1>Emergency SOS</h1>
         <p>Rapid alert system to notify your trusted contacts with your location.</p>
     </div>
 
+    <div id="sos-status-banner" class="sos-status-banner" style="display:none;"></div>
+
     <div class="emergency-actions">
-        <button class="sos-button" onclick="triggerSOS('manual')">
-            <div class="sos-icon">🚨</div>
+        <button class="sos-button call112" onclick="call112()">
+            <div class="sos-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h3l1.5 4-2 1.5a12 12 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4 6.2 2 2 0 0 1 6 3Z"/></svg></div>
+            <div class="sos-title">Call 112 (Police / ERSS)</div>
+            <div class="sos-description">India's official emergency number &mdash; always your first call</div>
+        </button>
+
+        <button class="sos-button primary" onclick="triggerSOS('manual')">
+            <div class="sos-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.4"/><path d="M12 3v5.3M12 15.7V21M3 12h5.3M15.7 12H21"/></svg></div>
             <div class="sos-title">Emergency SOS</div>
-            <div class="sos-description">Alert all trusted contacts NOW</div>
+            <div class="sos-description">Alert all trusted contacts now</div>
         </button>
 
         <button class="sos-button" onclick="callEmergencyContact()">
-            <div class="sos-icon">☎️</div>
+            <div class="sos-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h3l1.5 4-2 1.5a12 12 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4 6.2 2 2 0 0 1 6 3Z"/></svg></div>
             <div class="sos-title">Call Trusted Contact</div>
             <div class="sos-description">Direct call to your primary trusted contact</div>
         </button>
 
         <button class="sos-button" onclick="showFakeCallOptions()">
-            <div class="sos-icon">📞</div>
+            <div class="sos-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M9 18h6"/></svg></div>
             <div class="sos-title">Fake Call (Escape)</div>
             <div class="sos-description">Pretend to receive a call</div>
         </button>
 
         <button class="sos-button" onclick="triggerSOS('voice')">
-            <div class="sos-icon">🎤</div>
+            <div class="sos-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></div>
             <div class="sos-title">Voice SOS</div>
             <div class="sos-description">Voice-activated alert</div>
         </button>
 
         <button class="sos-button" onclick="triggerSOS('gesture')">
-            <div class="sos-icon">🤳</div>
+            <div class="sos-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M6 7h12M6 17h12" stroke-opacity="0.5"/></svg></div>
             <div class="sos-title">Gesture SOS</div>
             <div class="sos-description">Shake to activate</div>
         </button>
 
-        <button class="sos-button" onclick="triggerSOS('offline')">
-            <div class="sos-icon">📱</div>
+        <button class="sos-button" onclick="triggerOfflineSOS()">
+            <div class="sos-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m4 7 8 6 8-6"/></svg></div>
             <div class="sos-title">Offline SOS</div>
-            <div class="sos-description">SMS-based alert</div>
+            <div class="sos-description">Sends SMS directly — no internet or backend needed</div>
         </button>
     </div>
 
@@ -229,68 +447,71 @@
         <h2>SOS Features</h2>
         <div class="feature-list">
             <div class="feature-item">
-                <div class="feature-icon">📍</div>
+                <div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg></div>
                 <div class="feature-content">
                     <h3>Live Location Sharing</h3>
                     <p>Your real-time location is automatically shared with your trusted circle</p>
                 </div>
             </div>
             <div class="feature-item">
-                <div class="feature-icon">☎️</div>
+                <div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h3l1.5 4-2 1.5a12 12 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4 6.2 2 2 0 0 1 6 3Z"/></svg></div>
                 <div class="feature-content">
-                    <h3>Call Trusted Contact (REAL)</h3>
-                    <p>Directly calls your trusted contact’s phone number (real call).</p>
+                    <h3>Call Trusted Contact (real)</h3>
+                    <p>Directly calls your trusted contact's phone number (real call).</p>
                 </div>
             </div>
             <div class="feature-item">
-                <div class="feature-icon">📞</div>
+                <div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M9 18h6"/></svg></div>
                 <div class="feature-content">
-                    <h3>Fake Call (Escape Tool)</h3>
-                    <p>Shows fake incoming call screen to help you escape dangerous situations - NOT a real call!</p>
+                    <h3>Fake Call (escape tool)</h3>
+                    <p>Shows a fake incoming call screen to help you leave a situation &mdash; not a real call.</p>
                 </div>
             </div>
             <div class="feature-item">
-                <div class="feature-icon">🌐</div>
+                <div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
                 <div class="feature-content">
-                    <h3>Offline Mode</h3>
-                    <p>Works even with poor connectivity using SMS</p>
+                    <h3>Offline mode</h3>
+                    <p>Opens your phone's own SMS app to text trusted contacts directly over cellular signal — works with no data connection, and kicks in automatically if the app can't reach Saheli's servers.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="alerts-history">
-        <h2>📊 Recent Alerts</h2>
+        <h2>Recent Alerts</h2>
         {% if recent_alerts %}
             {% for alert in recent_alerts %}
                 <div class="alert-item">
                     <div class="alert-header">
                         <span class="alert-type">{{ alert.alert_type.title() }} SOS</span>
                         <span class="alert-status {% if alert.is_resolved %}resolved{% else %}active{% endif %}">
-                            {% if alert.is_resolved %}✓ Resolved{% else %}🚨 Active{% endif %}
+                            {% if alert.is_resolved %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg> Resolved
+                            {% else %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg> Active
+                            {% endif %}
                         </span>
                     </div>
                     <div class="alert-date">
                         {{ alert.triggered_at.strftime('%B %d, %Y at %I:%M %p') }}
                     </div>
                     {% if alert.location_address %}
-                        <div style="color: #475569; font-size: 0.9rem; margin-top: 0.5rem;">
-                            📍 {{ alert.location_address }}
+                        <div class="alert-location">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg>
+                            {{ alert.location_address }}
                         </div>
                     {% endif %}
                     {% if not alert.is_resolved %}
-                        <form method="POST" action="{{ url_for('resolve_sos', alert_id=alert.id) }}" style="margin-top: 1rem;">
-                            <button type="submit" style="padding: 0.5rem 1rem; background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600;">
-                                Mark as Resolved
-                            </button>
+                        <form method="POST" action="{{ url_for('resolve_sos', alert_id=alert.id) }}">
+                            <button type="submit" class="btn-resolve">Mark as resolved</button>
                         </form>
                     {% endif %}
                 </div>
             {% endfor %}
         {% else %}
             <div class="empty-state">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🕘</div>
-                <h3 style="color: #0b1220; margin-bottom: 0.5rem;">No Alerts Yet</h3>
+                <div class="empty-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+                <h3>No alerts yet</h3>
                 <p>You haven't triggered any SOS alerts.</p>
             </div>
         {% endif %}
@@ -300,10 +521,33 @@
 
 {% block extra_js %}
 <script>
+    function call112() {
+        window.location.href = 'tel:112';
+    }
+
+    // Rendered once from the server; used by both the online SOS path
+    // (dispatch via Twilio from the backend) and the offline fallback
+    // (native sms: links sent directly from the device, no backend needed).
+    const TRUSTED_CONTACTS = [
+        {% for contact in user.trusted_contacts %}
+        {
+            name: "{{ contact.name }}",
+            phone_number: "{{ contact.phone_number }}",
+            email: "{{ contact.email }}",
+            is_primary: {{ 'true' if contact.is_primary else 'false' }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    let sosCountdownTimer = null;
+    let sosPollTimer = null;
+
     function triggerSOS(alertType) {
-        const confirmation = confirm(`🚨 Trigger ${alertType.toUpperCase()} SOS?\n\nThis will alert all your trusted contacts!`);
-        
-        if (!confirmation) return;
+        // No blocking confirm() dialog here by design: the countdown banner
+        // below IS the confirmation step, with a visible "I'm Safe" cancel —
+        // a native confirm() would be redundant and (on some mobile webviews)
+        // can hang the page.
+        if (sosCountdownTimer) return; // an SOS is already armed
 
         // Get current location if available
         if (navigator.geolocation) {
@@ -311,7 +555,7 @@
                 sendSOSAlert(alertType, position.coords.latitude, position.coords.longitude);
             }, function(error) {
                 sendSOSAlert(alertType, null, null);
-            });
+            }, { timeout: 8000 });
         } else {
             sendSOSAlert(alertType, null, null);
         }
@@ -320,9 +564,9 @@
     function sendSOSAlert(alertType, latitude, longitude) {
         const formData = new FormData();
         formData.append('alert_type', alertType);
-        formData.append('latitude', latitude);
-        formData.append('longitude', longitude);
-        formData.append('location_address', 'Current Location');
+        if (latitude !== null && latitude !== undefined) formData.append('latitude', latitude);
+        if (longitude !== null && longitude !== undefined) formData.append('longitude', longitude);
+        formData.append('location_address', (latitude !== null && longitude !== null) ? 'Current Location' : '');
 
         fetch('{{ url_for("trigger_sos") }}', {
             method: 'POST',
@@ -330,17 +574,246 @@
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                alert('✅ SOS alert sent successfully to your trusted contacts.\n\nHelp is on the way.');
-                location.reload();
-            } else {
-                alert('❌ Error: ' + data.message);
+            if (!data.success) {
+                alert('Error: ' + data.message);
+                return;
             }
+
+            if (!data.location_attached) {
+                console.warn('SOS armed WITHOUT a GPS fix — contacts will not get a precise map link.');
+            }
+
+            if (data.dispatch_status === 'failed') {
+                renderBanner('failed', 'SOS could not be sent', data.message, null);
+                return;
+            }
+
+            renderCountdownBanner(data.alert_id, data.grace_seconds, data.contacts_total, data.location_attached);
+            startSosPolling(data.alert_id);
         })
         .catch(error => {
-            alert('❌ Error sending SOS. Please try again.');
-            console.error('Error:', error);
+            // fetch() rejects on a real network failure (offline/no signal/DNS down) —
+            // not on an HTTP error status, which is already handled above. This is the
+            // one case where the backend genuinely cannot be reached, so fall back to
+            // native SMS (works over plain cellular, no data connection required)
+            // instead of just showing a dead-end error.
+            console.warn('trigger-sos unreachable, falling back to offline SMS:', error);
+            queueOfflineSos(alertType, latitude, longitude);
+            sendOfflineSmsFallback(latitude, longitude, true);
         });
+    }
+
+    // ==================== OFFLINE SOS (SMS fallback, no backend) ====================
+    // Twilio/email alerts need the backend to be reachable. When there's no data
+    // connection (or the user explicitly chooses Offline SOS), fall back to the
+    // device's native SMS composer, which sends over plain cellular signal.
+
+    function triggerOfflineSOS() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                sendOfflineSmsFallback(position.coords.latitude, position.coords.longitude, false);
+            }, function () {
+                sendOfflineSmsFallback(null, null, false);
+            }, { timeout: 8000 });
+        } else {
+            sendOfflineSmsFallback(null, null, false);
+        }
+    }
+
+    function buildSosSmsBody(latitude, longitude) {
+        const hasLoc = latitude !== null && latitude !== undefined && longitude !== null && longitude !== undefined;
+        const mapUrl = hasLoc ? `https://www.google.com/maps?q=${latitude},${longitude}` : null;
+        return (
+            `EMERGENCY SOS from Saheli. I need help now. ` +
+            (mapUrl ? `My location: ${mapUrl}` : `Location unavailable — please call me or check my last known location.`)
+        );
+    }
+
+    function sendOfflineSmsFallback(latitude, longitude, isAutoFallback) {
+        const contacts = (TRUSTED_CONTACTS || []).filter(c => c.phone_number);
+
+        if (contacts.length === 0) {
+            renderBanner('failed', 'No trusted contacts to SMS', 'Add a trusted contact with a phone number in Trusted Circle first.', null);
+            return;
+        }
+
+        const body = buildSosSmsBody(latitude, longitude);
+        const encodedBody = encodeURIComponent(body);
+
+        const primary = contacts.find(c => c.is_primary) || contacts[0];
+
+        const otherButtons = contacts
+            .filter(c => c !== primary)
+            .map(c => `<a class="btn-im-safe" style="background:#5c2a3a;text-decoration:none;display:inline-block;margin:0.25rem 0.4rem 0 0;" href="sms:${c.phone_number}?body=${encodedBody}">Text ${c.name}</a>`)
+            .join('');
+
+        renderBanner(
+            'pending',
+            isAutoFallback ? '📴 No connection — switched to offline SMS' : '📴 Offline SOS armed',
+            `Opening your SMS app to text ${primary.name}${!latitude ? ' (no GPS fix — location omitted)' : ''}. If it doesn't open, tap a contact below.`,
+            `<a class="btn-im-safe" style="text-decoration:none;display:inline-block;" href="sms:${primary.phone_number}?body=${encodedBody}">Text ${primary.name}</a>`
+        );
+
+        if (otherButtons) {
+            const banner = document.getElementById('sos-status-banner');
+            banner.innerHTML += `<div class="sos-channel-results">${otherButtons}</div>`;
+        }
+
+        // Best-effort auto-open; browsers may block this without a direct user
+        // gesture, which is exactly why the buttons above exist as a fallback.
+        window.location.href = `sms:${primary.phone_number}?body=${encodedBody}`;
+    }
+
+    // Queue an SOS that couldn't reach the backend so it still reaches the
+    // trusted-circle dispatch log once connectivity returns, instead of just
+    // vanishing because the phone was offline at the moment it was triggered.
+    function queueOfflineSos(alertType, latitude, longitude) {
+        try {
+            const queue = JSON.parse(localStorage.getItem('saheli_pending_sos') || '[]');
+            queue.push({ alertType, latitude, longitude, queuedAt: Date.now() });
+            localStorage.setItem('saheli_pending_sos', JSON.stringify(queue));
+        } catch (e) {
+            // localStorage unavailable (private mode, etc.) — SMS fallback above still fired.
+        }
+    }
+
+    function flushQueuedOfflineSos() {
+        let queue;
+        try {
+            queue = JSON.parse(localStorage.getItem('saheli_pending_sos') || '[]');
+        } catch (e) {
+            return;
+        }
+        if (!queue.length) return;
+
+        localStorage.removeItem('saheli_pending_sos');
+        queue.forEach(item => {
+            console.log('Back online — syncing queued offline SOS to the backend.');
+            sendSOSAlert(item.alertType, item.latitude, item.longitude);
+        });
+    }
+
+    window.addEventListener('online', flushQueuedOfflineSos);
+    document.addEventListener('DOMContentLoaded', flushQueuedOfflineSos);
+
+    function renderBanner(statusClass, title, subtitle, actionsHtml) {
+        const banner = document.getElementById('sos-status-banner');
+        banner.className = 'sos-status-banner ' + statusClass;
+        banner.style.display = 'block';
+        banner.innerHTML = `
+            <div class="sos-status-head">
+                <div>
+                    <div class="sos-status-title">${title}</div>
+                    <div class="sos-status-sub">${subtitle || ''}</div>
+                </div>
+                ${actionsHtml || ''}
+            </div>
+        `;
+    }
+
+    function renderCountdownBanner(alertId, graceSeconds, contactsTotal, locationAttached) {
+        let remaining = graceSeconds;
+        const locNote = locationAttached
+            ? 'Your live location will be attached.'
+            : '⚠️ No GPS fix — contacts will be notified WITHOUT a precise location.';
+
+        const tick = () => {
+            renderBanner(
+                'pending',
+                `Sending SOS to ${contactsTotal} trusted contact(s) in ${remaining}s…`,
+                locNote,
+                `<button class="btn-im-safe" onclick="cancelSOS(${alertId})">I'm Safe — Cancel</button>`
+            );
+            remaining -= 1;
+            if (remaining < 0) {
+                clearInterval(sosCountdownTimer);
+            }
+        };
+        if (sosCountdownTimer) clearInterval(sosCountdownTimer);
+        tick();
+        sosCountdownTimer = setInterval(tick, 1000);
+    }
+
+    function cancelSOS(alertId) {
+        fetch(`/cancel-sos/${alertId}`, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (sosCountdownTimer) clearInterval(sosCountdownTimer);
+                if (sosPollTimer) clearInterval(sosPollTimer);
+                if (data.success) {
+                    renderBanner('cancelled', "Marked safe", 'No trusted contacts were notified.', null);
+                } else {
+                    // Grace window already elapsed server-side; alerts are going out.
+                    renderBanner('pending', 'Too late to cancel', data.message, null);
+                    startSosPolling(alertId);
+                }
+            })
+            .catch(() => alert('Could not reach the server to cancel. Please try again.'));
+    }
+
+    function startSosPolling(alertId) {
+        if (sosPollTimer) clearInterval(sosPollTimer);
+        sosPollTimer = setInterval(() => {
+            fetch(`/sos-status/${alertId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) return;
+                    if (data.dispatch_status === 'sending' || data.dispatch_status === 'pending') return;
+
+                    clearInterval(sosPollTimer);
+                    if (sosCountdownTimer) clearInterval(sosCountdownTimer);
+                    renderDispatchResult(data);
+                    // Refresh the Recent Alerts list in the background
+                    setTimeout(() => location.reload(), 4000);
+                })
+                .catch(() => {});
+        }, 2000);
+    }
+
+    function renderDispatchResult(data) {
+        const results = data.results || {};
+        const sent = results.sent || {};
+        const attempted = results.attempted || {};
+
+        if (data.dispatch_status === 'cancelled') {
+            renderBanner('cancelled', 'Marked safe', 'No trusted contacts were notified.', null);
+            return;
+        }
+
+        if (!attempted.email && !attempted.sms && !attempted.call && !attempted.whatsapp) {
+            renderBanner('failed', 'SOS could not be delivered', results.reason === 'no_trusted_contacts'
+                ? 'You have no trusted contacts configured.' : 'Nothing could be attempted — check Settings.', null);
+            return;
+        }
+
+        const channelHtml = `
+            <div class="sos-channel-results">
+                <div class="sos-channel"><strong>${sent.email || 0}/${attempted.email || 0}</strong>Emails sent</div>
+                <div class="sos-channel"><strong>${sent.sms || 0}/${attempted.sms || 0}</strong>SMS sent</div>
+                <div class="sos-channel"><strong>${sent.call || 0}/${attempted.call || 0}</strong>Calls placed</div>
+                <div class="sos-channel"><strong>${sent.whatsapp || 0}/${attempted.whatsapp || 0}</strong>WhatsApp sent</div>
+            </div>
+        `;
+
+        const statusClass = data.dispatch_status === 'sent' ? 'sent' : 'failed';
+        const title = data.dispatch_status === 'sent'
+            ? '✅ SOS alerts sent'
+            : '⚠️ SOS alerts failed to send';
+        const sub = data.location_attached
+            ? 'Live location was included.' : 'No location was attached — contacts were notified without GPS coordinates.';
+
+        const banner = document.getElementById('sos-status-banner');
+        banner.className = 'sos-status-banner ' + statusClass;
+        banner.style.display = 'block';
+        banner.innerHTML = `
+            <div class="sos-status-head">
+                <div>
+                    <div class="sos-status-title">${title}</div>
+                    <div class="sos-status-sub">${sub}</div>
+                </div>
+            </div>
+            ${channelHtml}
+        `;
     }
 
     // Gesture detection (shake to SOS)
@@ -356,7 +829,7 @@
 
             if (deltaX + deltaY + deltaZ > shakeThreshold) {
                 // Shake detected!
-                const autoTrigger = confirm('🤳 Shake detected!\n\nTrigger Emergency SOS?');
+                const autoTrigger = confirm('Shake detected!\n\nTrigger Emergency SOS?');
                 if (autoTrigger) {
                     triggerSOS('gesture');
                 }
@@ -370,20 +843,10 @@
 
     // Call emergency contact function
     function callEmergencyContact() {
-        // Get phone numbers from trusted contacts (convert to plain objects)
-        const contacts = [
-            {% for contact in user.trusted_contacts %}
-            {
-                name: "{{ contact.name }}",
-                phone_number: "{{ contact.phone_number }}",
-                email: "{{ contact.email }}",
-                is_primary: {{ 'true' if contact.is_primary else 'false' }}
-            }{% if not loop.last %},{% endif %}
-            {% endfor %}
-        ];
-        
+        const contacts = TRUSTED_CONTACTS;
+
         if (!contacts || contacts.length === 0) {
-            alert('❌ No trusted contacts added!\n\nPlease add trusted contacts with phone numbers first.');
+            alert('No trusted contacts added!\n\nPlease add trusted contacts with phone numbers first.');
             window.location.href = '/trusted-circle';
             return;
         }
@@ -393,13 +856,13 @@
                            contacts.find(c => c.phone_number);
 
         if (!contactToCall) {
-            alert('❌ No trusted contacts with phone numbers found!');
+            alert('No trusted contacts with phone numbers found!');
             return;
         }
 
         // Show confirmation dialog
         const callConfirm = confirm(
-            `☎️ CALL ${contactToCall.name.toUpperCase()}?\n\n` +
+            `CALL ${contactToCall.name.toUpperCase()}?\n\n` +
             `Phone: ${contactToCall.phone_number}\n\n` +
             `This will ACTUALLY CALL your trusted contact.\n` +
             `Your phone dialer will open.`
@@ -429,16 +892,16 @@
     // Show fake call options
     function showFakeCallOptions() {
         const options = [
-            'Mom 👩',
-            'Dad 👨', 
-            'Boss 💼',
-            'Friend 👥',
-            'Doctor 🏥',
+            'Mom',
+            'Dad', 
+            'Boss',
+            'Friend',
+            'Doctor',
             'Custom Name'
         ];
 
         const choice = prompt(
-            '📞 FAKE CALL (Escape Tool)\n\n' +
+            'FAKE CALL (Escape Tool)\n\n' +
             'Who should "call" you?\n' +
             'Choose a number or type a name:\n\n' +
             '1. Mom\n' +

@@ -44,6 +44,8 @@ BREVO_SENDER_NAME = os.environ.get('BREVO_SENDER_NAME', 'Saheli').strip()
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
 TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER', '')
+BREVO_WHATSAPP_SENDER_NUMBER = os.environ.get('BREVO_WHATSAPP_SENDER_NUMBER', '').strip()
+BREVO_WHATSAPP_TEMPLATE_ID = os.environ.get('BREVO_WHATSAPP_TEMPLATE_ID', '').strip()
 NCRB_DATA_FILE = os.environ.get('NCRB_DATA_FILE', '')
 
 db = SQLAlchemy(app)
@@ -102,7 +104,12 @@ class SOSAlert(db.Model):
     triggered_at = db.Column(db.DateTime, default=datetime.utcnow)
     resolved_at = db.Column(db.DateTime, nullable=True)
     notes = db.Column(db.Text, nullable=True)
-    
+    # Dispatch lifecycle: 'pending' (grace window, cancellable) -> 'sending' -> 'sent' | 'cancelled' | 'failed'
+    dispatch_status = db.Column(db.String(20), default='pending', nullable=False)
+    contacts_total = db.Column(db.Integer, default=0)
+    results_json = db.Column(db.Text, nullable=True)  # per-channel attempted/sent counts + per-contact outcomes
+    location_attached = db.Column(db.Boolean, default=False)
+
     def __repr__(self):
         return f'<SOSAlert {self.id} - {self.alert_type}>'
 
@@ -521,45 +528,147 @@ def make_voice_call(to_phone, user_name, location_address):
         return False
 
 
-def send_sos_alerts_async(user, contacts, latitude, longitude, location_address):
-    """Send alerts to all trusted contacts in background"""
-    def send_alerts():
-        # Create Google Maps URL
-        map_url = f"https://www.google.com/maps?q={latitude},{longitude}" if latitude is not None and longitude is not None else "https://www.google.com/maps"
-        
-        success_count = {'email': 0, 'sms': 0, 'call': 0}
-        attempted = {'email': 0, 'sms': 0, 'call': 0}
-        
-        for contact in contacts:
-            # Send Email if available
-            if contact.email:
-                attempted['email'] += 1
-                if send_email_alert(contact.email, user.username, map_url, location_address):
-                    success_count['email'] += 1
-            
-            # Send SMS if available
-            if contact.phone_number:
-                attempted['sms'] += 1
-                if send_sms_alert(contact.phone_number, user.username, map_url, location_address):
-                    success_count['sms'] += 1
-                
-                # Make automated voice call
-                attempted['call'] += 1
-                if make_voice_call(contact.phone_number, user.username, location_address):
-                    success_count['call'] += 1
-        
-        print(
-            "📊 Alerts attempted: "
-            f"{attempted['email']} emails, {attempted['sms']} SMS, {attempted['call']} calls | "
-            "sent: "
-            f"{success_count['email']} emails, {success_count['sms']} SMS, {success_count['call']} calls"
+def _normalize_whatsapp_number(phone_number):
+    """Brevo's WhatsApp API expects digits only (country code + number, no '+' or spaces)."""
+    return re.sub(r'\D', '', phone_number or '')
+
+
+def send_whatsapp_alert(to_phone, user_name, location_url, location_address):
+    """Send SOS alert via WhatsApp using Brevo's transactional WhatsApp API.
+
+    Requires BREVO_API_KEY (with 'Transactional WhatsApp' permission),
+    BREVO_WHATSAPP_SENDER_NUMBER (a WhatsApp sender activated on Brevo), and
+    BREVO_WHATSAPP_TEMPLATE_ID (a Meta-approved message template's id) to be
+    configured. WhatsApp Business policy requires every business-initiated
+    message to reference an approved template id - free-form text is not
+    supported here.
+    """
+    if not BREVO_API_KEY or not BREVO_WHATSAPP_SENDER_NUMBER or not BREVO_WHATSAPP_TEMPLATE_ID:
+        print("Brevo WhatsApp not configured. Skipping WhatsApp alert.")
+        return False
+
+    contact_number = _normalize_whatsapp_number(to_phone)
+    if not contact_number:
+        return False
+
+    # NOTE: Brevo's public API reference does not document the exact field name for
+    # injecting template variables into a WhatsApp send - "params" is our best guess
+    # based on Brevo's other transactional-messaging endpoints. If Brevo rejects this
+    # field, its 400 response's `message` will say so; adjust the key name (or template
+    # design) based on that real error rather than this comment.
+    payload = {
+        "senderNumber": _normalize_whatsapp_number(BREVO_WHATSAPP_SENDER_NUMBER),
+        "contactNumbers": [contact_number],
+        "templateId": int(BREVO_WHATSAPP_TEMPLATE_ID),
+        "params": {
+            "user_name": user_name,
+            "location_address": location_address,
+            "location_url": location_url,
+        },
+    }
+
+    try:
+        resp = requests.post(
+            "https://api.brevo.com/v3/whatsapp/sendMessage",
+            headers={"api-key": BREVO_API_KEY, "Content-Type": "application/json", "Accept": "application/json"},
+            data=json.dumps(payload),
+            timeout=20,
         )
-        return success_count
-    
-    # Run in background thread
-    thread = threading.Thread(target=send_alerts)
-    thread.daemon = True
-    thread.start()
+        if 200 <= resp.status_code < 300:
+            print(f"✅ WhatsApp alert sent to {to_phone}: {resp.json().get('messageId')}")
+            return True
+        print(f"❌ WhatsApp alert error: HTTP {resp.status_code} {resp.text}")
+        return False
+    except Exception as e:
+        print(f"❌ WhatsApp alert error: {e}")
+        return False
+
+
+def dispatch_sos_alert(alert_id, grace_seconds=0):
+    """Actually send SOS alerts for a given SOSAlert row and persist real,
+    per-channel results so the UI can show honest status (never a blind
+    'sent successfully' before anything was attempted).
+
+    Runs on a background timer so the user gets a short, cancellable grace
+    window ("I'm safe") before contacts are actually notified.
+    """
+    def _run():
+        with app.app_context():
+            alert = db.session.get(SOSAlert, alert_id)
+            if not alert or alert.dispatch_status != 'pending':
+                return  # cancelled, or already handled
+
+            alert.dispatch_status = 'sending'
+            db.session.commit()
+
+            user = db.session.get(User, alert.user_id)
+            contacts = TrustedContact.query.filter_by(user_id=user.id).all()
+            latitude, longitude = alert.latitude, alert.longitude
+            location_address = alert.location_address or 'Location not specified'
+            map_url = (
+                f"https://www.google.com/maps?q={latitude},{longitude}"
+                if latitude is not None and longitude is not None
+                else "https://www.google.com/maps"
+            )
+
+            per_contact = []
+            totals = {'email': 0, 'sms': 0, 'call': 0, 'whatsapp': 0}
+            attempted = {'email': 0, 'sms': 0, 'call': 0, 'whatsapp': 0}
+
+            for contact in contacts:
+                outcome = {'name': contact.name, 'email': None, 'sms': None, 'call': None, 'whatsapp': None}
+
+                if contact.email:
+                    attempted['email'] += 1
+                    ok = send_email_alert(contact.email, user.username, map_url, location_address)
+                    outcome['email'] = ok
+                    if ok:
+                        totals['email'] += 1
+
+                if contact.phone_number:
+                    attempted['sms'] += 1
+                    ok_sms = send_sms_alert(contact.phone_number, user.username, map_url, location_address)
+                    outcome['sms'] = ok_sms
+                    if ok_sms:
+                        totals['sms'] += 1
+
+                    attempted['call'] += 1
+                    ok_call = make_voice_call(contact.phone_number, user.username, location_address)
+                    outcome['call'] = ok_call
+                    if ok_call:
+                        totals['call'] += 1
+
+                    attempted['whatsapp'] += 1
+                    ok_wa = send_whatsapp_alert(contact.phone_number, user.username, map_url, location_address)
+                    outcome['whatsapp'] = ok_wa
+                    if ok_wa:
+                        totals['whatsapp'] += 1
+
+                per_contact.append(outcome)
+
+            any_sent = any(totals.values())
+            alert.dispatch_status = 'sent' if (any_sent or not contacts) else 'failed'
+            alert.results_json = json.dumps({'attempted': attempted, 'sent': totals, 'contacts': per_contact})
+            db.session.commit()
+
+            print(
+                "📊 Alerts attempted: "
+                f"{attempted['email']} emails, {attempted['sms']} SMS, {attempted['call']} calls, {attempted['whatsapp']} WhatsApp | "
+                "sent: "
+                f"{totals['email']} emails, {totals['sms']} SMS, {totals['call']} calls, {totals['whatsapp']} WhatsApp"
+            )
+
+    timer = threading.Timer(grace_seconds, _run)
+    timer.daemon = True
+    timer.start()
+    return timer
+
+
+# Tracks in-flight grace-window timers so an "I'm safe" cancel can stop dispatch
+# before any contact is actually notified. In-process only (fine for a single
+# dev/Flask-debug process; swap for a durable queue before multi-worker prod use).
+_pending_sos_timers = {}
+_pending_sos_timers_lock = threading.Lock()
 
 
 # ==================== HELPER FUNCTIONS ====================
@@ -580,35 +689,50 @@ def calculate_safety_score(latitude, longitude, time_of_day=None):
     """
     if time_of_day is None:
         time_of_day = datetime.now()
-    
+
+    breakdown = {
+        'base_score': 70,
+        'time_factor': {'value': 0, 'source': 'real', 'detail': None},
+        'crime_factor': {'value': 0, 'source': 'unavailable', 'detail': None},
+        'community_factor': {'value': 0, 'source': 'unavailable', 'detail': None},
+        'unmodeled_variation': {'value': 0, 'source': 'simulated', 'detail': None},
+    }
+
     # Base score starts at 70
     score = 70
-    
+
     # === TIME FACTOR (REAL DATA) ===
     hour = time_of_day.hour
     if 22 <= hour or hour <= 5:
-        score -= 25  # Night time (10 PM - 5 AM) - Less safe
+        time_adj, time_detail = -25, 'Night (10 PM – 5 AM)'
     elif 18 <= hour < 22:
-        score -= 12  # Evening (6 PM - 10 PM) - Moderately safe
+        time_adj, time_detail = -12, 'Evening (6 PM – 10 PM)'
     elif 6 <= hour < 9:
-        score += 8   # Morning rush (6 AM - 9 AM) - Safer
+        time_adj, time_detail = 8, 'Morning rush (6 AM – 9 AM)'
     elif 9 <= hour < 18:
-        score += 15  # Daytime (9 AM - 6 PM) - Safest
-    
+        time_adj, time_detail = 15, 'Daytime (9 AM – 6 PM)'
+    else:
+        time_adj, time_detail = 0, None
+    score += time_adj
+    breakdown['time_factor'] = {'value': time_adj, 'source': 'real', 'detail': time_detail}
+
     # === LOCATION FACTOR (Using real coordinates) ===
     # NCRB crime factor (state-level index from official NCRB dataset, if configured)
     crime_index = get_ncrb_crime_index(latitude, longitude)
     if crime_index is not None:
         # 0.0 (lower risk) → no change, 1.0 (higher risk) → -22 points
-        score -= (crime_index * 22)
-    
-    # For now, use realistic simulation based on Indian city patterns
-    # Areas around major metro stations, malls = safer
-    # Industrial areas at night = less safe
-    
-    # Check if location is in known safe zones (could be database)
-    # This is where you'd integrate real government data
-    
+        crime_adj = -(crime_index * 22)
+        score += crime_adj
+        breakdown['crime_factor'] = {
+            'value': round(crime_adj, 2), 'source': 'ncrb_dataset',
+            'detail': f'State-level NCRB crime index: {round(crime_index, 2)}'
+        }
+    else:
+        breakdown['crime_factor'] = {
+            'value': 0, 'source': 'not_configured',
+            'detail': 'No NCRB dataset configured (NCRB_DATA_FILE) — this factor is not applied, not estimated.'
+        }
+
     # === COMMUNITY DATA (REAL from your database) ===
     # Get community reports for this area
     from sqlalchemy import func
@@ -616,21 +740,34 @@ def calculate_safety_score(latitude, longitude, time_of_day=None):
         func.abs(CommunityReport.latitude - latitude) < 0.01,
         func.abs(CommunityReport.longitude - longitude) < 0.01
     ).all()
-    
+
     if nearby_reports:
         # Calculate average safety rating from community
         avg_rating = sum(r.safety_rating for r in nearby_reports if r.safety_rating) / len(nearby_reports)
         community_factor = (avg_rating - 3) * 5  # Convert 1-5 rating to score adjustment
         score += community_factor
-    
+        breakdown['community_factor'] = {
+            'value': round(community_factor, 2), 'source': 'real',
+            'detail': f'{len(nearby_reports)} nearby community report(s), avg rating {round(avg_rating, 1)}/5'
+        }
+    else:
+        breakdown['community_factor'] = {
+            'value': 0, 'source': 'no_data',
+            'detail': 'No community reports near this location yet.'
+        }
+
     # Add realistic variation based on location
     variation = random.randint(-10, 10)
     score += variation
-    
+    breakdown['unmodeled_variation'] = {
+        'value': variation, 'source': 'simulated',
+        'detail': 'Placeholder noise standing in for factors not yet integrated (lighting infra, foot-traffic data, etc). Not derived from real data.'
+    }
+
     # Ensure score is within bounds
     score = max(0, min(100, score))
-    
-    return round(score, 2)
+
+    return round(score, 2), breakdown
 
 
 def get_lighting_score(latitude, longitude):
@@ -1133,68 +1270,154 @@ def sos_page():
     return render_template('sos.html', user=user, recent_alerts=recent_alerts)
 
 
+SOS_GRACE_SECONDS = int(os.environ.get('SOS_GRACE_SECONDS', 10))
+
+
 @app.route('/trigger-sos', methods=['POST'])
 def trigger_sos():
     if 'user_id' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
-    
+
     alert_type = request.form.get('alert_type', 'manual')
     latitude = request.form.get('latitude', type=float)
     longitude = request.form.get('longitude', type=float)
     location_address = request.form.get('location_address', '')
-    
-    # Create SOS Alert
+    location_attached = latitude is not None and longitude is not None
+
+    user = db.session.get(User, session['user_id'])
+    contacts = TrustedContact.query.filter_by(user_id=user.id).all()
+
+    # Create SOS Alert in a 'pending' state: nothing has been sent yet.
     sos_alert = SOSAlert(
         user_id=session['user_id'],
         alert_type=alert_type,
         latitude=latitude,
         longitude=longitude,
-        location_address=location_address
+        location_address=location_address or 'Location not specified',
+        dispatch_status='pending',
+        contacts_total=len(contacts),
+        location_attached=location_attached,
     )
-    
+
     try:
         db.session.add(sos_alert)
         db.session.commit()
-        
-        # Get user and trusted contacts
-        user = db.session.get(User, session['user_id'])
-        contacts = TrustedContact.query.filter_by(user_id=user.id).all()
-        
+
         if len(contacts) == 0:
+            # Nothing to dispatch; close it out immediately and be explicit about why.
+            sos_alert.dispatch_status = 'failed'
+            sos_alert.results_json = json.dumps({'reason': 'no_trusted_contacts'})
+            db.session.commit()
             flash('⚠️ No trusted contacts added! Please add contacts first.', 'warning')
             return jsonify({
                 'success': True,
-                'message': 'SOS Alert created but no contacts to notify',
-                'contacts_notified': 0
+                'alert_id': sos_alert.id,
+                'dispatch_status': 'failed',
+                'grace_seconds': 0,
+                'contacts_total': 0,
+                'location_attached': location_attached,
+                'message': 'SOS Alert created but you have no trusted contacts to notify.'
             })
-        
-        # Pre-check configuration so we can show an honest message
-        email_configured = bool((SMTP_USERNAME and SMTP_PASSWORD and '@' in SMTP_USERNAME) or (BREVO_API_KEY and BREVO_SENDER_EMAIL and '@' in BREVO_SENDER_EMAIL))
-        sms_configured = bool(TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER)
-        contacts_with_email = sum(1 for c in contacts if c.email)
-        contacts_with_phone = sum(1 for c in contacts if c.phone_number)
 
-        # Send REAL alerts via Email and SMS (in background)
-        send_sos_alerts_async(user, contacts, latitude, longitude, location_address or 'Location not specified')
+        # Start the grace-window timer. Contacts are only actually notified
+        # once it elapses — the user can cancel ("I'm safe") before then.
+        timer = dispatch_sos_alert(sos_alert.id, grace_seconds=SOS_GRACE_SECONDS)
+        with _pending_sos_timers_lock:
+            _pending_sos_timers[sos_alert.id] = timer
 
-        if email_configured and contacts_with_email:
-            flash(f'SOS created. Sending email alerts to {contacts_with_email} contact(s)...', 'success')
-        elif not email_configured and contacts_with_email:
-            flash('SOS created, but email is not configured. Add SMTP details in Settings to send emails.', 'error')
-        elif email_configured and not contacts_with_email:
-            flash('SOS created, but none of your trusted contacts have email saved.', 'error')
-
-        if sms_configured and contacts_with_phone:
-            flash(f'Sending SMS/calls to {contacts_with_phone} contact(s)...', 'info')
-        
         return jsonify({
             'success': True,
-            'message': 'SOS Alert triggered successfully',
-            'alert_id': sos_alert.id
+            'alert_id': sos_alert.id,
+            'dispatch_status': 'pending',
+            'grace_seconds': SOS_GRACE_SECONDS,
+            'contacts_total': len(contacts),
+            'location_attached': location_attached,
+            'message': f'SOS armed. Notifying {len(contacts)} trusted contact(s) in {SOS_GRACE_SECONDS}s unless cancelled.'
         })
     except Exception as e:
         db.session.rollback()
+        print(f"❌ trigger_sos error: {e}")
         return jsonify({'success': False, 'message': 'Error triggering SOS'}), 500
+
+
+@app.route('/cancel-sos/<int:alert_id>', methods=['POST'])
+def cancel_sos(alert_id):
+    """'I'm safe' — cancel an SOS alert during its grace window, before any
+    trusted contact has actually been notified."""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    alert = SOSAlert.query.filter_by(id=alert_id, user_id=session['user_id']).first()
+    if not alert:
+        return jsonify({'success': False, 'message': 'Alert not found'}), 404
+
+    if alert.dispatch_status != 'pending':
+        return jsonify({
+            'success': False,
+            'message': 'Too late to cancel — alerts have already started sending.',
+            'dispatch_status': alert.dispatch_status
+        }), 409
+
+    with _pending_sos_timers_lock:
+        timer = _pending_sos_timers.pop(alert_id, None)
+    if timer:
+        timer.cancel()
+
+    alert.dispatch_status = 'cancelled'
+    alert.is_active = False
+    alert.is_resolved = True
+    alert.resolved_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': "Marked safe. No contacts were notified.", 'dispatch_status': 'cancelled'})
+
+
+def reconcile_sos_alert_if_overdue(alert):
+    """Safety net for the grace-window timer: if the Flask process restarted or
+    crashed between arming an SOS and the timer firing (the in-memory
+    `_pending_sos_timers` dict does not survive a restart), a 'pending' alert
+    would otherwise sit un-dispatched forever with trusted contacts never
+    notified — silent failure is the worst outcome for a safety feature.
+    Called on every status poll, so the client's own polling loop closes this
+    gap within seconds even with no timer at all.
+    """
+    if alert.dispatch_status != 'pending':
+        return
+    elapsed = (datetime.utcnow() - alert.triggered_at).total_seconds()
+    if elapsed < SOS_GRACE_SECONDS:
+        return  # still within the legitimate cancel window
+
+    with _pending_sos_timers_lock:
+        timer = _pending_sos_timers.pop(alert.id, None)
+    if timer:
+        timer.cancel()
+    # dispatch_sos_alert's own guard (status must still be 'pending') makes this
+    # safe even if the original timer fires concurrently — only one path wins.
+    dispatch_sos_alert(alert.id, grace_seconds=0)
+
+
+@app.route('/sos-status/<int:alert_id>')
+def sos_status(alert_id):
+    """Poll for real dispatch status: whether alerts were actually attempted/sent,
+    per-channel, per-contact — not just 'SOS sent'."""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    alert = SOSAlert.query.filter_by(id=alert_id, user_id=session['user_id']).first()
+    if not alert:
+        return jsonify({'success': False, 'message': 'Alert not found'}), 404
+
+    reconcile_sos_alert_if_overdue(alert)
+
+    results = json.loads(alert.results_json) if alert.results_json else None
+    return jsonify({
+        'success': True,
+        'alert_id': alert.id,
+        'dispatch_status': alert.dispatch_status,
+        'contacts_total': alert.contacts_total,
+        'location_attached': alert.location_attached,
+        'results': results,
+    })
 
 
 @app.route('/resolve-sos/<int:alert_id>', methods=['POST'])
@@ -1266,7 +1489,7 @@ def check_safety():
         return jsonify({'success': False, 'message': 'Location required'}), 400
     
     # Calculate safety metrics
-    safety_score = calculate_safety_score(latitude, longitude, datetime.now())
+    safety_score, score_breakdown = calculate_safety_score(latitude, longitude, datetime.now())
     lighting_score = get_lighting_score(latitude, longitude)
     crowd_density = get_crowd_density(latitude, longitude)
     crime_rate = get_crime_rate(latitude, longitude)
@@ -1312,7 +1535,9 @@ def check_safety():
         'crowd_density': crowd_density,
         'crime_rate': crime_rate,
         'safety_level': safety_level,
-        'message': safety_message
+        'message': safety_message,
+        'score_breakdown': score_breakdown,
+        'ncrb_configured': bool(NCRB_DATA_FILE),
     })
 
 
@@ -1421,19 +1646,23 @@ def settings():
     brevo_configured = bool(BREVO_API_KEY and BREVO_SENDER_EMAIL and '@' in BREVO_SENDER_EMAIL)
     email_configured = smtp_configured or brevo_configured
     sms_configured = bool(TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER)
-    
-    return render_template('settings.html', 
+    whatsapp_configured = bool(BREVO_API_KEY and BREVO_WHATSAPP_SENDER_NUMBER and BREVO_WHATSAPP_TEMPLATE_ID)
+
+    return render_template('settings.html',
                           user=user,
                           email_configured=email_configured,
                           smtp_configured=smtp_configured,
                           brevo_configured=brevo_configured,
                           sms_configured=sms_configured,
+                          whatsapp_configured=whatsapp_configured,
                           contact_count=contact_count,
                           current_email=SMTP_USERNAME if email_configured else '',
                           current_brevo_sender=BREVO_SENDER_EMAIL if brevo_configured else '',
                           current_brevo_sender_name=BREVO_SENDER_NAME if brevo_configured else 'Saheli',
                           current_twilio_sid=TWILIO_ACCOUNT_SID[:10] + '...' if TWILIO_ACCOUNT_SID else '',
-                          current_twilio_phone=TWILIO_PHONE_NUMBER if TWILIO_PHONE_NUMBER else '')
+                          current_twilio_phone=TWILIO_PHONE_NUMBER if TWILIO_PHONE_NUMBER else '',
+                          current_whatsapp_sender=BREVO_WHATSAPP_SENDER_NUMBER,
+                          current_whatsapp_template_id=BREVO_WHATSAPP_TEMPLATE_ID)
 
 
 @app.route('/settings/test-email', methods=['POST'])
@@ -1584,6 +1813,84 @@ def save_brevo_config():
             f.writelines(lines)
 
         return jsonify({'success': True, 'message': 'Brevo configuration saved! Please restart the app.'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error saving configuration: {str(e)}'}), 500
+
+
+@app.route('/settings/test-whatsapp', methods=['POST'])
+def test_whatsapp_config():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    data = request.json or {}
+    api_key = (data.get('brevo_api_key') or BREVO_API_KEY or '').strip()
+    sender_number = (data.get('whatsapp_sender_number') or '').strip()
+    template_id = (data.get('whatsapp_template_id') or '').strip()
+    test_number = (data.get('test_number') or '').strip()
+
+    if not api_key or not sender_number or not template_id or not test_number:
+        return jsonify({'success': False, 'message': 'Sender number, template ID, and a test recipient number are all required'}), 400
+
+    payload = {
+        "senderNumber": _normalize_whatsapp_number(sender_number),
+        "contactNumbers": [_normalize_whatsapp_number(test_number)],
+        "templateId": int(template_id),
+    }
+
+    try:
+        resp = requests.post(
+            "https://api.brevo.com/v3/whatsapp/sendMessage",
+            headers={"api-key": api_key, "Content-Type": "application/json", "Accept": "application/json"},
+            data=json.dumps(payload),
+            timeout=20,
+        )
+        if 200 <= resp.status_code < 300:
+            return jsonify({'success': True, 'message': f'Test WhatsApp message sent! messageId: {resp.json().get("messageId")}'})
+        return jsonify({'success': False, 'message': f'Brevo WhatsApp error: HTTP {resp.status_code} {resp.text}'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Brevo WhatsApp request failed: {str(e)}'}), 500
+
+
+@app.route('/settings/save-whatsapp', methods=['POST'])
+def save_whatsapp_config():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    data = request.json or {}
+    sender_number = (data.get('whatsapp_sender_number') or '').strip()
+    template_id = (data.get('whatsapp_template_id') or '').strip()
+
+    if not sender_number or not template_id:
+        return jsonify({'success': False, 'message': 'Sender number and template ID are required'}), 400
+
+    try:
+        env_path = os.path.join(os.path.dirname(__file__), '.env')
+        if os.path.exists(env_path):
+            with open(env_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        else:
+            lines = []
+
+        def upsert(key, value):
+            nonlocal lines
+            found = False
+            for i, line in enumerate(lines):
+                if line.startswith(key + '='):
+                    lines[i] = f'{key}={value}\n'
+                    found = True
+                    break
+            if not found:
+                if lines and not lines[-1].endswith('\n'):
+                    lines[-1] = lines[-1] + '\n'
+                lines.append(f'{key}={value}\n')
+
+        upsert('BREVO_WHATSAPP_SENDER_NUMBER', sender_number)
+        upsert('BREVO_WHATSAPP_TEMPLATE_ID', template_id)
+
+        with open(env_path, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+
+        return jsonify({'success': True, 'message': 'WhatsApp configuration saved! Please restart the app.'})
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error saving configuration: {str(e)}'}), 500
 
@@ -1753,10 +2060,44 @@ def toggle_adaptive_mode():
 
 # ==================== INITIALIZE DATABASE ====================
 
+def ensure_sos_alert_columns():
+    """Lightweight additive migration: add new SOSAlert columns to an existing
+    sqlite DB file without wiping data (no Flask-Migrate configured in this project)."""
+    from sqlalchemy import text
+    with db.engine.connect() as conn:
+        existing = {row[1] for row in conn.execute(text("PRAGMA table_info(sos_alert)"))}
+        additions = {
+            'dispatch_status': "ALTER TABLE sos_alert ADD COLUMN dispatch_status VARCHAR(20) DEFAULT 'sent'",
+            'contacts_total': "ALTER TABLE sos_alert ADD COLUMN contacts_total INTEGER DEFAULT 0",
+            'results_json': "ALTER TABLE sos_alert ADD COLUMN results_json TEXT",
+            'location_attached': "ALTER TABLE sos_alert ADD COLUMN location_attached BOOLEAN DEFAULT 0",
+        }
+        for column, ddl in additions.items():
+            if column not in existing:
+                conn.execute(text(ddl))
+                conn.commit()
+                print(f"✅ Migrated sos_alert: added column {column}")
+
+
+def sweep_orphaned_pending_sos():
+    """On startup, dispatch any SOSAlert left 'pending' by a previous process
+    that crashed or was killed mid-grace-window. Its in-memory timer died with
+    that process, so without this sweep the alert — and the person who
+    triggered it — would be stuck waiting on a notification that can now never
+    fire on its own. Favor dispatching late over not dispatching at all.
+    """
+    orphaned = SOSAlert.query.filter_by(dispatch_status='pending').all()
+    for alert in orphaned:
+        print(f"⚠️ Recovering orphaned pending SOS alert #{alert.id} from a previous process — dispatching now.")
+        dispatch_sos_alert(alert.id, grace_seconds=0)
+
+
 def init_db():
     with app.app_context():
         db.create_all()
-        
+        ensure_sos_alert_columns()
+        sweep_orphaned_pending_sos()
+
         # Add some demo safety beacons
         if SafetyBeacon.query.count() == 0:
             demo_beacons = [

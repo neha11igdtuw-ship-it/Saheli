@@ -1,248 +1,485 @@
 {% extends "base.html" %}
 
-{% block title %}Sign Up - Saheli{% endblock %}
+{% block title %}Create your account - Saheli{% endblock %}
 
 {% block extra_css %}
 <style>
-    .auth-card {
-        background: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
-        padding: 3rem;
-        width: 100%;
-        max-width: 500px;
-        animation: fadeInUp 0.5s ease-out;
-        border: 1px solid #cbd5e1;
+    .navbar, footer { display: none; }
+
+    body { background: #fff; }
+
+    main.container {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+        flex: 1;
+    }
+
+    .auth-shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 900px) {
+        .auth-shell { grid-template-columns: 1fr; }
+        .auth-visual { display: none; }
+    }
+
+    /* Left panel */
+    .auth-visual {
         position: relative;
+        overflow: hidden;
+        background: linear-gradient(160deg, #5c2a3a 0%, #8a3b3f 45%, #b9544a 100%);
+        color: #fdf3ee;
+        padding: 3rem 3.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2.5rem;
+    }
+
+    .auth-visual::before {
+        content: '';
+        position: absolute;
+        inset: -20% -10% auto auto;
+        width: 420px;
+        height: 420px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .auth-visual::after {
+        content: '';
+        position: absolute;
+        left: -140px;
+        bottom: -160px;
+        width: 340px;
+        height: 340px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.10), transparent 70%);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .brand-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: absolute;
+        top: 3rem;
+        left: 3.5rem;
+        z-index: 1;
+    }
+
+    .brand-badge {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
         overflow: hidden;
     }
 
-    .auth-card::before {
-        content: '';
+    .brand-badge img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
-    .auth-card::after {
-        content: '';
+    .brand-row .brand-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
     }
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .brand-row .brand-text strong {
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+    }
+
+    .brand-row .brand-text span {
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(253, 243, 238, 0.75);
+    }
+
+    .visual-body {
+        position: relative;
+        z-index: 1;
+        max-width: 420px;
+    }
+
+    .visual-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 1.75rem;
+    }
+
+    .visual-pill .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #f3c969;
+    }
+
+    .visual-body h1 {
+        font-size: 2.6rem;
+        line-height: 1.15;
+        font-weight: 800;
+        margin: 0 0 1rem 0;
+        font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .visual-body h1 em {
+        font-style: italic;
+        color: #f3c969;
+    }
+
+    .visual-body p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: rgba(253, 243, 238, 0.88);
+        margin: 0;
+    }
+
+    .visual-features {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2.5rem;
+    }
+
+    .visual-feature {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    .visual-feature .feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+
+    .visual-feature strong {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
+
+    .visual-feature span {
+        font-size: 0.82rem;
+        color: rgba(253, 243, 238, 0.75);
+    }
+
+    .visual-footnote {
+        position: absolute;
+        bottom: 3rem;
+        left: 3.5rem;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        color: rgba(253, 243, 238, 0.7);
+    }
+
+    /* Right panel */
+    .auth-form-side {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        background: #fdf6f2;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 460px;
+    }
+
+    .auth-eyebrow {
+        color: #b9544a;
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin-bottom: 0.75rem;
     }
 
     .auth-card h1 {
-        color: #0b1220;
-        margin-bottom: 0.5rem;
-        font-size: 2.2rem;
-        text-align: center;
-        text-shadow: none;
-    }
-
-    .auth-card h1::before {
-        content: '';
-    }
-
-    .auth-card h1::after {
-        content: '';
+        color: #2b1a1c;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.9rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-weight: 800;
+        text-align: left;
     }
 
     .auth-card .subtitle {
-        color: #475569;
-        text-align: center;
+        color: #6b5a57;
+        text-align: left;
         margin-bottom: 2rem;
-        font-size: 1rem;
-        font-style: normal;
+        font-size: 0.95rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    @media (max-width: 480px) {
+        .form-row { grid-template-columns: 1fr; }
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.25rem;
     }
 
     .form-group label {
         display: block;
-        margin-bottom: 0.5rem;
-        color: #475569;
-        font-weight: 600;
-        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+        color: #4a3a38;
+        font-weight: 650;
+        font-size: 0.88rem;
     }
 
-    .form-group label .required {
-        color: #0f766e;
-        margin-left: 0.2rem;
-    }
+    .form-group label .required { color: #b9544a; margin-left: 0.2rem; }
 
     .form-group label .optional {
-        color: #64748b;
+        color: #9c8a86;
         font-weight: normal;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         margin-left: 0.3rem;
     }
 
+    .form-group .input-wrap { position: relative; }
+
     .form-group input {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid #cbd5e1;
+        padding: 0.8rem 1rem;
+        border: 1px solid #e7d6cf;
         border-radius: 12px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
+        font-size: 0.96rem;
+        transition: all 0.2s ease;
         background: #ffffff;
+        color: #2b1a1c;
     }
 
     .form-group input:focus {
         outline: none;
-        border-color: #14b8a6;
-        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.25);
-        background: white;
+        border-color: #b9544a;
+        box-shadow: 0 0 0 4px rgba(185, 84, 74, 0.15);
     }
 
     .form-group input::placeholder {
-        color: #9ca3af;
+        color: #b6a39d;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 0.9rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #9c8a86;
+        font-size: 0.95rem;
+        padding: 0;
     }
 
     .password-requirements {
-        font-size: 0.8rem;
-        color: #64748b;
-        margin-top: 0.5rem;
-        padding-left: 1rem;
+        font-size: 0.78rem;
+        color: #9c8a86;
+        margin: 0.6rem 0 0 0;
+        padding-left: 1.1rem;
     }
 
-    .password-requirements li::marker {
-        color: #0f766e;
-    }
-
-    .password-requirements li {
-        margin-bottom: 0.25rem;
-    }
+    .password-requirements li::marker { color: #b9544a; }
+    .password-requirements li { margin-bottom: 0.2rem; }
 
     .btn-primary {
         width: 100%;
-        padding: 1rem;
-        background: #0f766e;
+        padding: 0.9rem;
+        background: #b9544a;
         color: white;
         border: none;
         border-radius: 12px;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 700;
         cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 1rem;
-        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
-        text-shadow: none;
+        transition: all 0.2s ease;
+        margin-top: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }
 
     .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16);
-        background: #0a5f59;
-    }
-
-    .btn-primary:active {
-        transform: translateY(0);
+        background: #a2473e;
+        transform: translateY(-1px);
     }
 
     .auth-footer {
         text-align: center;
         margin-top: 1.5rem;
-        color: #666;
-        font-size: 0.95rem;
+        color: #6b5a57;
+        font-size: 0.88rem;
     }
 
     .auth-footer a {
-        color: #0f766e;
+        color: #b9544a;
         text-decoration: none;
         font-weight: 700;
     }
 
-    .auth-footer a:hover {
-        text-decoration: underline;
-        color: #0a5f59;
+    .auth-footer a:hover { text-decoration: underline; }
+
+    .privacy-note {
+        display: flex;
+        gap: 0.65rem;
+        margin-top: 1.5rem;
+        padding: 1rem 1.1rem;
+        background: #f6e9e3;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        color: #6b5a57;
+        line-height: 1.5;
     }
 
-    .divider {
-        margin: 1.5rem 0;
-        text-align: center;
-        position: relative;
-    }
-
-    .divider::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        width: 100%;
-        height: 1px;
-        background: #e5e7eb;
-    }
-
-    .divider span {
-        position: relative;
-        background: white;
-        padding: 0 1rem;
-        color: #999;
-        font-size: 0.9rem;
-    }
+    .privacy-note .icon { flex-shrink: 0; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="auth-card">
-    <h1>Create Account</h1>
-    <p class="subtitle">Create your account to set up your safety network.</p>
-
-    <form method="POST" action="{{ url_for('signup') }}" id="signupForm">
-        <div class="form-group">
-            <label for="username">Username<span class="required">*</span></label>
-            <input type="text" id="username" name="username" placeholder="Choose a username" required>
+<div class="auth-shell">
+    <div class="auth-visual">
+        <div class="brand-row">
+            <span class="brand-badge" aria-hidden="true"><img src="{{ url_for('static', filename='icon.png') }}" alt="Saheli"></span>
+            <div class="brand-text">
+                <strong>Saheli</strong>
+                <span>Personal Safety</span>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="email">Email Address<span class="required">*</span></label>
-            <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+        <div class="visual-body">
+            <div class="visual-pill"><span class="dot"></span> Your safety, on your terms</div>
+            <h1>Build your <em>safety network</em> in minutes.</h1>
+            <p>Create your account to set up trusted contacts, safety alerts, and the tools that keep you prepared wherever you go.</p>
+
+            <div class="visual-features">
+                <div class="visual-feature">
+                    <span class="feature-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 20c0-3.3 2.5-5.8 5.5-5.8s5.5 2.5 5.5 5.8"/><circle cx="17.5" cy="9.3" r="2.3"/><path d="M15.8 14.3c2.2.2 4.2 2.1 4.7 5.7"/></svg></span>
+                    <div>
+                        <strong>Add your trusted circle</strong>
+                        <span>So they can reach you back, instantly</span>
+                    </div>
+                </div>
+                <div class="visual-feature">
+                    <span class="feature-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 9.5v5"/><path d="M12 17.3h.01"/></svg></span>
+                    <div>
+                        <strong>Set up emergency alerts</strong>
+                        <span>SOS reaches your contacts in one tap</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="phone_number">Phone Number<span class="optional">(optional)</span></label>
-            <input type="tel" id="phone_number" name="phone_number" placeholder="+91 1234567890">
+        <div class="visual-footnote"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Your information is yours to control</div>
+    </div>
+
+    <div class="auth-form-side">
+        <div class="auth-card">
+            <div class="auth-eyebrow">Get started</div>
+            <h1>Create your account</h1>
+            <p class="subtitle">Set up your safety network in a couple of minutes.</p>
+
+            <form method="POST" action="{{ url_for('signup') }}" id="signupForm">
+                <div class="form-group">
+                    <label for="username">Username<span class="required">*</span></label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email address<span class="required">*</span></label>
+                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone_number">Phone number<span class="optional">(optional)</span></label>
+                        <input type="tel" id="phone_number" name="phone_number" placeholder="+91 1234567890">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergency_contact">Emergency contact<span class="optional">(optional)</span></label>
+                        <input type="tel" id="emergency_contact" name="emergency_contact" placeholder="+91 9876543210">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password<span class="required">*</span></label>
+                    <div class="input-wrap">
+                        <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+                        <button type="button" class="toggle-password" data-target="password" aria-label="Show password"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    </div>
+                    <ul class="password-requirements">
+                        <li>At least 8 characters long</li>
+                        <li>Contains uppercase and lowercase letters</li>
+                        <li>Contains at least one number</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm password<span class="required">*</span></label>
+                    <div class="input-wrap">
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+                        <button type="button" class="toggle-password" data-target="confirm_password" aria-label="Show password"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Create account →</button>
+            </form>
+
+            <div class="auth-footer">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></div>
+
+            <div class="privacy-note">
+                <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5.5c0 5 3 8.6 7 9.5 4-.9 7-4.5 7-9.5V6l-7-3Z"/></svg></span>
+                <span>Your safety information stays private. You choose what to share, and with whom.</span>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label for="emergency_contact">Emergency Contact<span class="optional">(optional)</span></label>
-            <input type="tel" id="emergency_contact" name="emergency_contact" placeholder="+91 9876543210">
-        </div>
-
-        <div class="form-group">
-            <label for="password">Password<span class="required">*</span></label>
-            <input type="password" id="password" name="password" placeholder="Create a strong password" required>
-            <ul class="password-requirements">
-                <li>• At least 8 characters long</li>
-                <li>• Contains uppercase and lowercase letters</li>
-                <li>• Contains at least one number</li>
-            </ul>
-        </div>
-
-        <div class="form-group">
-            <label for="confirm_password">Confirm Password<span class="required">*</span></label>
-            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
-        </div>
-
-        <button type="submit" class="btn-primary">Create Account</button>
-    </form>
-
-    <div class="auth-footer">
-        Already have an account? <a href="{{ url_for('login') }}">Login here</a>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Client-side password validation
     document.getElementById('signupForm').addEventListener('submit', function(e) {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm_password').value;
@@ -260,19 +497,30 @@
         }
     });
 
-    // Real-time password match validation
     document.getElementById('confirm_password').addEventListener('input', function() {
         const password = document.getElementById('password').value;
         const confirmPassword = this.value;
-        
+
         if (confirmPassword && password !== confirmPassword) {
-            this.style.borderColor = '#ef4444';
+            this.style.borderColor = '#b91c1c';
         } else if (confirmPassword && password === confirmPassword) {
-            this.style.borderColor = '#10b981';
+            this.style.borderColor = '#1f9d6c';
         } else {
-            this.style.borderColor = '#e5e7eb';
+            this.style.borderColor = '#e7d6cf';
         }
+    });
+
+    const EYE_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const EYE_OFF_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.2A10.4 10.4 0 0 1 12 5c7 0 10.5 7 10.5 7a15.8 15.8 0 0 1-3.2 4.1M6.2 6.6C3.5 8.4 1.5 12 1.5 12s3.5 7 10.5 7a10 10 0 0 0 4.2-.9"/><path d="M9.5 10a3 3 0 0 0 4.2 4.2"/></svg>';
+
+    document.querySelectorAll('.toggle-password').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const input = document.getElementById(this.dataset.target);
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            this.innerHTML = isHidden ? EYE_OFF_ICON : EYE_ICON;
+            this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+        });
     });
 </script>
 {% endblock %}
-

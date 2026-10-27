@@ -5,19 +5,28 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
+    .navbar, footer { display: none; }
+
+    body { background: #f8f1ec; }
+
+    main.container {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+    }
+
     .page-container {
-        max-width: 1200px;
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 2rem;
+        padding: 2rem 1.5rem 3rem 1.5rem;
     }
 
     #map {
         width: 100%;
         height: 400px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        border-radius: 16px;
         margin-bottom: 1.5rem;
-        border: 1px solid #cbd5e1;
+        border: 1px solid #ece0d8;
         z-index: 1;
         display: none;
     }
@@ -41,26 +50,30 @@
     }
 
     .map-instructions {
-        background: #f1f5f9;
-        padding: 1rem;
-        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+        background: #f6efe9;
+        padding: 0.85rem;
+        border-radius: 12px;
         margin-bottom: 1rem;
         text-align: center;
-        color: #0b1220;
+        color: #2b1a1c;
         font-weight: 600;
+        font-size: 0.9rem;
     }
 
     .btn-toggle-map {
-        padding: 0.75rem 1.5rem;
-        background: #0f766e;
+        padding: 0.8rem 1.5rem;
+        background: #5c2a3a;
         color: white;
         border: none;
-        border-radius: 20px;
-        font-size: 1rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
         font-weight: 700;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
+        transition: all 0.2s ease;
         margin-bottom: 1rem;
         display: flex;
         align-items: center;
@@ -69,44 +82,61 @@
     }
 
     .btn-toggle-map:hover {
-        background: #0a5f59;
+        background: #4a2129;
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16);
     }
 
     .page-header {
-        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        background: linear-gradient(160deg, #3d1b26 0%, #5c2a3a 55%, #7a3540 100%);
         border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        border: 1px solid #cbd5e1;
+        padding: 2.25rem 2rem;
+        margin-bottom: 1.5rem;
         text-align: center;
+        color: #fdf3ee;
+    }
+
+    .page-header .page-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem auto;
     }
 
     .page-header h1 {
-        color: #0b1220;
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #fff;
+        font-size: 1.9rem;
+        margin: 0 0 0.5rem 0;
     }
 
     .page-header p {
-        color: #475569;
-        font-size: 1.1rem;
+        color: rgba(253, 243, 238, 0.85);
+        font-size: 1rem;
+        margin: 0;
     }
 
     .check-safety-card {
         background: #ffffff;
         border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        border: 1px solid #cbd5e1;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #ece0d8;
     }
 
     .check-safety-card h2 {
-        color: #0b1220;
-        margin-bottom: 1.5rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #2b1a1c;
+        margin: 0 0 1.25rem 0;
+        font-size: 1.3rem;
+    }
+
+    .check-safety-card > p {
+        color: #6b5a57;
     }
 
     .form-group {
@@ -116,169 +146,373 @@
     .form-group label {
         display: block;
         margin-bottom: 0.5rem;
-        color: #475569;
-        font-weight: 600;
+        color: #4a3a38;
+        font-weight: 650;
     }
 
     .form-group input {
         width: 100%;
         padding: 0.75rem;
-        border: 1px solid #cbd5e1;
-        border-radius: 15px;
+        border: 1px solid #e7d6cf;
+        border-radius: 12px;
         font-size: 1rem;
+        color: #2b1a1c;
     }
 
     .form-group input:focus {
         outline: none;
-        border-color: #14b8a6;
-        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.25);
+        border-color: #b9544a;
+        box-shadow: 0 0 0 4px rgba(185, 84, 74, 0.15);
     }
 
     .btn-check {
-        padding: 0.75rem 2rem;
-        background: #0f766e;
+        padding: 0.8rem 2rem;
+        background: #b9544a;
         color: white;
         border: none;
-        border-radius: 20px;
+        border-radius: 12px;
         font-size: 1rem;
         font-weight: 700;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
     }
 
     .btn-check:hover {
-        background: #0a5f59;
+        background: #a2473e;
         transform: translateY(-2px);
+    }
+
+    .btn-location-primary {
+        flex: 1;
+        min-width: 200px;
+        padding: 0.75rem 1.5rem;
+        background: rgba(185, 84, 74, 0.1);
+        color: #b9544a;
+        border: 1px solid rgba(185, 84, 74, 0.45);
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .btn-location-primary:hover { background: #b9544a; color: #fff; }
+
+    .btn-location-secondary {
+        flex: 1;
+        min-width: 200px;
+        padding: 0.75rem 1.5rem;
+        background: rgba(201, 121, 58, 0.1);
+        color: #a0591f;
+        border: 1px solid rgba(201, 121, 58, 0.4);
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .btn-location-secondary:hover { background: #c9793a; color: #fff; }
+
+    .btn-manual-toggle {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        color: #b9544a;
+        border: 1px dashed rgba(185, 84, 74, 0.6);
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .manual-entry-box {
+        display: none;
+        margin-top: 1rem;
+        padding: 1.5rem;
+        background: #f6efe9;
+        border: 1px dashed #e0b8ae;
+        border-radius: 12px;
+    }
+
+    .manual-entry-box h4 {
+        color: #2b1a1c;
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .manual-entry-box label {
+        color: #6b5a57;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .manual-entry-box input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e7d6cf;
+        border-radius: 10px;
+    }
+
+    .btn-use-coords {
+        width: 100%;
+        padding: 0.75rem;
+        background: #5c2a3a;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+    }
+
+    .btn-use-coords:hover { background: #4a2129; }
+
+    .location-preview-box {
+        display: none;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f6efe9;
+        border-radius: 12px;
+        text-align: center;
     }
 
     .result-card {
         display: none;
         background: #ffffff;
         border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        border: 1px solid #cbd5e1;
-        animation: fadeIn 0.5s ease;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #ece0d8;
+        animation: popIn 0.4s ease;
     }
 
-    @keyframes fadeIn {
+    @keyframes popIn {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
     .safety-score-display {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .score-circle {
-        width: 200px;
-        height: 200px;
+        width: 180px;
+        height: 180px;
         margin: 0 auto 1rem;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 4rem;
+        font-size: 3.5rem;
         font-weight: 700;
         color: white;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     }
 
     .score-circle.safe {
-        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        background: linear-gradient(135deg, #1f9d6c 0%, #34d399 100%);
     }
 
     .score-circle.moderate {
-        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        background: linear-gradient(135deg, #c9793a 0%, #e0a259 100%);
     }
 
     .score-circle.unsafe {
-        background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #d8342b 100%);
     }
 
     .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 1rem;
-        margin-top: 2rem;
+        margin-top: 1.5rem;
     }
 
     .metric-card {
-        background: #f1f5f9;
-        border-radius: 15px;
-        padding: 1.5rem;
+        background: #f6efe9;
+        border-radius: 12px;
+        padding: 1.25rem;
         text-align: center;
     }
 
     .metric-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #fdece5;
+        color: #b9544a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.6rem auto;
     }
 
     .metric-value {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
         font-weight: 700;
-        color: #0f766e;
+        color: #2b1a1c;
         margin-bottom: 0.25rem;
     }
 
     .metric-label {
-        color: #475569;
-        font-size: 0.9rem;
+        color: #6b5a57;
+        font-size: 0.85rem;
         font-weight: 600;
+    }
+
+    .result-tip {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+        padding: 0.85rem 1rem;
+        background: #f6efe9;
+        border-radius: 12px;
+        text-align: center;
+        color: #6b5a57;
+        font-size: 0.88rem;
+    }
+
+    .btn-breakdown-toggle {
+        width: 100%;
+        margin-top: 0.75rem;
+        padding: 0.7rem 1rem;
+        background: transparent;
+        border: 1px dashed #d8c6bd;
+        border-radius: 12px;
+        color: #5c2a3a;
+        font-weight: 650;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+    }
+
+    .btn-breakdown-toggle:hover { background: #f6efe9; }
+
+    .score-breakdown {
+        margin-top: 0.9rem;
+        display: grid;
+        gap: 0.6rem;
+    }
+
+    .breakdown-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        background: #f6efe9;
+        font-size: 0.85rem;
+    }
+
+    .breakdown-row .label { color: #2b1a1c; font-weight: 650; }
+    .breakdown-row .detail { color: #6b5a57; font-size: 0.78rem; margin-top: 0.2rem; }
+    .breakdown-row .value { font-weight: 700; white-space: nowrap; }
+    .breakdown-row .value.positive { color: #1f7a5c; }
+    .breakdown-row .value.negative { color: #b9544a; }
+    .breakdown-row .value.neutral { color: #9c8a86; }
+
+    .source-tag {
+        display: inline-block;
+        margin-top: 0.3rem;
+        padding: 0.1rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .source-tag.real, .source-tag.ncrb_dataset { background: #e5f2ec; color: #1f7a5c; }
+    .source-tag.simulated, .source-tag.not_configured, .source-tag.unavailable, .source-tag.no_data {
+        background: #fdf0e3; color: #a9652f;
     }
 
     .zones-list {
         background: #ffffff;
         border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        border: 1px solid #cbd5e1;
+        padding: 1.75rem;
+        border: 1px solid #ece0d8;
     }
 
     .zones-list h2 {
-        color: #0b1220;
-        margin-bottom: 1.5rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #2b1a1c;
+        margin: 0 0 1.25rem 0;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .zone-item {
         padding: 1rem;
-        background: #f1f5f9;
+        background: #f6efe9;
         border-radius: 12px;
         margin-bottom: 1rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
     }
 
     .zone-info h3 {
-        color: #0b1220;
-        margin-bottom: 0.25rem;
+        color: #2b1a1c;
+        margin: 0 0 0.25rem 0;
+        font-size: 1rem;
     }
 
     .zone-details {
         font-size: 0.85rem;
-        color: #475569;
+        color: #6b5a57;
     }
 
     .zone-score {
-        font-size: 2rem;
+        font-size: 1.8rem;
         font-weight: 700;
-        color: #0f766e;
+        color: #b9544a;
     }
 
     .ai-badge {
-        display: inline-block;
-        background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: #5c2a3a;
         color: white;
         padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        font-size: 0.75rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
         font-weight: 700;
+        letter-spacing: 0.03em;
         margin-left: 0.5rem;
+        vertical-align: middle;
     }
 </style>
 {% endblock %}
@@ -286,80 +520,92 @@
 {% block content %}
 <div class="page-container">
     <div class="page-header">
-        <h1>📊 AI Safety Score</h1>
+        <div class="page-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11"/><path d="M12 20V4"/><path d="M20 20v-6"/></svg></div>
+        <h1>AI Safety Score</h1>
         <p>Uses contextual signals, community feedback, and public crime statistics (NCRB India).</p>
     </div>
 
     <div class="check-safety-card">
         <h2>Check Area Safety <span class="ai-badge">AI-Powered</span></h2>
-        <p style="color: #475569; margin-bottom: 1.5rem;">
+        <p style="margin-bottom: 1.5rem;">
             Our AI analyzes lighting, crowd density, crime data, and real-time factors to predict safety levels
         </p>
-        
+
         <button type="button" class="btn-toggle-map" onclick="toggleMap()">
-            <span id="map-icon">🗺️</span>
+            <span id="map-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6.5v14L9 18l6 2.5 6-2.5v-14L15 6.5 9 4Z"/><path d="M9 4v14M15 6.5v14"/></svg></span>
             <span id="map-text">Show Map to Select Location</span>
         </button>
 
         <div id="map-container" class="map-container">
             <div class="map-instructions">
-                🗺️ Click anywhere on the map to select a location.
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg>
+                Click anywhere on the map to select a location.
             </div>
             <div id="map"></div>
         </div>
-        
+
         <form id="safety-check-form" onsubmit="checkSafety(event)">
             <div class="form-group">
                 <label for="area_name">Area Name</label>
                 <input type="text" id="area_name" name="area_name" placeholder="Click on map or use current location to auto-fill" required>
             </div>
-            
+
             <!-- Hidden fields for coordinates -->
             <input type="hidden" id="latitude" name="latitude">
             <input type="hidden" id="longitude" name="longitude">
 
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button type="button" onclick="getCurrentLocation()" style="flex: 1; min-width: 200px; padding: 0.75rem 1.5rem; background: rgba(20, 184, 166, 0.12); color: #0f766e; border: 1px solid rgba(20, 184, 166, 0.6); border-radius: 15px; cursor: pointer; font-weight: 700; transition: all 0.3s ease;" onmouseover="this.style.background='#0f766e'; this.style.color='white';" onmouseout="this.style.background='rgba(20, 184, 166, 0.12)'; this.style.color='#0f766e';">
-                    📍 Use My Current Location
+                <button type="button" class="btn-location-primary" onclick="getCurrentLocation()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg>
+                    Use My Current Location
                 </button>
-                
-                <button type="button" onclick="testLocation()" style="flex: 1; min-width: 200px; padding: 0.75rem 1.5rem; background: rgba(180, 83, 9, 0.10); color: #b45309; border: 1px solid rgba(180, 83, 9, 0.45); border-radius: 15px; cursor: pointer; font-weight: 700; transition: all 0.3s ease;" onmouseover="this.style.background='#b45309'; this.style.color='white';" onmouseout="this.style.background='rgba(180, 83, 9, 0.10)'; this.style.color='#b45309';">
-                    🔍 Test My Location
+
+                <button type="button" class="btn-location-secondary" onclick="testLocation()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    Test My Location
                 </button>
             </div>
-            
+
             <div style="text-align: center; margin-top: 0.5rem;">
-                <button type="button" onclick="toggleManualEntry()" style="padding: 0.5rem 1rem; background: transparent; color: #0f766e; border: 1px dashed rgba(20, 184, 166, 0.9); border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 700;">
-                    ⌨️ Or Enter Coordinates Manually
+                <button type="button" class="btn-manual-toggle" onclick="toggleManualEntry()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h12"/></svg>
+                    Or Enter Coordinates Manually
                 </button>
             </div>
-            
-            <div id="manual-entry" style="display: none; margin-top: 1rem; padding: 1.5rem; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 15px;">
-                <h4 style="color: #0b1220; margin-bottom: 1rem;">📝 Manual Coordinate Entry</h4>
+
+            <div id="manual-entry" class="manual-entry-box">
+                <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V6a2 2 0 0 1 2-2h12.5A1.5 1.5 0 0 1 20 5.5v13"/><path d="M6.5 17H20v3a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5Z"/></svg> Manual Coordinate Entry</h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                     <div>
-                        <label style="color: #475569; font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Latitude</label>
-                        <input type="number" step="any" id="manual-lat" placeholder="28.6139" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 10px;">
+                        <label>Latitude</label>
+                        <input type="number" step="any" id="manual-lat" placeholder="28.6139">
                     </div>
                     <div>
-                        <label style="color: #475569; font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Longitude</label>
-                        <input type="number" step="any" id="manual-lng" placeholder="77.2090" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 10px;">
+                        <label>Longitude</label>
+                        <input type="number" step="any" id="manual-lng" placeholder="77.2090">
                     </div>
                 </div>
-                <button type="button" onclick="useManualCoordinates()" style="width: 100%; padding: 0.75rem; background: #0f766e; color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">
-                    ✓ Use These Coordinates
+                <button type="button" class="btn-use-coords" onclick="useManualCoordinates()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
+                    Use These Coordinates
                 </button>
-                <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #475569;">
+                <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #6b5a57;">
                     <strong>Tip:</strong> Open Google Maps, right-click your location, and copy coordinates
                 </p>
             </div>
 
-            <div id="location-preview" style="display: none; margin-top: 1rem; padding: 1rem; background: #f1f5f9; border-radius: 15px; text-align: center;">
-                <div style="color: #0b1220; font-weight: 700; margin-bottom: 0.5rem;">✓ Location Selected</div>
-                <div id="location-details" style="color: #475569; font-size: 0.9rem;"></div>
+            <div id="location-preview" class="location-preview-box">
+                <div style="color: #2b1a1c; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1f9d6c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
+                    Location Selected
+                </div>
+                <div id="location-details" style="color: #6b5a57; font-size: 0.9rem;"></div>
             </div>
 
-            <button type="submit" class="btn-check" style="margin-top: 1rem;">Check Safety Score 🔍</button>
+            <button type="submit" class="btn-check" style="margin-top: 1rem;">
+                Check Safety Score
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </button>
         </form>
     </div>
 
@@ -368,46 +614,51 @@
             <div id="score-circle" class="score-circle safe">
                 <span id="score-value">--</span>
             </div>
-            <h2 style="color: #0b1220; margin-bottom: 0.5rem;" id="safety-message">Analyzing...</h2>
-            <p style="color: #475569;" id="area-name-display">--</p>
+            <h2 style="color: #2b1a1c; font-family: Georgia, 'Times New Roman', serif; margin-bottom: 0.5rem;" id="safety-message">Analyzing...</h2>
+            <p style="color: #6b5a57;" id="area-name-display">--</p>
         </div>
 
         <div class="metrics-grid">
             <div class="metric-card">
-                <div class="metric-icon">💡</div>
+                <div class="metric-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a6.5 6.5 0 0 0-3.8 11.8c.7.5 1.2 1.3 1.3 2.2h5a3 3 0 0 1 1.3-2.2A6.5 6.5 0 0 0 12 2Z"/></svg></div>
                 <div class="metric-value" id="lighting-score">--</div>
                 <div class="metric-label">Lighting Score</div>
             </div>
             <div class="metric-card">
-                <div class="metric-icon">👥</div>
+                <div class="metric-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 20c0-3.3 2.5-5.8 5.5-5.8s5.5 2.5 5.5 5.8"/><circle cx="17.5" cy="9.3" r="2.3"/><path d="M15.8 14.3c2.2.2 4.2 2.1 4.7 5.7"/></svg></div>
                 <div class="metric-value" id="crowd-density">--</div>
                 <div class="metric-label">Crowd Density</div>
             </div>
             <div class="metric-card">
-                <div class="metric-icon">🚨</div>
+                <div class="metric-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 9.5v5"/><path d="M12 17.3h.01"/></svg></div>
                 <div class="metric-value" id="crime-rate">--</div>
                 <div class="metric-label">Crime Rate</div>
             </div>
         </div>
 
-        <div style="margin-top: 2rem; padding: 1rem; background: #f1f5f9; border-radius: 15px; text-align: center;">
-            <p style="color: #475569; font-size: 0.9rem;">
-                <strong>Tip:</strong> Safety scores update based on time of day and recent community activity.
-            </p>
+        <div class="result-tip">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a6.5 6.5 0 0 0-3.8 11.8c.7.5 1.2 1.3 1.3 2.2h5a3 3 0 0 1 1.3-2.2A6.5 6.5 0 0 0 12 2Z"/></svg>
+            <span><strong>Tip:</strong> Safety scores update based on time of day and recent community activity.</span>
         </div>
+
+        <button type="button" class="btn-breakdown-toggle" onclick="toggleBreakdown()">
+            <span id="breakdown-toggle-label">Show how this score was calculated</span>
+            <svg id="breakdown-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="score-breakdown" class="score-breakdown" style="display:none;"></div>
     </div>
 
     <div class="zones-list">
-        <h2>📍 Recent Safety Zones</h2>
+        <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg> Recent Safety Zones</h2>
         {% if safety_zones %}
             {% for zone in safety_zones %}
                 <div class="zone-item">
                     <div class="zone-info">
                         <h3>{{ zone.area_name }}</h3>
                         <div class="zone-details">
-                            💡 Lighting: {{ zone.lighting_score|round(1) if zone.lighting_score else 'N/A' }} | 
-                            👥 Crowd: {{ zone.crowd_density|title if zone.crowd_density else 'N/A' }} | 
-                            🚨 Crime: {{ zone.crime_rate|title if zone.crime_rate else 'N/A' }}
+                            Lighting: {{ zone.lighting_score|round(1) if zone.lighting_score else 'N/A' }} &middot;
+                            Crowd: {{ zone.crowd_density|title if zone.crowd_density else 'N/A' }} &middot;
+                            Crime: {{ zone.crime_rate|title if zone.crime_rate else 'N/A' }}
                         </div>
                         <div class="zone-details" style="margin-top: 0.25rem;">
                             Updated: {{ zone.last_updated.strftime('%b %d, %I:%M %p') }}
@@ -417,8 +668,10 @@
                 </div>
             {% endfor %}
         {% else %}
-            <div style="text-align: center; padding: 2rem; color: #475569;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
+            <div style="text-align: center; padding: 2rem; color: #6b5a57;">
+                <div style="width:56px;height:56px;border-radius:50%;background:#f6efe9;color:#9c8a86;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem auto;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6.5v14L9 18l6 2.5 6-2.5v-14L15 6.5 9 4Z"/><path d="M9 4v14M15 6.5v14"/></svg>
+                </div>
                 <p>No safety zones checked yet. Check your first area above.</p>
             </div>
         {% endif %}
@@ -449,7 +702,7 @@
             mapContainer.classList.add('show');
             mapElement.classList.add('show');
             mapText.textContent = 'Hide Map';
-            mapIcon.textContent = '❌';
+            mapIcon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 6 12 12M18 6 6 18"/></svg>';
             
             // Initialize map only once
             if (!mapInitialized) {
@@ -467,7 +720,7 @@
             mapContainer.classList.remove('show');
             mapElement.classList.remove('show');
             mapText.textContent = 'Show Map to Select Location';
-            mapIcon.textContent = '🗺️';
+            mapIcon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6.5v14L9 18l6 2.5 6-2.5v-14L15 6.5 9 4Z"/><path d="M9 4v14M15 6.5v14"/></svg>';
         }
     }
 
@@ -484,7 +737,7 @@
         // Add a pink marker
         const pinkIcon = L.divIcon({
             className: 'custom-marker',
-            html: '<div style="font-size: 2rem;">📍</div>',
+            html: '<div><svg width="32" height="32" viewBox="0 0 24 24" fill="#b9544a" stroke="#ffffff" stroke-width="1" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.6" fill="#ffffff" stroke="none"/></svg></div>',
             iconSize: [30, 30],
             iconAnchor: [15, 30]
         });
@@ -523,7 +776,7 @@
     function showLocationPreview(lat, lng) {
         const preview = document.getElementById('location-preview');
         const details = document.getElementById('location-details');
-        details.innerHTML = `📍 Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}<br>Getting location name...`;
+        details.innerHTML = `Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}<br>Getting location name...`;
         preview.style.display = 'block';
     }
 
@@ -540,13 +793,13 @@
                     
                     // Update preview
                     const details = document.getElementById('location-details');
-                    details.innerHTML = `📍 ${areaName}`;
+                    details.innerHTML = `${areaName}`;
                 }
             })
             .catch(error => {
                 console.log('Could not get location name:', error);
                 const details = document.getElementById('location-details');
-                details.innerHTML = `📍 Location selected successfully!`;
+                details.innerHTML = `Location selected successfully!`;
             });
     }
 
@@ -564,17 +817,17 @@
         const lng = parseFloat(document.getElementById('manual-lng').value);
         
         if (!lat || !lng) {
-            alert('❌ Please enter both latitude and longitude!');
+            alert(' Please enter both latitude and longitude!');
             return;
         }
         
         if (lat < -90 || lat > 90) {
-            alert('❌ Latitude must be between -90 and 90!');
+            alert(' Latitude must be between -90 and 90!');
             return;
         }
         
         if (lng < -180 || lng > 180) {
-            alert('❌ Longitude must be between -180 and 180!');
+            alert(' Longitude must be between -180 and 180!');
             return;
         }
         
@@ -585,7 +838,7 @@
         // Show preview
         const preview = document.getElementById('location-preview');
         const details = document.getElementById('location-details');
-        details.innerHTML = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}<br><small>✓ Manual entry</small>`;
+        details.innerHTML = `${lat.toFixed(6)}, ${lng.toFixed(6)}<br><small>Manual entry</small>`;
         preview.style.display = 'block';
         
         // Update map if open
@@ -596,7 +849,7 @@
             }
             const pinkIcon = L.divIcon({
                 className: 'custom-marker',
-                html: '<div style="font-size: 2rem;">📍</div>',
+                html: '<div><svg width="32" height="32" viewBox="0 0 24 24" fill="#b9544a" stroke="#ffffff" stroke-width="1" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.6" fill="#ffffff" stroke="none"/></svg></div>',
                 iconSize: [30, 30],
                 iconAnchor: [15, 30]
             });
@@ -610,19 +863,19 @@
         // Hide manual entry
         document.getElementById('manual-entry').style.display = 'none';
         
-        alert('✅ Coordinates set successfully.');
+        alert(' Coordinates set successfully.');
     }
     
     function testLocation() {
         // Diagnostic tool to test what location data the browser provides
         if (!navigator.geolocation) {
-            alert('❌ Your browser does NOT support geolocation!\n\nPlease use the map or manual entry.');
+            alert(' Your browser does NOT support geolocation!\n\nPlease use the map or manual entry.');
             return;
         }
         
         const preview = document.getElementById('location-preview');
         const details = document.getElementById('location-details');
-        details.innerHTML = '🔍 Testing location services...<br>This will show you what data your device provides.';
+        details.innerHTML = 'Testing location services...<br>This will show you what data your device provides.';
         preview.style.display = 'block';
         
         const options = {
@@ -643,37 +896,37 @@
                 const speed = position.coords.speed;
                 const timestamp = new Date(position.timestamp);
                 
-                let report = '📍 LOCATION TEST RESULTS\n\n';
-                report += `✓ Latitude: ${lat.toFixed(8)}\n`;
-                report += `✓ Longitude: ${lng.toFixed(8)}\n`;
-                report += `✓ Accuracy: ±${Math.round(accuracy)} meters\n`;
-                report += `✓ Timestamp: ${timestamp.toLocaleTimeString()}\n`;
+                let report = 'LOCATION TEST RESULTS\n\n';
+                report += `Latitude: ${lat.toFixed(8)}\n`;
+                report += `Longitude: ${lng.toFixed(8)}\n`;
+                report += `Accuracy: ±${Math.round(accuracy)} meters\n`;
+                report += `Timestamp: ${timestamp.toLocaleTimeString()}\n`;
                 
                 if (altitude !== null) {
-                    report += `✓ Altitude: ${Math.round(altitude)} meters\n`;
+                    report += `Altitude: ${Math.round(altitude)} meters\n`;
                 }
                 if (speed !== null) {
-                    report += `✓ Speed: ${Math.round(speed * 3.6)} km/h\n`;
+                    report += `Speed: ${Math.round(speed * 3.6)} km/h\n`;
                 }
                 
-                report += `\n📊 QUALITY CHECK:\n`;
+                report += `\n QUALITY CHECK:\n`;
                 if (accuracy < 50) {
-                    report += `✅ Excellent accuracy!\n`;
+                    report += `Excellent accuracy!\n`;
                     report += `Your GPS is working perfectly.\n`;
                 } else if (accuracy < 100) {
-                    report += `✓ Good accuracy.\n`;
+                    report += `Good accuracy.\n`;
                     report += `Acceptable for safety checks.\n`;
                 } else if (accuracy < 500) {
-                    report += `⚠️ Low accuracy.\n`;
+                    report += `Low accuracy.\n`;
                     report += `Using WiFi/Cell tower location.\n`;
                     report += `Try moving near a window.\n`;
                 } else {
-                    report += `❌ Very low accuracy.\n`;
+                    report += `Very low accuracy.\n`;
                     report += `GPS signal is weak.\n`;
                     report += `Use map or manual entry instead.\n`;
                 }
                 
-                report += `\n💡 TIPS:\n`;
+                report += `\n TIPS:\n`;
                 report += `• For best results, be near a window\n`;
                 report += `• Enable GPS on your device\n`;
                 report += `• Wait 5-10 seconds for GPS lock\n`;
@@ -681,11 +934,11 @@
                 
                 alert(report);
                 
-                details.innerHTML = `🔍 Test complete!<br>` +
+                details.innerHTML = `Test complete!<br>` +
                     `Latitude: ${lat.toFixed(6)}<br>` +
                     `Longitude: ${lng.toFixed(6)}<br>` +
                     `Accuracy: ±${Math.round(accuracy)}m<br>` +
-                    `<small>${accuracy < 100 ? '✅ Location looks good!' : '⚠️ Consider using map instead'}</small>`;
+                    `<small>${accuracy < 100 ? ' Location looks good!' : ' Consider using map instead'}</small>`;
                 
                 // Ask if they want to use this location
                 setTimeout(() => {
@@ -702,7 +955,7 @@
                             }
                             const pinkIcon = L.divIcon({
                                 className: 'custom-marker',
-                                html: '<div style="font-size: 2rem;">📍</div>',
+                                html: '<div><svg width="32" height="32" viewBox="0 0 24 24" fill="#b9544a" stroke="#ffffff" stroke-width="1" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.6" fill="#ffffff" stroke="none"/></svg></div>',
                                 iconSize: [30, 30],
                                 iconAnchor: [15, 30]
                             });
@@ -711,8 +964,8 @@
                             // Add accuracy circle
                             L.circle([lat, lng], {
                                 radius: accuracy,
-                                color: '#0f766e',
-                                fillColor: '#99f6e4',
+                                color: '#b9544a',
+                                fillColor: '#f3c6bd',
                                 fillOpacity: 0.2,
                                 weight: 2
                             }).addTo(map);
@@ -721,19 +974,19 @@
                 }, 500);
             },
             function(error) {
-                let errorReport = '❌ LOCATION TEST FAILED\n\n';
+                let errorReport = 'LOCATION TEST FAILED\n\n';
                 
                 switch(error.code) {
                     case error.PERMISSION_DENIED:
-                        errorReport += '🚫 Permission Denied\n\n';
+                        errorReport += 'Permission Denied\n\n';
                         errorReport += 'How to fix:\n';
-                        errorReport += '1. Click the 🔒 lock icon in address bar\n';
+                        errorReport += '1. Click the lock icon in address bar\n';
                         errorReport += '2. Find "Location" setting\n';
                         errorReport += '3. Change to "Allow"\n';
                         errorReport += '4. Refresh page and try again\n';
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        errorReport += '📡 Location Unavailable\n\n';
+                        errorReport += 'Location Unavailable\n\n';
                         errorReport += 'Possible reasons:\n';
                         errorReport += '• GPS is disabled on your device\n';
                         errorReport += '• No GPS hardware available\n';
@@ -741,7 +994,7 @@
                         errorReport += 'Solution: Use the map to select location\n';
                         break;
                     case error.TIMEOUT:
-                        errorReport += '⏱️ Request Timeout\n\n';
+                        errorReport += 'Request Timeout\n\n';
                         errorReport += 'GPS is taking too long to respond.\n\n';
                         errorReport += 'Try:\n';
                         errorReport += '• Move near a window or outside\n';
@@ -750,11 +1003,11 @@
                         break;
                 }
                 
-                errorReport += '\n💡 Alternative: Use the map to click your location!';
+                errorReport += '\n Alternative: Use the map to click your location!';
                 
                 alert(errorReport);
                 
-                details.innerHTML = '❌ Location test failed<br><small>Use map or manual entry instead</small>';
+                details.innerHTML = 'Location test failed<br><small>Use map or manual entry instead</small>';
             },
             options
         );
@@ -775,12 +1028,12 @@
             gpsAttempts = 0;
             bestLocation = null;
             
-            details.innerHTML = '📍 <strong>Activating GPS...</strong><br><small>⚠️ Please allow location access<br>⏱️ Getting accurate location (max 500m accuracy required)</small>';
+            details.innerHTML = '<strong>Activating GPS...</strong><br><small>Please allow location access<br>Getting accurate location (max 500m accuracy required)</small>';
             preview.style.display = 'block';
             
             tryGetAccurateLocation();
         } else {
-            alert('❌ Geolocation is not supported by your browser.\n\nPlease use the map to select your location manually.');
+            alert(' Geolocation is not supported by your browser.\n\nPlease use the map to select your location manually.');
         }
     }
 
@@ -790,13 +1043,13 @@
         const preview = document.getElementById('location-preview');
         const details = document.getElementById('location-details');
         
-        details.innerHTML = `📡 <strong>GPS Attempt ${gpsAttempts}/${MAX_GPS_ATTEMPTS}</strong><br><small>⏱️ Waiting for accurate signal...<br>🎯 Target: ≤500m accuracy</small>`;
+        details.innerHTML = `<strong>GPS Attempt ${gpsAttempts}/${MAX_GPS_ATTEMPTS}</strong><br><small>Waiting for accurate signal...<br>Target: ≤500m accuracy</small>`;
         
         // ULTRA HIGH ACCURACY OPTIONS - Force actual GPS hardware
         const options = {
-            enableHighAccuracy: true,     // CRITICAL: Force GPS hardware (not WiFi/Cell)
-            timeout: 20000,               // 20 seconds per attempt
-            maximumAge: 0                 // MUST be fresh - no cached location
+            enableHighAccuracy: true, // CRITICAL: Force GPS hardware (not WiFi/Cell)
+            timeout: 20000, // 20 seconds per attempt
+            maximumAge: 0 // MUST be fresh - no cached location
         };
         
         navigator.geolocation.getCurrentPosition(
@@ -822,22 +1075,22 @@
                         accuracy: accuracy,
                         timestamp: timestamp
                     };
-                    console.log(`✅ New best accuracy: ${accuracy.toFixed(2)}m`);
+                    console.log(` New best accuracy: ${accuracy.toFixed(2)}m`);
                 }
                 
-                // ✅ ACCEPT if accuracy is within 500m limit
+                // ACCEPT if accuracy is within 500m limit
                 if (accuracy <= MAX_ACCURACY_ALLOWED) {
-                    console.log(`🎯 Excellent! Accuracy ${accuracy.toFixed(2)}m is within 500m limit`);
+                    console.log(` Excellent! Accuracy ${accuracy.toFixed(2)}m is within 500m limit`);
                     acceptLocation(lat, lng, accuracy, timestamp);
                     return;
                 }
                 
-                // ❌ REJECT if accuracy is too poor (> 500m)
-                console.log(`⚠️ Accuracy ${accuracy.toFixed(2)}m exceeds 500m limit`);
+                // REJECT if accuracy is too poor (> 500m)
+                console.log(` Accuracy ${accuracy.toFixed(2)}m exceeds 500m limit`);
                 
                 // Try again if we have attempts left
                 if (gpsAttempts < MAX_GPS_ATTEMPTS) {
-                    details.innerHTML = `⚠️ <strong>Accuracy: ${Math.round(accuracy)}m (need ≤500m)</strong><br><small>🔄 Retrying... (${gpsAttempts}/${MAX_GPS_ATTEMPTS})<br>💡 Move near a window or outdoors</small>`;
+                    details.innerHTML = `<strong>Accuracy: ${Math.round(accuracy)}m (need ≤500m)</strong><br><small>Retrying... (${gpsAttempts}/${MAX_GPS_ATTEMPTS})<br>Move near a window or outdoors</small>`;
                     
                     // Wait 2 seconds before retry
                     setTimeout(() => {
@@ -863,28 +1116,22 @@
         
         // Check accuracy quality for display
         let qualityStatus = '';
-        let qualityEmoji = '';
-        
+
         if (accuracy < 20) {
             qualityStatus = 'Perfect GPS accuracy!';
-            qualityEmoji = '🎯';
         } else if (accuracy < 50) {
             qualityStatus = 'Excellent GPS accuracy!';
-            qualityEmoji = '✅';
         } else if (accuracy < 100) {
             qualityStatus = 'Good GPS accuracy';
-            qualityEmoji = '👍';
         } else if (accuracy < 300) {
             qualityStatus = 'Acceptable accuracy';
-            qualityEmoji = '✓';
         } else {
             qualityStatus = 'Moderate accuracy';
-            qualityEmoji = '⚠️';
         }
                     
                     // Show detailed info
                     details.innerHTML = `
-                        📍 GPS Location Detected<br>
+                        GPS Location Detected<br>
                         <strong>Coordinates:</strong> ${lat.toFixed(8)}, ${lng.toFixed(8)}<br>
                         <strong>Accuracy:</strong> ±${Math.round(accuracy)} meters<br>
                         <strong>Status:</strong> ${qualityStatus}<br>
@@ -909,7 +1156,7 @@
                             // Add marker
                             const pinkIcon = L.divIcon({
                                 className: 'custom-marker',
-                                html: '<div style="font-size: 2rem; animation: pulse 1s infinite;">📍</div>',
+                                html: '<div style="animation: pulse 1s infinite;"><svg width="32" height="32" viewBox="0 0 24 24" fill="#b9544a" stroke="#ffffff" stroke-width="1" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.6" fill="#ffffff" stroke="none"/></svg></div>',
                                 iconSize: [30, 30],
                                 iconAnchor: [15, 30]
                             });
@@ -926,7 +1173,7 @@
                             }).addTo(map);
                             
                             marker.bindPopup(`
-                                <b>Your GPS Location 📍</b><br>
+                                <b>Your GPS Location </b><br>
                                 Lat: ${lat.toFixed(6)}<br>
                                 Lng: ${lng.toFixed(6)}<br>
                                 Accuracy: ±${Math.round(accuracy)}m
@@ -952,7 +1199,7 @@
                             }
                             
                             // Build confirmation message
-                            let confirmMessage = '📍 GPS LOCATION DETECTED\n\n';
+                            let confirmMessage = 'GPS LOCATION DETECTED\n\n';
                             confirmMessage += `Coordinates:\n`;
                             confirmMessage += `Latitude: ${lat.toFixed(8)}\n`;
                             confirmMessage += `Longitude: ${lng.toFixed(8)}\n\n`;
@@ -961,9 +1208,9 @@
                             confirmMessage += `Detected Location:\n${locationName}\n\n`;
                             
                             if (accuracy < 100) {
-                                confirmMessage += `This looks accurate! ✅\n\n`;
+                                confirmMessage += `This looks accurate!\n\n`;
                             } else {
-                                confirmMessage += `⚠️ Low accuracy - Check the map!\n\n`;
+                                confirmMessage += `Low accuracy - Check the map!\n\n`;
                             }
                             
                             confirmMessage += `Is this your correct location?\n\n`;
@@ -972,10 +1219,10 @@
                             
                             // Update preview
                             details.innerHTML = `
-                                📍 <strong>${locationName}</strong><br>
+                                <strong>${locationName}</strong><br>
                                 ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
                                 Accuracy: ±${Math.round(accuracy)}m ${qualityStatus}<br>
-                                <small>⬇️ Check the map and confirm below</small>
+                                <small>Check the map and confirm below</small>
                             `;
                             
                             // Ask for confirmation (or auto-accept if very accurate)
@@ -989,23 +1236,23 @@
                                     document.getElementById('area_name').value = locationName;
                                     
                                     details.innerHTML = `
-                                        ✅ <strong>Location Confirmed!</strong><br>
-                                        📍 ${locationName}<br>
+                                        <strong>Location Confirmed!</strong><br>
+                                        ${locationName}<br>
                                         ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
                                         <small>Accuracy: ±${Math.round(accuracy)}m</small>
                                     `;
                                     
                                     if (!shouldAsk) {
                                         // Auto-accepted, show brief notification
-                                        alert(`✅ Location set successfully!\n\n${locationName}\n\nAccuracy: ±${Math.round(accuracy)}m`);
+                                        alert(`Location set successfully!\n\n${locationName}\n\nAccuracy: ±${Math.round(accuracy)}m`);
                                     }
                                 } else {
                                     // User declined
                                     details.innerHTML = `
-                                        ❌ Location not confirmed<br>
+                                        Location not confirmed<br>
                                         <small>Please use the map or manual entry</small>
                                     `;
-                                    alert('👉 Please click on the map to select your exact location!\n\nThe map is now showing your GPS position. Click on your actual location.');
+                                    alert('Please click on the map to select your exact location!\n\nThe map is now showing your GPS position. Click on your actual location.');
                                 }
                             }, 1000);
                         })
@@ -1013,7 +1260,7 @@
                             console.log('Reverse geocoding failed:', error);
                             
                             // Still use coordinates but without area name
-                            let confirmMessage = '📍 GPS LOCATION DETECTED\n\n';
+                            let confirmMessage = 'GPS LOCATION DETECTED\n\n';
                             confirmMessage += `Coordinates:\n`;
                             confirmMessage += `Latitude: ${lat.toFixed(8)}\n`;
                             confirmMessage += `Longitude: ${lng.toFixed(8)}\n\n`;
@@ -1025,7 +1272,7 @@
                             if (confirm(confirmMessage)) {
                                 document.getElementById('latitude').value = lat.toFixed(8);
                                 document.getElementById('longitude').value = lng.toFixed(8);
-                                details.innerHTML = `✅ Location set<br>${lat.toFixed(6)}, ${lng.toFixed(6)}<br>±${Math.round(accuracy)}m`;
+                                details.innerHTML = `Location set<br>${lat.toFixed(6)}, ${lng.toFixed(6)}<br>±${Math.round(accuracy)}m`;
                             }
                         });
     }
@@ -1036,13 +1283,13 @@
         
         if (bestLocation && bestLocation.accuracy <= 1000) {
             // We have a location, but it's not perfect - try to improve it
-            details.innerHTML = `🔄 <strong>Trying advanced methods...</strong><br><small>Using WiFi/Cell tower triangulation</small>`;
+            details.innerHTML = `<strong>Trying advanced methods...</strong><br><small>Using WiFi/Cell tower triangulation</small>`;
             
             // Try continuous tracking for better accuracy
             tryWatchPosition();
         } else {
             // No good location at all - offer alternatives
-            details.innerHTML = '🔄 <strong>Trying alternative methods...</strong><br><small>WiFi/IP-based location</small>';
+            details.innerHTML = '<strong>Trying alternative methods...</strong><br><small>WiFi/IP-based location</small>';
             
             // Try IP-based geolocation as last resort
             tryIPGeolocation();
@@ -1058,9 +1305,9 @@
         const preview = document.getElementById('location-preview');
         const details = document.getElementById('location-details');
         
-        console.log('🔄 Starting continuous GPS tracking for better accuracy...');
+        console.log(' Starting continuous GPS tracking for better accuracy...');
         
-        details.innerHTML = `📡 <strong>Continuous GPS Tracking</strong><br><small>Waiting for accurate signal... (${watchAttempts}/${MAX_WATCH_ATTEMPTS})</small>`;
+        details.innerHTML = `<strong>Continuous GPS Tracking</strong><br><small>Waiting for accurate signal... (${watchAttempts}/${MAX_WATCH_ATTEMPTS})</small>`;
         
         const options = {
             enableHighAccuracy: true,
@@ -1073,7 +1320,7 @@
                 watchAttempts++;
                 const accuracy = position.coords.accuracy;
                 
-                console.log(`📡 Watch update ${watchAttempts}: ${accuracy.toFixed(2)}m`);
+                console.log(` Watch update ${watchAttempts}: ${accuracy.toFixed(2)}m`);
                 
                 // Update best location if this is better
                 if (!bestLocation || accuracy < bestLocation.accuracy) {
@@ -1083,14 +1330,14 @@
                         accuracy: accuracy,
                         timestamp: position.timestamp
                     };
-                    console.log(`✅ New best: ${accuracy.toFixed(2)}m`);
+                    console.log(` New best: ${accuracy.toFixed(2)}m`);
                 }
                 
-                details.innerHTML = `📡 <strong>Tracking...</strong> (${watchAttempts}/${MAX_WATCH_ATTEMPTS})<br><small>Best so far: ±${Math.round(bestLocation.accuracy)}m</small>`;
+                details.innerHTML = `<strong>Tracking...</strong> (${watchAttempts}/${MAX_WATCH_ATTEMPTS})<br><small>Best so far: ±${Math.round(bestLocation.accuracy)}m</small>`;
                 
                 // Accept if we get good accuracy
                 if (accuracy <= MAX_ACCURACY_ALLOWED) {
-                    console.log(`🎯 Success! Accuracy ${accuracy.toFixed(2)}m`);
+                    console.log(` Success! Accuracy ${accuracy.toFixed(2)}m`);
                     navigator.geolocation.clearWatch(watchId);
                     acceptLocation(
                         position.coords.latitude,
@@ -1108,14 +1355,14 @@
                     if (bestLocation.accuracy <= 1000) {
                         // Offer best available
                         const useBest = confirm(
-                            `⚠️ BEST ACCURACY ACHIEVED\n\n` +
+                            ` BEST ACCURACY ACHIEVED\n\n` +
                             `After continuous tracking:\n` +
                             `±${Math.round(bestLocation.accuracy)} meters\n\n` +
                             `This is the most accurate location available.\n\n` +
                             `OPTIONS:\n` +
                             `• Click OK to use this location\n` +
                             `• Click Cancel to select on map\n\n` +
-                            `💡 For better accuracy, move outdoors.`
+                            ` For better accuracy, move outdoors.`
                         );
                         
                         if (useBest) {
@@ -1126,7 +1373,7 @@
                                 bestLocation.timestamp
                             );
                         } else {
-                            details.innerHTML = '❌ Please use map to select location';
+                            details.innerHTML = 'Please use map to select location';
                             if (!mapVisible) {
                                 toggleMap();
                             }
@@ -1151,7 +1398,7 @@
         const preview = document.getElementById('location-preview');
         const details = document.getElementById('location-details');
         
-        details.innerHTML = '🌐 <strong>Using WiFi/Cell Tower location...</strong><br><small>Getting precise indoor location</small>';
+        details.innerHTML = '<strong>Using WiFi/Cell Tower location...</strong><br><small>Getting precise indoor location</small>';
         
         // Try Google Geolocation API first (MOST ACCURATE - uses WiFi networks!)
         const googleApiKey = '{{ GOOGLE_MAPS_API_KEY if GOOGLE_MAPS_API_KEY else "" }}';
@@ -1169,13 +1416,13 @@
         const preview = document.getElementById('location-preview');
         const details = document.getElementById('location-details');
         
-        console.log('🔍 Trying Google Geolocation API (WiFi-based)...');
+        console.log(' Trying Google Geolocation API (WiFi-based)...');
         
-        details.innerHTML = '📡 <strong>Scanning WiFi networks...</strong><br><small>Getting accurate indoor location</small>';
+        details.innerHTML = '<strong>Scanning WiFi networks...</strong><br><small>Getting accurate indoor location</small>';
         
         // Google Geolocation API - automatically detects nearby WiFi and cell towers
         const requestData = {
-            considerIp: true,  // Use IP as fallback
+            considerIp: true, // Use IP as fallback
             // Browser will automatically include WiFi and cell tower data
         };
         
@@ -1193,7 +1440,7 @@
                 const lng = data.location.lng;
                 const accuracy = data.accuracy || 100; // Google returns accuracy in meters
                 
-                console.log('✅ Google Geolocation:', { lat, lng, accuracy: accuracy + 'm' });
+                console.log(' Google Geolocation:', { lat, lng, accuracy: accuracy + 'm' });
                 
                 // Get address name
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`)
@@ -1210,21 +1457,21 @@
                         let shouldAsk = true;
                         
                         if (accuracy <= 50) {
-                            accuracyLevel = '✅ Excellent accuracy (WiFi-based)';
+                            accuracyLevel = 'Excellent accuracy (WiFi-based)';
                             shouldAsk = false;
                         } else if (accuracy <= 200) {
-                            accuracyLevel = '👍 Good accuracy (WiFi/Cell tower)';
+                            accuracyLevel = 'Good accuracy (WiFi/Cell tower)';
                             shouldAsk = false;
                         } else if (accuracy <= 500) {
-                            accuracyLevel = '✓ Acceptable accuracy';
+                            accuracyLevel = 'Acceptable accuracy';
                             shouldAsk = true;
                         } else {
-                            accuracyLevel = '⚠️ Moderate accuracy';
+                            accuracyLevel = 'Moderate accuracy';
                             shouldAsk = true;
                         }
                         
                         const message = shouldAsk ? confirm(
-                            `📍 WIFI/CELL TOWER LOCATION\n\n` +
+                            ` WIFI/CELL TOWER LOCATION\n\n` +
                             `Location: ${locationName}\n` +
                             `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n\n` +
                             `Accuracy: ±${Math.round(accuracy)} meters\n` +
@@ -1244,7 +1491,7 @@
                         console.log('Reverse geocoding failed, using coordinates only');
                         
                         const message = confirm(
-                            `📍 WIFI/CELL TOWER LOCATION\n\n` +
+                            ` WIFI/CELL TOWER LOCATION\n\n` +
                             `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n` +
                             `Accuracy: ±${Math.round(accuracy)} meters\n\n` +
                             `Use this location?`
@@ -1259,7 +1506,7 @@
             } else if (data.error) {
                 console.error('Google Geolocation error:', data.error);
                 alert(
-                    `⚠️ Google Geolocation API Error\n\n` +
+                    ` Google Geolocation API Error\n\n` +
                     `${data.error.message}\n\n` +
                     `Trying alternative methods...`
                 );
@@ -1280,7 +1527,7 @@
         const preview = document.getElementById('location-preview');
         const details = document.getElementById('location-details');
         
-        details.innerHTML = '🌐 <strong>Using IP-based location...</strong><br><small>Getting approximate location</small>';
+        details.innerHTML = '<strong>Using IP-based location...</strong><br><small>Getting approximate location</small>';
         
         // Try IPGeolocation API
         const ipgeoApiKey = '{{ IPGEOLOCATION_API_KEY if IPGEOLOCATION_API_KEY else "" }}';
@@ -1294,13 +1541,13 @@
                         const lng = parseFloat(data.longitude);
                         const locationName = `${data.city}, ${data.state_prov}, ${data.country_name}`;
                         
-                        console.log('📍 IP Geolocation:', { lat, lng, location: locationName });
+                        console.log(' IP Geolocation:', { lat, lng, location: locationName });
                         
                         const useIP = confirm(
-                            `📍 IP-BASED LOCATION\n\n` +
+                            ` IP-BASED LOCATION\n\n` +
                             `Location: ${locationName}\n` +
                             `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n\n` +
-                            `⚠️ Accuracy: City-level (~1-5km)\n\n` +
+                            ` Accuracy: City-level (~1-5km)\n\n` +
                             `This is approximate but better than nothing.\n\n` +
                             `• Click OK to use this location\n` +
                             `• Click Cancel to select on map manually`
@@ -1334,13 +1581,13 @@
                     const lng = data.longitude;
                     const locationName = `${data.city}, ${data.region}, ${data.country_name}`;
                     
-                    console.log('📍 IP Location (ipapi.co):', { lat, lng, location: locationName });
+                    console.log(' IP Location (ipapi.co):', { lat, lng, location: locationName });
                     
                     const useIP = confirm(
-                        `📍 WIFI/IP-BASED LOCATION\n\n` +
+                        ` WIFI/IP-BASED LOCATION\n\n` +
                         `Location: ${locationName}\n` +
                         `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n\n` +
-                        `⚠️ Accuracy: City-level (~1-5km)\n\n` +
+                        ` Accuracy: City-level (~1-5km)\n\n` +
                         `This is approximate but better than nothing.\n\n` +
                         `• Click OK to use this location\n` +
                         `• Click Cancel to select on map manually`
@@ -1366,13 +1613,13 @@
         const details = document.getElementById('location-details');
         
         alert(
-            `❌ ALL AUTOMATIC METHODS FAILED\n\n` +
+            ` ALL AUTOMATIC METHODS FAILED\n\n` +
             `Could not get your location automatically.\n\n` +
-            `📍 Please use the MAP to select your location manually.\n\n` +
+            ` Please use the MAP to select your location manually.\n\n` +
             `The map will open now.`
         );
         
-        details.innerHTML = '❌ Please use map to select location';
+        details.innerHTML = 'Please use map to select location';
         preview.style.display = 'none';
         
         if (!mapVisible) {
@@ -1389,18 +1636,18 @@
         
         switch(error.code) {
             case error.PERMISSION_DENIED:
-                errorMessage = '❌ LOCATION PERMISSION DENIED';
+                errorMessage = 'LOCATION PERMISSION DENIED';
                 errorDetails = 
                     'You denied location access.\n\n' +
                     'TO FIX:\n' +
-                    '1. Click the 🔒 icon in address bar\n' +
+                    '1. Click the icon in address bar\n' +
                     '2. Allow location access\n' +
                     '3. Refresh the page\n\n' +
                     'OR use the map to select location manually.';
                 break;
                 
             case error.POSITION_UNAVAILABLE:
-                errorMessage = '❌ GPS UNAVAILABLE';
+                errorMessage = 'GPS UNAVAILABLE';
                 errorDetails =
                     'Location information is unavailable.\n\n' +
                     'POSSIBLE FIXES:\n' +
@@ -1411,7 +1658,7 @@
                 break;
                 
             case error.TIMEOUT:
-                errorMessage = '⏱️ GPS TIMEOUT';
+                errorMessage = 'GPS TIMEOUT';
                 errorDetails =
                     'Location request timed out.\n\n' +
                     'POSSIBLE FIXES:\n' +
@@ -1421,7 +1668,7 @@
                 
                 // Retry if we have attempts left
                 if (gpsAttempts < MAX_GPS_ATTEMPTS) {
-                    details.innerHTML = `⏱️ <strong>Timeout - Retrying...</strong><br><small>(${gpsAttempts}/${MAX_GPS_ATTEMPTS})</small>`;
+                    details.innerHTML = `<strong>Timeout - Retrying...</strong><br><small>(${gpsAttempts}/${MAX_GPS_ATTEMPTS})</small>`;
                     setTimeout(() => {
                         tryGetAccurateLocation();
                     }, 2000);
@@ -1430,12 +1677,12 @@
                 break;
                 
             default:
-                errorMessage = '❌ GPS ERROR';
+                errorMessage = 'GPS ERROR';
                 errorDetails = 'An unknown error occurred.\n\nPlease use the map to select your location.';
         }
         
         alert(errorMessage + '\n\n' + errorDetails);
-        details.innerHTML = errorMessage.replace('❌', '').replace('⏱️', '');
+        details.innerHTML = errorMessage;
         preview.style.display = 'none';
         
         // Open map for manual selection
@@ -1451,7 +1698,7 @@
             .then(data => {
                 if (data.latitude && data.longitude) {
                     const shouldUse = confirm(
-                        '📍 GPS not available.\n\n' +
+                        ' GPS not available.\n\n' +
                         'Use approximate location based on IP?\n' +
                         '(Less accurate - shows your city/area)\n\n' +
                         'Click OK to use, or Cancel to select on map.'
@@ -1467,7 +1714,7 @@
                         
                         const preview = document.getElementById('location-preview');
                         const details = document.getElementById('location-details');
-                        details.innerHTML = `📍 ${data.city}, ${data.region}<br><small>⚠️ Approximate location (IP-based)</small>`;
+                        details.innerHTML = `${data.city}, ${data.region}<br><small>Approximate location (IP-based)</small>`;
                         preview.style.display = 'block';
                         
                         if (mapInitialized) {
@@ -1477,7 +1724,7 @@
                             }
                             const pinkIcon = L.divIcon({
                                 className: 'custom-marker',
-                                html: '<div style="font-size: 2rem;">📍</div>',
+                                html: '<div><svg width="32" height="32" viewBox="0 0 24 24" fill="#b9544a" stroke="#ffffff" stroke-width="1" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.6" fill="#ffffff" stroke="none"/></svg></div>',
                                 iconSize: [30, 30],
                                 iconAnchor: [15, 30]
                             });
@@ -1499,7 +1746,7 @@
         const lng = document.getElementById('longitude').value;
         
         if (!lat || !lng) {
-            alert('❌ Please select a location first!\n\n• Click "Show Map" and select on map, OR\n• Click "Use My Current Location" 📍');
+            alert(' Please select a location first!\n\n• Click "Show Map" and select on map, OR\n• Click "Use My Current Location" ');
             return;
         }
         
@@ -1514,11 +1761,11 @@
             if (data.success) {
                 displaySafetyResult(data, formData.get('area_name'));
             } else {
-                alert('❌ Error: ' + data.message);
+                alert(' Error: ' + data.message);
             }
         })
         .catch(error => {
-            alert('❌ Error checking safety. Please try again.');
+            alert(' Error checking safety. Please try again.');
             console.error('Error:', error);
         });
     }
@@ -1529,23 +1776,68 @@
         const scoreValue = document.getElementById('score-value');
         const safetyMessage = document.getElementById('safety-message');
         const areaNameDisplay = document.getElementById('area-name-display');
-        
+
         // Set score
         scoreValue.textContent = Math.round(data.safety_score);
         areaNameDisplay.textContent = areaName;
-        
+
         // Set metrics
         document.getElementById('lighting-score').textContent = Math.round(data.lighting_score);
         document.getElementById('crowd-density').textContent = data.crowd_density.toUpperCase();
         document.getElementById('crime-rate').textContent = data.crime_rate.toUpperCase();
-        
+
         // Set color and message based on safety level
         scoreCircle.className = 'score-circle ' + data.safety_level;
         safetyMessage.textContent = data.message;
-        
+
+        renderScoreBreakdown(data.score_breakdown);
+
         // Show result
         resultCard.style.display = 'block';
         resultCard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderScoreBreakdown(breakdown) {
+        const container = document.getElementById('score-breakdown');
+        if (!breakdown) { container.innerHTML = ''; return; }
+
+        const rows = [
+            { key: 'time_factor', label: 'Time of day' },
+            { key: 'crime_factor', label: 'Crime data (NCRB)' },
+            { key: 'community_factor', label: 'Community reports' },
+            { key: 'unmodeled_variation', label: 'Unmodeled variation' },
+        ];
+
+        let html = `<div class="breakdown-row"><div><div class="label">Base score</div></div><div class="value neutral">${breakdown.base_score}</div></div>`;
+
+        rows.forEach(r => {
+            const f = breakdown[r.key];
+            if (!f) return;
+            const sign = f.value > 0 ? '+' : '';
+            const cls = f.value > 0 ? 'positive' : (f.value < 0 ? 'negative' : 'neutral');
+            html += `
+                <div class="breakdown-row">
+                    <div>
+                        <div class="label">${r.label}</div>
+                        ${f.detail ? `<div class="detail">${f.detail}</div>` : ''}
+                        <span class="source-tag ${f.source}">${f.source.replace('_', ' ')}</span>
+                    </div>
+                    <div class="value ${cls}">${sign}${f.value}</div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function toggleBreakdown() {
+        const panel = document.getElementById('score-breakdown');
+        const label = document.getElementById('breakdown-toggle-label');
+        const chevron = document.getElementById('breakdown-chevron');
+        const showing = panel.style.display !== 'none';
+        panel.style.display = showing ? 'none' : 'grid';
+        label.textContent = showing ? 'Show how this score was calculated' : 'Hide calculation details';
+        chevron.style.transform = showing ? 'rotate(0deg)' : 'rotate(180deg)';
     }
 </script>
 {% endblock %}

@@ -4,35 +4,69 @@
 
 {% block extra_css %}
 <style>
+    .navbar, footer { display: none; }
+
+    body { background: #f8f1ec; }
+
+    main.container {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+    }
+
     .settings-container {
-        max-width: 900px;
-        margin: 2rem auto;
-        padding: 2rem;
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem 1.5rem;
     }
 
     .settings-header {
-        background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+        background: linear-gradient(160deg, #3d1b26 0%, #5c2a3a 55%, #7a3540 100%);
         border-radius: 16px;
-        padding: 2rem;
+        padding: 2.25rem 2rem;
         text-align: center;
-        color: white;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #fdf3ee;
+        margin-bottom: 1.5rem;
+    }
+
+    .settings-header .page-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem auto;
+    }
+
+    .settings-header h1 {
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #fff;
+        font-size: 1.9rem;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .settings-header p {
+        color: rgba(253, 243, 238, 0.85);
+        font-size: 1rem;
+        margin: 0;
     }
 
     .settings-card {
         background: #ffffff;
         border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        border: 1px solid #cbd5e1;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #ece0d8;
     }
 
     .settings-card h2 {
-        color: #0b1220;
-        margin-bottom: 1rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #2b1a1c;
+        margin: 0 0 1rem 0;
+        font-size: 1.25rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -43,9 +77,11 @@
     }
 
     .form-group label {
-        display: block;
-        font-weight: 600;
-        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-weight: 650;
+        color: #4a3a38;
         margin-bottom: 0.5rem;
     }
 
@@ -53,155 +89,176 @@
     .form-group select {
         width: 100%;
         padding: 0.75rem;
-        border: 1px solid #cbd5e1;
-        border-radius: 15px;
+        border: 1px solid #e7d6cf;
+        border-radius: 12px;
         font-size: 1rem;
-        transition: all 0.3s ease;
+        color: #2b1a1c;
+        transition: all 0.2s ease;
     }
 
     .form-group input:focus {
         outline: none;
-        border-color: #14b8a6;
-        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.25);
+        border-color: #b9544a;
+        box-shadow: 0 0 0 4px rgba(185, 84, 74, 0.15);
     }
 
     .form-group small {
         display: block;
         margin-top: 0.5rem;
-        color: #666;
+        color: #9c8a86;
     }
 
     .btn {
-        padding: 0.75rem 2rem;
+        padding: 0.75rem 1.75rem;
         border: none;
-        border-radius: 20px;
-        font-weight: 600;
+        border-radius: 12px;
+        font-weight: 650;
         cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 1rem;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .btn-primary {
-        background: #0f766e;
+        background: #b9544a;
         color: white;
     }
 
     .btn-primary:hover {
+        background: #a2473e;
         transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.16);
     }
 
     .btn-secondary {
-        background: linear-gradient(135deg, #6c757d 0%, #828a91 100%);
+        background: #9c8a86;
         color: white;
         margin-left: 1rem;
     }
 
+    .btn-secondary:hover {
+        background: #87746f;
+    }
+
     .btn-test {
-        background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+        background: #5c2a3a;
         color: white;
     }
 
+    .btn-test:hover {
+        background: #4a2129;
+    }
+
     .status-badge {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
         padding: 0.5rem 1rem;
-        border-radius: 15px;
-        font-weight: 600;
-        font-size: 0.9rem;
+        border-radius: 999px;
+        font-weight: 650;
+        font-size: 0.85rem;
     }
 
     .status-configured {
-        background: #d4edda;
-        color: #155724;
+        background: #e2f3ea;
+        color: #1f8a5c;
     }
 
     .status-not-configured {
-        background: #f8d7da;
-        color: #721c24;
+        background: #fdece5;
+        color: #b9544a;
     }
 
     .help-box {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        background: #fbeed9;
+        border-left: 4px solid #c9793a;
         padding: 1rem;
         border-radius: 10px;
         margin: 1rem 0;
+        color: #4a3a38;
     }
 
+    .help-box svg { flex-shrink: 0; margin-top: 0.15rem; color: #b9742a; }
+
     .help-box strong {
-        color: #856404;
+        color: #8a5a1f;
     }
 
     .config-status {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
         gap: 1rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .status-item {
         padding: 1rem;
-        background: #f1f5f9;
-        border-radius: 15px;
+        background: #f6efe9;
+        border-radius: 12px;
         text-align: center;
     }
 
     .status-item h3 {
-        font-size: 0.9rem;
-        color: #666;
-        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        color: #6b5a57;
+        margin-bottom: 0.6rem;
+        font-weight: 650;
     }
 
-    #test-result {
+    #test-result,
+    #brevo-test-result,
+    #whatsapp-test-result {
         margin-top: 1rem;
         padding: 1rem;
-        border-radius: 15px;
+        border-radius: 12px;
         display: none;
     }
 
-    #test-result.success {
-        background: #d4edda;
-        color: #155724;
-        border: 2px solid #c3e6cb;
+    #test-result.success,
+    #brevo-test-result.success,
+    #whatsapp-test-result.success {
+        background: #e2f3ea;
+        color: #1f8a5c;
+        border: 1px solid #b9ddc6;
         display: block;
     }
 
-    #test-result.error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 2px solid #f5c6cb;
-        display: block;
-    }
-
-    #brevo-test-result {
-        margin-top: 1rem;
-        padding: 1rem;
-        border-radius: 15px;
-        display: none;
-    }
-
-    #brevo-test-result.success {
-        background: #d4edda;
-        color: #155724;
-        border: 2px solid #c3e6cb;
-        display: block;
-    }
-
-    #brevo-test-result.error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 2px solid #f5c6cb;
+    #test-result.error,
+    #brevo-test-result.error,
+    #whatsapp-test-result.error {
+        background: #fdece5;
+        color: #b9544a;
+        border: 1px solid #f3c6bd;
         display: block;
     }
 
     .loading {
         display: none;
-        text-align: center;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
         padding: 1rem;
+        color: #6b5a57;
     }
 
     .loading.active {
-        display: block;
+        display: flex;
+    }
+
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>
 {% endblock %}
@@ -209,32 +266,55 @@
 {% block content %}
 <div class="settings-container">
     <div class="settings-header">
-        <h1>⚙️ App Settings</h1>
+        <div class="page-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="15" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="9" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="14" cy="18" r="2"/></svg></div>
+        <h1>App Settings</h1>
         <p>Configure SOS alerts, email & SMS notifications</p>
     </div>
 
     <!-- Configuration Status -->
     <div class="config-status">
         <div class="status-item">
-            <h3>📧 Email Alerts</h3>
+            <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m4 7 8 6 8-6"/></svg> Email Alerts</h3>
             <span class="status-badge {% if email_configured %}status-configured{% else %}status-not-configured{% endif %}">
-                {{ '✅ Configured' if email_configured else '❌ Not Setup' }}
+                {% if email_configured %}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg> Configured
+                {% else %}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg> Not Setup
+                {% endif %}
             </span>
         </div>
         <div class="status-item">
-            <h3>✉️ Email API (Brevo)</h3>
+            <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m4 7 8 6 8-6"/></svg> Email API (Brevo)</h3>
             <span class="status-badge {% if brevo_configured %}status-configured{% else %}status-not-configured{% endif %}">
-                {{ '✅ Configured' if brevo_configured else '❌ Not Setup' }}
+                {% if brevo_configured %}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg> Configured
+                {% else %}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg> Not Setup
+                {% endif %}
             </span>
         </div>
         <div class="status-item">
-            <h3>📱 SMS Alerts</h3>
+            <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg> SMS Alerts</h3>
             <span class="status-badge {% if sms_configured %}status-configured{% else %}status-not-configured{% endif %}">
-                {{ '✅ Configured' if sms_configured else '❌ Not Setup' }}
+                {% if sms_configured %}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg> Configured
+                {% else %}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg> Not Setup
+                {% endif %}
             </span>
         </div>
         <div class="status-item">
-            <h3>👥 Trusted Contacts</h3>
+            <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 8.6 8.6 0 0 1-3.6-.8L3 20l1-4.6A8.4 8.4 0 1 1 21 11.5Z"/></svg> WhatsApp Alerts</h3>
+            <span class="status-badge {% if whatsapp_configured %}status-configured{% else %}status-not-configured{% endif %}">
+                {% if whatsapp_configured %}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg> Configured
+                {% else %}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg> Not Setup
+                {% endif %}
+            </span>
+        </div>
+        <div class="status-item">
+            <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 20c0-3.3 2.5-5.8 5.5-5.8s5.5 2.5 5.5 5.8"/><circle cx="17.5" cy="9.3" r="2.3"/><path d="M15.8 14.3c2.2.2 4.2 2.1 4.7 5.7"/></svg> Trusted Contacts</h3>
             <span class="status-badge status-configured">
                 {{ contact_count }} contacts
             </span>
@@ -243,36 +323,39 @@
 
     <!-- Email Configuration -->
     <div class="settings-card">
-        <h2>📧 Email Configuration (Gmail SMTP)</h2>
-        
+        <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m4 7 8 6 8-6"/></svg> Email Configuration (Gmail SMTP)</h2>
+
         <div class="help-box">
-            <strong>💡 How to get Gmail App Password:</strong><br>
-            1. Visit: <a href="https://myaccount.google.com/apppasswords" target="_blank">myaccount.google.com/apppasswords</a><br>
-            2. Select "Mail" and "Other" (Saheli App)<br>
-            3. Copy the 16-character password<br>
-            4. Paste it below
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a6.5 6.5 0 0 0-3.8 11.8c.7.5 1.2 1.3 1.3 2.2h5a3 3 0 0 1 1.3-2.2A6.5 6.5 0 0 0 12 2Z"/></svg>
+            <span>
+                <strong>How to get Gmail App Password:</strong><br>
+                1. Visit: <a href="https://myaccount.google.com/apppasswords" target="_blank">myaccount.google.com/apppasswords</a><br>
+                2. Select "Mail" and "Other" (Saheli App)<br>
+                3. Copy the 16-character password<br>
+                4. Paste it below
+            </span>
         </div>
 
         <form id="email-config-form">
             <div class="form-group">
-                <label for="smtp_username">📧 Gmail Address</label>
-                <input type="email" id="smtp_username" name="smtp_username" 
-                       placeholder="your-email@gmail.com" 
+                <label for="smtp_username">Gmail Address</label>
+                <input type="email" id="smtp_username" name="smtp_username"
+                       placeholder="your-email@gmail.com"
                        value="{{ current_email }}" required>
                 <small>Your Gmail address (e.g., myemail@gmail.com)</small>
             </div>
 
             <div class="form-group">
-                <label for="smtp_password">🔑 Gmail App Password</label>
-                <input type="password" id="smtp_password" name="smtp_password" 
+                <label for="smtp_password">Gmail App Password</label>
+                <input type="password" id="smtp_password" name="smtp_password"
                        placeholder="abcdefghijklmnop"
                        value="{{ '••••••••••••••••' if email_configured else '' }}">
                 <small>16-character App Password from Google (no spaces)</small>
             </div>
 
             <div class="form-group">
-                <label for="test_email">📬 Test Email Address (Optional)</label>
-                <input type="email" id="test_email" name="test_email" 
+                <label for="test_email">Test Email Address (Optional)</label>
+                <input type="email" id="test_email" name="test_email"
                        placeholder="test-recipient@example.com">
                 <small>Send a test email to verify it works</small>
             </div>
@@ -280,31 +363,37 @@
             <div id="test-result"></div>
 
             <div class="loading" id="loading">
-                <p>⏳ Testing email configuration...</p>
+                <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a9 9 0 1 1-9 9"/></svg>
+                <span>Testing email configuration...</span>
             </div>
 
             <button type="button" class="btn btn-test" onclick="testEmail()">
-                🧪 Test Email
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                Test Email
             </button>
             <button type="submit" class="btn btn-primary">
-                💾 Save Configuration
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M7 3v5h9"/></svg>
+                Save Configuration
             </button>
         </form>
     </div>
 
     <!-- Email API Configuration (Recommended) -->
     <div class="settings-card">
-        <h2>✉️ Email API (Brevo) — Recommended</h2>
+        <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m4 7 8 6 8-6"/></svg> Email API (Brevo) — Recommended</h2>
 
         <div class="help-box">
-            <strong>Why Brevo?</strong><br>
-            Your network is blocking Gmail SMTP ports (465/587). Brevo sends email over HTTPS (443), so it works reliably.<br><br>
-            Steps:
-            <ol style="margin: 0.5rem 0 0 1.25rem;">
-                <li>Create a free Brevo account</li>
-                <li>Generate an API key (SMTP & API → API Keys)</li>
-                <li>Verify your sender email in Brevo</li>
-            </ol>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a6.5 6.5 0 0 0-3.8 11.8c.7.5 1.2 1.3 1.3 2.2h5a3 3 0 0 1 1.3-2.2A6.5 6.5 0 0 0 12 2Z"/></svg>
+            <span>
+                <strong>Why Brevo?</strong><br>
+                Your network is blocking Gmail SMTP ports (465/587). Brevo sends email over HTTPS (443), so it works reliably.<br><br>
+                Steps:
+                <ol style="margin: 0.5rem 0 0 1.25rem;">
+                    <li>Create a free Brevo account</li>
+                    <li>Generate an API key (SMTP & API → API Keys)</li>
+                    <li>Verify your sender email in Brevo</li>
+                </ol>
+            </span>
         </div>
 
         <form id="brevo-config-form">
@@ -340,58 +429,123 @@
             <div id="brevo-test-result"></div>
 
             <div class="loading" id="brevo-loading">
-                <p>⏳ Testing Brevo configuration...</p>
+                <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a9 9 0 1 1-9 9"/></svg>
+                <span>Testing Brevo configuration...</span>
             </div>
 
             <button type="button" class="btn btn-test" onclick="testBrevo()">
-                🧪 Test Brevo Email
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                Test Brevo Email
             </button>
             <button type="submit" class="btn btn-primary">
-                💾 Save Brevo Configuration
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M7 3v5h9"/></svg>
+                Save Brevo Configuration
             </button>
         </form>
     </div>
 
     <!-- SMS Configuration (Optional) -->
     <div class="settings-card">
-        <h2>📱 SMS Configuration (Twilio - Optional)</h2>
-        
+        <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg> SMS Configuration (Twilio - Optional)</h2>
+
         <div class="help-box">
-            <strong>💡 Get FREE Twilio Account:</strong><br>
-            1. Visit: <a href="https://www.twilio.com/try-twilio" target="_blank">www.twilio.com/try-twilio</a><br>
-            2. Sign up (get $15 FREE credit = ~500 SMS)<br>
-            3. Get Account SID, Auth Token, and Phone Number<br>
-            4. Enter them below
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a6.5 6.5 0 0 0-3.8 11.8c.7.5 1.2 1.3 1.3 2.2h5a3 3 0 0 1 1.3-2.2A6.5 6.5 0 0 0 12 2Z"/></svg>
+            <span>
+                <strong>Get FREE Twilio Account:</strong><br>
+                1. Visit: <a href="https://www.twilio.com/try-twilio" target="_blank">www.twilio.com/try-twilio</a><br>
+                2. Sign up (get $15 FREE credit = ~500 SMS)<br>
+                3. Get Account SID, Auth Token, and Phone Number<br>
+                4. Enter them below
+            </span>
         </div>
 
         <form id="sms-config-form">
             <div class="form-group">
-                <label for="twilio_sid">🆔 Account SID</label>
-                <input type="text" id="twilio_sid" name="twilio_sid" 
+                <label for="twilio_sid">Account SID</label>
+                <input type="text" id="twilio_sid" name="twilio_sid"
                        placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                        value="{{ current_twilio_sid }}">
             </div>
 
             <div class="form-group">
-                <label for="twilio_token">🔐 Auth Token</label>
-                <input type="password" id="twilio_token" name="twilio_token" 
+                <label for="twilio_token">Auth Token</label>
+                <input type="password" id="twilio_token" name="twilio_token"
                        placeholder="your_auth_token_here"
                        value="{{ '••••••••••••••••' if sms_configured else '' }}">
             </div>
 
             <div class="form-group">
-                <label for="twilio_phone">📞 Twilio Phone Number</label>
-                <input type="text" id="twilio_phone" name="twilio_phone" 
+                <label for="twilio_phone">Twilio Phone Number</label>
+                <input type="text" id="twilio_phone" name="twilio_phone"
                        placeholder="+1234567890"
                        value="{{ current_twilio_phone }}">
                 <small>Format: +1234567890 (with country code)</small>
             </div>
 
             <button type="submit" class="btn btn-primary">
-                💾 Save SMS Configuration
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M7 3v5h9"/></svg>
+                Save SMS Configuration
             </button>
             <button type="button" class="btn btn-secondary" onclick="clearSMS()">
-                🗑️ Clear SMS Config
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-13"/></svg>
+                Clear SMS Config
+            </button>
+        </form>
+    </div>
+
+    <!-- WhatsApp Configuration (Brevo) -->
+    <div class="settings-card">
+        <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 8.6 8.6 0 0 1-3.6-.8L3 20l1-4.6A8.4 8.4 0 1 1 21 11.5Z"/></svg> WhatsApp Alerts (Brevo) — Optional</h2>
+
+        <div class="help-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a6.5 6.5 0 0 0-3.8 11.8c.7.5 1.2 1.3 1.3 2.2h5a3 3 0 0 1 1.3-2.2A6.5 6.5 0 0 0 12 2Z"/></svg>
+            <span>
+                <strong>Before this will work, you must, in your Brevo account:</strong><br>
+                1. Activate WhatsApp on your Brevo account and connect a sender number<br>
+                2. Create a message template and get it approved by Meta (can take hours to days)<br>
+                3. Copy the approved template's numeric ID below<br>
+                Uses the same Brevo API key as your email configuration above &mdash; nothing extra needed there.
+            </span>
+        </div>
+
+        <form id="whatsapp-config-form">
+            <div class="form-group">
+                <label for="whatsapp_sender_number">WhatsApp Sender Number</label>
+                <input type="text" id="whatsapp_sender_number" name="whatsapp_sender_number"
+                       placeholder="919876543210"
+                       value="{{ current_whatsapp_sender }}">
+                <small>Digits only, with country code, no + or spaces</small>
+            </div>
+
+            <div class="form-group">
+                <label for="whatsapp_template_id">Approved Template ID</label>
+                <input type="text" id="whatsapp_template_id" name="whatsapp_template_id"
+                       placeholder="123"
+                       value="{{ current_whatsapp_template_id }}">
+                <small>From Brevo &rarr; WhatsApp &rarr; Templates, once Meta has approved it</small>
+            </div>
+
+            <div class="form-group">
+                <label for="whatsapp_test_number">Test Recipient Number (Optional)</label>
+                <input type="text" id="whatsapp_test_number" name="whatsapp_test_number"
+                       placeholder="919876543210">
+                <small>Must be a number that has opted in / messaged your WhatsApp sender before</small>
+            </div>
+
+            <div id="whatsapp-test-result"></div>
+
+            <div class="loading" id="whatsapp-loading">
+                <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a9 9 0 1 1-9 9"/></svg>
+                <span>Testing WhatsApp configuration...</span>
+            </div>
+
+            <button type="button" class="btn btn-test" onclick="testWhatsapp()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                Test WhatsApp
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M7 3v5h9"/></svg>
+                Save WhatsApp Configuration
             </button>
         </form>
     </div>
@@ -415,13 +569,13 @@ document.getElementById('email-config-form').addEventListener('submit', async (e
         const result = await response.json();
         
         if (result.success) {
-            alert('✅ Email configuration saved successfully!\n\nPlease restart the app for changes to take effect.');
+            alert('Email configuration saved successfully!\n\nPlease restart the app for changes to take effect.');
             location.reload();
         } else {
-            alert('❌ Error: ' + result.message);
+            alert('Error: ' + result.message);
         }
     } catch (error) {
-        alert('❌ Error saving configuration: ' + error);
+        alert('Error saving configuration: ' + error);
     }
 });
 
@@ -432,7 +586,7 @@ async function testEmail() {
     const testEmail = document.getElementById('test_email').value || username;
     
     if (!username || !password) {
-        alert('⚠️ Please enter both email and password first!');
+        alert('Please enter both email and password first!');
         return;
     }
     
@@ -462,7 +616,7 @@ async function testEmail() {
         
         if (result.success) {
             setTimeout(() => {
-                if (confirm('✅ Email test successful!\n\nDo you want to save these settings?')) {
+                if (confirm('Email test successful!\n\nDo you want to save these settings?')) {
                     document.getElementById('email-config-form').requestSubmit();
                 }
             }, 1000);
@@ -470,7 +624,7 @@ async function testEmail() {
     } catch (error) {
         loading.classList.remove('active');
         resultDiv.className = 'error';
-        resultDiv.textContent = '❌ Error testing email: ' + error;
+        resultDiv.textContent = 'Error testing email: ' + error;
         resultDiv.style.display = 'block';
     }
 }
@@ -492,13 +646,13 @@ document.getElementById('sms-config-form').addEventListener('submit', async (e) 
         const result = await response.json();
         
         if (result.success) {
-            alert('✅ SMS configuration saved successfully!\n\nPlease restart the app for changes to take effect.');
+            alert('SMS configuration saved successfully!\n\nPlease restart the app for changes to take effect.');
             location.reload();
         } else {
-            alert('❌ Error: ' + result.message);
+            alert('Error: ' + result.message);
         }
     } catch (error) {
-        alert('❌ Error saving configuration: ' + error);
+        alert('Error saving configuration: ' + error);
     }
 });
 
@@ -523,13 +677,13 @@ document.getElementById('brevo-config-form').addEventListener('submit', async (e
         const result = await response.json();
 
         if (result.success) {
-            alert('✅ Brevo configuration saved!\n\nPlease restart the app for changes to take effect.');
+            alert('Brevo configuration saved!\n\nPlease restart the app for changes to take effect.');
             location.reload();
         } else {
-            alert('❌ Error: ' + result.message);
+            alert('Error: ' + result.message);
         }
     } catch (error) {
-        alert('❌ Error saving Brevo configuration: ' + error);
+        alert('Error saving Brevo configuration: ' + error);
     }
 });
 
@@ -541,7 +695,7 @@ async function testBrevo() {
     const testEmail = document.getElementById('brevo_test_email').value || senderEmail;
 
     if (!apiKey || !senderEmail) {
-        alert('⚠️ Please enter Brevo sender email and API key first!');
+        alert('Please enter Brevo sender email and API key first!');
         return;
     }
 
@@ -572,7 +726,7 @@ async function testBrevo() {
 
         if (result.success) {
             setTimeout(() => {
-                if (confirm('✅ Brevo test successful!\n\nDo you want to save these settings?')) {
+                if (confirm('Brevo test successful!\n\nDo you want to save these settings?')) {
                     document.getElementById('brevo-config-form').requestSubmit();
                 }
             }, 800);
@@ -580,7 +734,7 @@ async function testBrevo() {
     } catch (error) {
         loading.classList.remove('active');
         resultDiv.className = 'error';
-        resultDiv.textContent = '❌ Error testing Brevo: ' + error;
+        resultDiv.textContent = 'Error testing Brevo: ' + error;
         resultDiv.style.display = 'block';
     }
 }
@@ -590,6 +744,75 @@ function clearSMS() {
         document.getElementById('twilio_sid').value = '';
         document.getElementById('twilio_token').value = '';
         document.getElementById('twilio_phone').value = '';
+    }
+}
+
+// WhatsApp Configuration Form
+document.getElementById('whatsapp-config-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+
+    try {
+        const response = await fetch('/settings/save-whatsapp', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('WhatsApp configuration saved!\n\nPlease restart the app for changes to take effect.');
+            location.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error saving configuration: ' + error);
+    }
+});
+
+// Test WhatsApp Function
+async function testWhatsapp() {
+    const senderNumber = document.getElementById('whatsapp_sender_number').value;
+    const templateId = document.getElementById('whatsapp_template_id').value;
+    const testNumber = document.getElementById('whatsapp_test_number').value;
+
+    if (!senderNumber || !templateId || !testNumber) {
+        alert('Please enter sender number, template ID, and a test recipient number first!');
+        return;
+    }
+
+    const loading = document.getElementById('whatsapp-loading');
+    const resultDiv = document.getElementById('whatsapp-test-result');
+
+    loading.classList.add('active');
+    resultDiv.style.display = 'none';
+
+    try {
+        const response = await fetch('/settings/test-whatsapp', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                whatsapp_sender_number: senderNumber,
+                whatsapp_template_id: templateId,
+                test_number: testNumber
+            })
+        });
+
+        const result = await response.json();
+
+        loading.classList.remove('active');
+        resultDiv.className = result.success ? 'success' : 'error';
+        resultDiv.textContent = result.message;
+        resultDiv.style.display = 'block';
+    } catch (error) {
+        loading.classList.remove('active');
+        resultDiv.className = 'error';
+        resultDiv.textContent = 'Error testing WhatsApp: ' + error;
+        resultDiv.style.display = 'block';
     }
 }
 </script>

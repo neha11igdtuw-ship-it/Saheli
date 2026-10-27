@@ -4,47 +4,74 @@
 
 {% block extra_css %}
 <style>
+    .navbar, footer { display: none; }
+
+    body { background: #f8f1ec; }
+
+    main.container {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+    }
+
     .page-container {
-        max-width: 1200px;
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 2rem;
+        padding: 2rem 1.5rem 3rem 1.5rem;
     }
 
     .page-header {
-        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        background: linear-gradient(160deg, #3d1b26 0%, #5c2a3a 55%, #7a3540 100%);
         border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        border: 1px solid #cbd5e1;
+        padding: 2.25rem 2rem;
+        margin-bottom: 1.5rem;
         text-align: center;
+        color: #fdf3ee;
+    }
+
+    .page-header .page-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem auto;
     }
 
     .page-header h1 {
-        color: #0b1220;
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #fff;
+        font-size: 1.9rem;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .page-header p {
+        color: rgba(253, 243, 238, 0.85);
+        font-size: 1rem;
+        margin: 0;
     }
 
     .beacons-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
     }
 
     .beacon-card {
         background: #ffffff;
         border-radius: 16px;
         padding: 1.5rem;
-        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.10);
-        border: 1px solid #cbd5e1;
-        transition: all 0.3s ease;
+        border: 1px solid #ece0d8;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
         position: relative;
     }
 
     .beacon-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.14);
+        transform: translateY(-4px);
+        box-shadow: 0 14px 28px rgba(92, 42, 58, 0.12);
     }
 
     .beacon-type-badge {
@@ -52,54 +79,65 @@
         top: 15px;
         right: 15px;
         padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        font-size: 0.75rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
         font-weight: 700;
         color: white;
     }
 
     .beacon-type-badge.metro {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        background: #3f5f74;
     }
 
     .beacon-type-badge.police_station {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: #b9544a;
     }
 
     .beacon-type-badge.hospital {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: #1f8a5c;
     }
 
     .beacon-type-badge.shop {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        background: #b9742a;
     }
 
     .beacon-icon {
-        font-size: 3rem;
-        text-align: center;
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: #fdece5;
+        color: #b9544a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         margin-bottom: 1rem;
     }
 
     .beacon-name {
-        font-size: 1.2rem;
+        font-size: 1.15rem;
         font-weight: 700;
-        color: #0b1220;
+        color: #2b1a1c;
         margin-bottom: 0.5rem;
     }
 
     .beacon-address {
-        font-size: 0.9rem;
-        color: #475569;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.4rem;
+        font-size: 0.88rem;
+        color: #6b5a57;
         margin-bottom: 1rem;
         line-height: 1.5;
     }
+
+    .beacon-address .ico { flex-shrink: 0; margin-top: 0.15rem; color: #9c8a86; }
 
     .beacon-contact {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        color: #0f766e;
-        font-weight: 600;
+        color: #b9544a;
+        font-weight: 650;
         margin-bottom: 1rem;
     }
 
@@ -110,53 +148,59 @@
 
     .btn-action {
         flex: 1;
-        padding: 0.5rem;
-        background: #0f766e;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.6rem;
+        background: #5c2a3a;
         color: white;
         border: none;
-        border-radius: 12px;
-        font-weight: 600;
+        border-radius: 10px;
+        font-weight: 650;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         text-align: center;
         text-decoration: none;
-        display: inline-block;
     }
 
     .btn-action:hover {
-        background: #0a5f59;
+        background: #4a2129;
         transform: translateY(-2px);
+        text-decoration: none;
+        color: #fff;
     }
 
     .verified-badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
-        background: rgba(16, 185, 129, 0.2);
-        color: #10b981;
+        gap: 0.3rem;
+        background: #e2f3ea;
+        color: #1f8a5c;
         padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 650;
         margin-top: 0.5rem;
     }
 
     .info-card {
         background: #ffffff;
         border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        border: 1px solid #cbd5e1;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #ece0d8;
     }
 
     .info-card h2 {
-        color: #0b1220;
-        margin-bottom: 1rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #2b1a1c;
+        margin: 0 0 1rem 0;
+        font-size: 1.25rem;
     }
 
     .info-card p {
-        color: #475569;
+        color: #6b5a57;
         line-height: 1.6;
     }
 </style>
@@ -165,15 +209,16 @@
 {% block content %}
 <div class="page-container">
     <div class="page-header">
-        <h1>🏪 Safety Beacons</h1>
+        <div class="page-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg></div>
+        <h1>Safety Beacons</h1>
         <p>Verified safe places nearby for quick help.</p>
     </div>
 
     <div class="info-card">
         <h2>What are Safety Beacons?</h2>
         <p>
-            Safety Beacons are verified locations like metro stations, police stations, hospitals, and 24/7 shops 
-            that can provide immediate assistance. These are IoT-enabled safe spots where you can find help quickly. 
+            Safety Beacons are verified locations like metro stations, police stations, hospitals, and 24/7 shops
+            that can provide immediate assistance. These are IoT-enabled safe spots where you can find help quickly.
             Use these beacons when you need nearby support.
         </p>
     </div>
@@ -186,40 +231,50 @@
                 </span>
 
                 <div class="beacon-icon">
-                    {% if beacon.beacon_type == 'metro' %}🚇
-                    {% elif beacon.beacon_type == 'police_station' %}🚔
-                    {% elif beacon.beacon_type == 'hospital' %}🏥
-                    {% elif beacon.beacon_type == 'shop' %}🏪
-                    {% else %}📍
+                    {% if beacon.beacon_type == 'metro' %}
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="3"/><path d="M4 11h16"/><circle cx="8.5" cy="19.5" r="1.2"/><circle cx="15.5" cy="19.5" r="1.2"/><path d="m6 16-2 3.5M18 16l2 3.5"/></svg>
+                    {% elif beacon.beacon_type == 'police_station' %}
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5.5c0 5 3 8.6 7 9.5 4-.9 7-4.5 7-9.5V6l-7-3Z"/></svg>
+                    {% elif beacon.beacon_type == 'hospital' %}
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 8v6M9 11h6"/></svg>
+                    {% elif beacon.beacon_type == 'shop' %}
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5 5 4h14l1 5.5"/><path d="M4 9.5a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0"/><path d="M5 10v9.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/></svg>
+                    {% else %}
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg>
                     {% endif %}
                 </div>
 
                 <div class="beacon-name">{{ beacon.name }}</div>
-                
+
                 <div class="beacon-address">
-                    📍 {{ beacon.address if beacon.address else 'Location on map' }}
+                    <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg></span>
+                    <span>{{ beacon.address if beacon.address else 'Location on map' }}</span>
                 </div>
 
                 {% if beacon.contact_number %}
                     <div class="beacon-contact">
-                        📞 {{ beacon.contact_number }}
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h3l1.5 4-2 1.5a12 12 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4 6.2 2 2 0 0 1 6 3Z"/></svg>
+                        {{ beacon.contact_number }}
                     </div>
                 {% endif %}
 
                 {% if beacon.is_verified %}
                     <div class="verified-badge">
-                        ✓ Verified Safe Spot
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
+                        Verified Safe Spot
                     </div>
                 {% endif %}
 
                 <div class="beacon-actions" style="margin-top: 1rem;">
-                    <a href="https://www.google.com/maps/search/?api=1&query={{ beacon.latitude }},{{ beacon.longitude }}" 
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ beacon.latitude }},{{ beacon.longitude }}"
                        target="_blank" class="btn-action">
-                        🗺️ View on Map
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6.5v14L9 18l6 2.5 6-2.5v-14L15 6.5 9 4Z"/><path d="M9 4v14M15 6.5v14"/></svg>
+                        View on Map
                     </a>
                     {% if beacon.contact_number %}
                         <a href="tel:{{ beacon.contact_number }}" class="btn-action">
-                            📞 Call
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h3l1.5 4-2 1.5a12 12 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4 6.2 2 2 0 0 1 6 3Z"/></svg>
+                            Call
                         </a>
                     {% endif %}
                 </div>
@@ -229,8 +284,10 @@
 
     {% if not beacons %}
         <div class="info-card" style="text-align: center; padding: 3rem;">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">🏪</div>
-            <h3 style="color: #0b1220; margin-bottom: 0.5rem;">No Beacons Found</h3>
+            <div style="width:64px;height:64px;border-radius:50%;background:#f6efe9;color:#9c8a86;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem auto;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg>
+            </div>
+            <h3 style="color: #2b1a1c; margin-bottom: 0.5rem;">No Beacons Found</h3>
             <p>Safety beacons will be added for your area soon.</p>
         </div>
     {% endif %}
