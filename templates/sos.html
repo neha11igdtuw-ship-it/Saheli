@@ -332,14 +332,29 @@
         font-weight: 650;
     }
 
-    .alert-status.active {
+    .alert-status.active,
+    .alert-status.pending,
+    .alert-status.sending {
         background: #fdece5;
         color: #b9544a;
     }
 
-    .alert-status.resolved {
+    .alert-status.sent,
+    .alert-status.resolved,
+    .alert-status.cancelled {
         background: #e5f2ec;
         color: #1f7a5c;
+    }
+
+    .alert-status.failed {
+        background: #fdf0e3;
+        color: #a9652f;
+    }
+
+    .alert-channel-summary {
+        margin-top: 0.5rem;
+        color: #6b5a57;
+        font-size: 0.8rem;
     }
 
     .alert-location {
@@ -481,14 +496,21 @@
         <h2>Recent Alerts</h2>
         {% if recent_alerts %}
             {% for alert in recent_alerts %}
+                {% set results = alert.results_json | fromjson %}
                 <div class="alert-item">
                     <div class="alert-header">
                         <span class="alert-type">{{ alert.alert_type.title() }} SOS</span>
-                        <span class="alert-status {% if alert.is_resolved %}resolved{% else %}active{% endif %}">
-                            {% if alert.is_resolved %}
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg> Resolved
-                            {% else %}
+                        <span class="alert-status {{ alert.dispatch_status }}">
+                            {% if alert.dispatch_status == 'sent' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg> Sent
+                            {% elif alert.dispatch_status == 'cancelled' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg> Marked safe
+                            {% elif alert.dispatch_status == 'failed' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg> Failed to send
+                            {% elif alert.dispatch_status in ('pending', 'sending') %}
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg> Active
+                            {% else %}
+                            {{ alert.dispatch_status|title }}
                             {% endif %}
                         </span>
                     </div>
@@ -499,9 +521,20 @@
                         <div class="alert-location">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg>
                             {{ alert.location_address }}
+                            {% if not alert.location_attached %}<span style="opacity:0.7;">(no GPS fix)</span>{% endif %}
                         </div>
                     {% endif %}
-                    {% if not alert.is_resolved %}
+                    {% if results and results.attempted %}
+                        <div class="alert-channel-summary">
+                            Email {{ results.sent.email|default(0) }}/{{ results.attempted.email|default(0) }} &middot;
+                            SMS {{ results.sent.sms|default(0) }}/{{ results.attempted.sms|default(0) }} &middot;
+                            Call {{ results.sent.call|default(0) }}/{{ results.attempted.call|default(0) }} &middot;
+                            WhatsApp {{ results.sent.whatsapp|default(0) }}/{{ results.attempted.whatsapp|default(0) }}
+                        </div>
+                    {% elif alert.dispatch_status == 'failed' and results and results.reason == 'no_trusted_contacts' %}
+                        <div class="alert-channel-summary">No trusted contacts were configured at the time.</div>
+                    {% endif %}
+                    {% if not alert.is_resolved and alert.dispatch_status not in ('pending', 'sending') %}
                         <form method="POST" action="{{ url_for('resolve_sos', alert_id=alert.id) }}">
                             <button type="submit" class="btn-resolve">Mark as resolved</button>
                         </form>

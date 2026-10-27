@@ -13,6 +13,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import threading
+from concurrent.futures import ThreadPoolExecutor
 import csv
 from functools import lru_cache
 import socket
@@ -49,6 +50,7 @@ BREVO_WHATSAPP_TEMPLATE_ID = os.environ.get('BREVO_WHATSAPP_TEMPLATE_ID', '').st
 NCRB_DATA_FILE = os.environ.get('NCRB_DATA_FILE', '')
 
 db = SQLAlchemy(app)
+app.jinja_env.filters['fromjson'] = lambda s: json.loads(s) if s else None
 
 # ==================== DATABASE MODELS ====================
 
@@ -611,40 +613,44 @@ def dispatch_sos_alert(alert_id, grace_seconds=0):
                 else "https://www.google.com/maps"
             )
 
-            per_contact = []
+            # Fire every channel for every contact concurrently. Sequentially,
+            # one slow/unreachable provider (seen in practice: Twilio call +
+            # SMS + WhatsApp + SMTP each taking real wall-clock time back to
+            # back) stacks up to a minute-plus before anyone is notified —
+            # unacceptable for an emergency alert. A thread pool collapses
+            # total latency to roughly the single slowest channel.
             totals = {'email': 0, 'sms': 0, 'call': 0, 'whatsapp': 0}
             attempted = {'email': 0, 'sms': 0, 'call': 0, 'whatsapp': 0}
+            per_contact_map = {c.id: {'name': c.name, 'email': None, 'sms': None, 'call': None, 'whatsapp': None} for c in contacts}
 
+            jobs = []  # (contact_id, channel, callable)
             for contact in contacts:
-                outcome = {'name': contact.name, 'email': None, 'sms': None, 'call': None, 'whatsapp': None}
-
                 if contact.email:
                     attempted['email'] += 1
-                    ok = send_email_alert(contact.email, user.username, map_url, location_address)
-                    outcome['email'] = ok
-                    if ok:
-                        totals['email'] += 1
-
+                    jobs.append((contact.id, 'email', lambda c=contact: send_email_alert(c.email, user.username, map_url, location_address)))
                 if contact.phone_number:
                     attempted['sms'] += 1
-                    ok_sms = send_sms_alert(contact.phone_number, user.username, map_url, location_address)
-                    outcome['sms'] = ok_sms
-                    if ok_sms:
-                        totals['sms'] += 1
-
+                    jobs.append((contact.id, 'sms', lambda c=contact: send_sms_alert(c.phone_number, user.username, map_url, location_address)))
                     attempted['call'] += 1
-                    ok_call = make_voice_call(contact.phone_number, user.username, location_address)
-                    outcome['call'] = ok_call
-                    if ok_call:
-                        totals['call'] += 1
-
+                    jobs.append((contact.id, 'call', lambda c=contact: make_voice_call(c.phone_number, user.username, location_address)))
                     attempted['whatsapp'] += 1
-                    ok_wa = send_whatsapp_alert(contact.phone_number, user.username, map_url, location_address)
-                    outcome['whatsapp'] = ok_wa
-                    if ok_wa:
-                        totals['whatsapp'] += 1
+                    jobs.append((contact.id, 'whatsapp', lambda c=contact: send_whatsapp_alert(c.phone_number, user.username, map_url, location_address)))
 
-                per_contact.append(outcome)
+            if jobs:
+                with ThreadPoolExecutor(max_workers=min(16, len(jobs))) as pool:
+                    futures = {pool.submit(fn): (contact_id, channel) for contact_id, channel, fn in jobs}
+                    for future in futures:
+                        contact_id, channel = futures[future]
+                        try:
+                            ok = future.result()
+                        except Exception as e:
+                            print(f"❌ {channel} dispatch error for contact {contact_id}: {e}")
+                            ok = False
+                        per_contact_map[contact_id][channel] = ok
+                        if ok:
+                            totals[channel] += 1
+
+            per_contact = list(per_contact_map.values())
 
             any_sent = any(totals.values())
             alert.dispatch_status = 'sent' if (any_sent or not contacts) else 'failed'
