@@ -25,7 +25,21 @@ load_dotenv(override=True)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///saheli.db'
+
+# Render's free tier has no persistent disk: a SQLite file on it is wiped on
+# every redeploy and every restart after the service sleeps from inactivity,
+# silently losing every signup, trusted contact, and SOS alert. Use Postgres
+# (DATABASE_URL, e.g. Render's managed Postgres add-on) whenever it's
+# configured; fall back to local SQLite only for local development.
+_database_url = os.environ.get('DATABASE_URL', '').strip()
+if _database_url:
+    # Render (and some other hosts) still hand out the legacy 'postgres://'
+    # scheme; SQLAlchemy's psycopg2 dialect requires 'postgresql://'.
+    if _database_url.startswith('postgres://'):
+        _database_url = _database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = _database_url
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///saheli.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # API Keys Configuration
@@ -2068,7 +2082,16 @@ def toggle_adaptive_mode():
 
 def ensure_sos_alert_columns():
     """Lightweight additive migration: add new SOSAlert columns to an existing
-    sqlite DB file without wiping data (no Flask-Migrate configured in this project)."""
+    sqlite DB file without wiping data (no Flask-Migrate configured in this project).
+
+    Sqlite-only: on Postgres (or any fresh database), db.create_all() already
+    creates sos_alert with every column the current model defines, so there is
+    nothing to patch — and 'PRAGMA table_info' is sqlite-specific syntax that
+    would error on another dialect.
+    """
+    if db.engine.dialect.name != 'sqlite':
+        return
+
     from sqlalchemy import text
     with db.engine.connect() as conn:
         existing = {row[1] for row in conn.execute(text("PRAGMA table_info(sos_alert)"))}
@@ -2128,6 +2151,12 @@ def init_db():
         print("✨ Database initialized successfully! 💕")
 
 
+# Must run at import time, not only under `if __name__ == '__main__'`: a
+# production WSGI server (gunicorn app:app, as used on Render) imports this
+# module directly and never executes that guard. Without this, the database
+# tables are never created on a fresh/ephemeral disk, and every DB-touching
+# route (including /login) fails with a 500.
+init_db()
+
 if __name__ == '__main__':
-    init_db()
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
