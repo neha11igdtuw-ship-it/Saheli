@@ -69,6 +69,93 @@
         }, 5000);
     </script>
 
+    <script>
+        // Scheduled Fake Call: lets a user arm a fake incoming call for N minutes
+        // from now and have it fire even after navigating to another page.
+        // Persisted in localStorage (not a server-side job) since it only needs
+        // to survive page navigation on the same device, not a backend restart.
+        (function () {
+            const STORAGE_KEY = 'saheli_fake_call_schedule';
+            const MAX_DELAY_MINUTES = 60;
+            let pollTimer = null;
+
+            function clearSchedule() {
+                localStorage.removeItem(STORAGE_KEY);
+                if (pollTimer) {
+                    clearTimeout(pollTimer);
+                    pollTimer = null;
+                }
+                const banner = document.getElementById('fake-call-banner');
+                if (banner) banner.remove();
+            }
+
+            function fireFakeCall(data) {
+                localStorage.removeItem(STORAGE_KEY);
+                const params = new URLSearchParams({ name: data.name });
+                window.location.href = `/fake-call?${params.toString()}`;
+            }
+
+            function renderBanner(data) {
+                let banner = document.getElementById('fake-call-banner');
+                if (!banner) {
+                    banner = document.createElement('div');
+                    banner.id = 'fake-call-banner';
+                    banner.className = 'fake-call-banner';
+                    banner.innerHTML =
+                        '<span class="fake-call-banner-text"></span>' +
+                        '<button type="button" class="fake-call-banner-cancel">Cancel</button>';
+                    banner.querySelector('.fake-call-banner-cancel').addEventListener('click', clearSchedule);
+                    document.body.appendChild(banner);
+                }
+                const secondsLeft = Math.max(0, Math.round((data.triggerAt - Date.now()) / 1000));
+                const mins = Math.floor(secondsLeft / 60);
+                const secs = secondsLeft % 60;
+                banner.querySelector('.fake-call-banner-text').textContent =
+                    `Fake call from ${data.name} in ${mins}:${String(secs).padStart(2, '0')}`;
+            }
+
+            function poll() {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+
+                let data;
+                try {
+                    data = JSON.parse(raw);
+                } catch (e) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    return;
+                }
+                if (!data || typeof data.triggerAt !== 'number' || !data.name) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    return;
+                }
+
+                if (Date.now() >= data.triggerAt) {
+                    fireFakeCall(data);
+                    return;
+                }
+
+                renderBanner(data);
+                pollTimer = setTimeout(poll, 1000);
+            }
+
+            // Public API used by pages (e.g. sos.html) to arm a scheduled fake call.
+            window.SaheliFakeCallScheduler = {
+                maxDelayMinutes: MAX_DELAY_MINUTES,
+                schedule(name, delayMinutes) {
+                    const minutes = Math.min(Math.max(Number(delayMinutes) || 0, 0), MAX_DELAY_MINUTES);
+                    const triggerAt = Date.now() + minutes * 60000;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({ name, triggerAt }));
+                    poll();
+                    return triggerAt;
+                },
+                cancel: clearSchedule
+            };
+
+            poll();
+        })();
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -329,6 +329,40 @@ input:focus, select:focus, textarea:focus {
 .flash.error .flash-icon { color: var(--danger); }
 .flash.info .flash-icon { color: var(--amber); }
 
+/* Scheduled fake call countdown banner (see base.html) */
+.fake-call-banner {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(180, 83, 9, 0.35);
+  background: rgba(180, 83, 9, 0.10);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.fake-call-banner-cancel {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.fake-call-banner-cancel:hover {
+  background: rgba(185, 28, 28, 0.08);
+  border-color: rgba(185, 28, 28, 0.35);
+}
+
 /* Small utility styling for existing inline sections */
 .help-box {
   background: var(--amber-bg) !important;

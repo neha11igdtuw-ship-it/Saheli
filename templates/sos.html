@@ -413,6 +413,7 @@
     </div>
 
     <div id="sos-status-banner" class="sos-status-banner" style="display:none;"></div>
+    <div id="sos-beacons" style="display:none; margin: 0 0 1rem 0; padding: 1rem 1.25rem; border: 1px solid #ece0d8; border-radius: 14px; background: #fff;"></div>
 
     <div class="emergency-actions">
         <button class="sos-button call112" onclick="call112()">
@@ -515,7 +516,7 @@
                         </span>
                     </div>
                     <div class="alert-date">
-                        {{ alert.triggered_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        {{ (alert.triggered_at | ist).strftime('%B %d, %Y at %I:%M %p') }} IST
                     </div>
                     {% if alert.location_address %}
                         <div class="alert-location">
@@ -622,6 +623,7 @@
             }
 
             renderCountdownBanner(data.alert_id, data.grace_seconds, data.contacts_total, data.location_attached);
+            renderNearbyBeacons(data.nearby_beacons);
             startSosPolling(data.alert_id);
         })
         .catch(error => {
@@ -765,6 +767,33 @@
         if (sosCountdownTimer) clearInterval(sosCountdownTimer);
         tick();
         sosCountdownTimer = setInterval(tick, 1000);
+    }
+
+    // Nearest safe places so the user knows where to head while help is notified.
+    function renderNearbyBeacons(beacons) {
+        const box = document.getElementById('sos-beacons');
+        box.replaceChildren();
+        if (!beacons || !beacons.length) { box.style.display = 'none'; return; }
+
+        const title = document.createElement('strong');
+        title.textContent = 'Nearest safe places';
+        box.appendChild(title);
+        beacons.forEach(b => {
+            const row = document.createElement('div');
+            row.style.marginTop = '0.6rem';
+            const link = document.createElement('a');
+            link.href = b.maps_url;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.textContent = b.name;
+            const meta = document.createElement('span');
+            meta.style.color = '#6b5a57';
+            meta.textContent = ' · ' + (b.distance_m / 1000).toFixed(1) + ' km' +
+                (b.contact_number ? ' · ' + b.contact_number : '');
+            row.append(link, meta);
+            box.appendChild(row);
+        });
+        box.style.display = 'block';
     }
 
     function cancelSOS(alertId) {
@@ -949,18 +978,39 @@
         if (!choice) return;
 
         let callerName = 'Mom';
-        
+
         switch(choice.trim()) {
             case '1': callerName = 'Mom'; break;
             case '2': callerName = 'Dad'; break;
             case '3': callerName = 'Boss'; break;
             case '4': callerName = 'Friend'; break;
             case '5': callerName = 'Dr. Sharma'; break;
-            case '6': 
+            case '6':
                 callerName = prompt('Enter caller name:') || 'Mom';
                 break;
             default:
                 callerName = choice;
+        }
+
+        const maxDelay = (window.SaheliFakeCallScheduler && window.SaheliFakeCallScheduler.maxDelayMinutes) || 60;
+        const delayInput = prompt(
+            `When should ${callerName} "call"?\n\n` +
+            `Enter 0 to call immediately, or a number of minutes (1-${maxDelay}) to schedule it for later ` +
+            `(the call will still trigger even if you leave this page):`,
+            '0'
+        );
+        if (delayInput === null) return;
+
+        const delayMinutes = parseFloat(delayInput);
+        if (isNaN(delayMinutes) || delayMinutes < 0 || delayMinutes > maxDelay) {
+            alert(`Please enter a number between 0 and ${maxDelay}.`);
+            return;
+        }
+
+        if (delayMinutes > 0 && window.SaheliFakeCallScheduler) {
+            window.SaheliFakeCallScheduler.schedule(callerName, delayMinutes);
+            alert(`Fake call from ${callerName} scheduled in ${delayMinutes} minute(s). A countdown with a Cancel option will stay visible until then.`);
+            return;
         }
 
         // Generate realistic phone number

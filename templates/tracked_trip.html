@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Tracked Trip - Saheli{% endblock %}
+
+{% block extra_css %}
+<style>
+    .navbar, footer { display: none; }
+    body { background: #f8f1ec; }
+    main.container { max-width: none; padding: 0; margin: 0; }
+    .page-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 3rem 1.5rem; }
+
+    .page-header {
+        background: linear-gradient(160deg, #3d1b26 0%, #5c2a3a 55%, #7a3540 100%);
+        border-radius: 16px; padding: 2.25rem 2rem; margin-bottom: 1.5rem;
+        text-align: center; color: #fdf3ee;
+    }
+    .page-header .page-icon {
+        width: 52px; height: 52px; border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;
+    }
+    .page-header h1 { font-family: Georgia, 'Times New Roman', serif; color: #fff; font-size: 1.9rem; margin: 0 0 0.5rem 0; }
+    .page-header p { color: rgba(253, 243, 238, 0.85); font-size: 1rem; margin: 0; }
+
+    .route-card, .results-card {
+        background: #fff; border-radius: 16px; padding: 1.75rem;
+        margin-bottom: 1.5rem; border: 1px solid #ece0d8;
+    }
+    .route-card h2 { font-family: Georgia, 'Times New Roman', serif; color: #2b1a1c; margin: 0 0 1.25rem 0; font-size: 1.3rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-row.three { grid-template-columns: 2fr 1fr 1fr; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; color: #4a3a38; font-weight: 650; }
+    .form-group input, .form-group select {
+        width: 100%; padding: 0.75rem; border: 1px solid #e7d6cf; border-radius: 12px;
+        font-size: 1rem; color: #2b1a1c; background: #fff;
+    }
+    .form-group input:focus, .form-group select:focus {
+        outline: none; border-color: #b9544a; box-shadow: 0 0 0 4px rgba(185, 84, 74, 0.15);
+    }
+    .actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-check {
+        padding: 0.8rem 2rem; background: #b9544a; color: #fff; border: none; border-radius: 12px;
+        font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+    }
+    .btn-check:hover { background: #a2473e; transform: translateY(-2px); }
+    .btn-check:disabled { opacity: 0.6; cursor: wait; transform: none; }
+    .btn-location {
+        padding: 0.75rem 1.5rem; background: rgba(185, 84, 74, 0.1); color: #b9544a;
+        border: 1px solid rgba(185, 84, 74, 0.45); border-radius: 12px; cursor: pointer; font-weight: 700;
+    }
+    .btn-location:hover { background: rgba(185, 84, 74, 0.18); }
+
+    .error-box {
+        display: none; background: #fdecea; color: #8a2d26; border: 1px solid #f3c6c1;
+        border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1rem; font-weight: 600;
+    }
+    .trip-status { text-align: center; }
+    .trip-status .dest { font-family: Georgia, serif; font-size: 1.4rem; color: #2b1a1c; margin: 0 0 0.25rem 0; }
+    .countdown { font-size: 2.6rem; font-weight: 800; color: #5c2a3a; margin: 0.5rem 0; font-variant-numeric: tabular-nums; }
+    .countdown.late { color: #b3342b; }
+    .trip-note { color: #6b5a57; margin: 0 0 1.25rem 0; }
+    .btn-arrived { background: #2f9e57; }
+    .btn-arrived:hover { background: #25804a; }
+    .ended { padding: 1rem; border-radius: 12px; font-weight: 650; margin-bottom: 1rem; }
+    .ended.ok { background: #e3f4e8; color: #226b3a; }
+    .ended.bad { background: #fdecea; color: #8a2d26; }
+    @media (max-width: 640px) { .form-row, .form-row.three { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div class="page-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/></svg></div>
+        <h1>Tracked Trip</h1>
+        <p>Tell us when you expect to arrive. If you don't check in, your trusted contacts are alerted.</p>
+    </div>
+
+    <div id="error-box" class="error-box" role="alert"></div>
+    <div id="ended-box"></div>
+
+    <div class="route-card" id="trip-panel" style="{{ '' if trip else 'display:none;' }}">
+        <div class="trip-status">
+            <h2 class="dest" id="trip-dest">{{ trip.destination if trip }}</h2>
+            <div class="countdown" id="countdown">--:--</div>
+            <p class="trip-note" id="trip-note"></p>
+            <button type="button" class="btn-check btn-arrived" id="arrived-btn" onclick="markArrived()">I've arrived safely</button>
+        </div>
+    </div>
+
+    <div class="route-card" id="start-panel" style="{{ 'display:none;' if trip }}">
+        <h2>Start a trip</h2>
+        <form id="trip-form" onsubmit="startTrip(event)">
+            <div class="form-row three">
+                <div class="form-group">
+                    <label for="destination">Destination</label>
+                    <input type="text" id="destination" maxlength="200" placeholder="Where are you headed?" required>
+                </div>
+                <div class="form-group">
+                    <label for="eta_minutes">Arriving in (min)</label>
+                    <input type="number" id="eta_minutes" min="1" max="1440" value="30" required>
+                </div>
+                <div class="form-group">
+                    <label for="grace_minutes">Grace (min)</label>
+                    <input type="number" id="grace_minutes" min="1" max="60" value="{{ default_grace }}" required>
+                </div>
+            </div>
+            <p class="trip-note">If you haven't confirmed arrival this many minutes after your ETA, an SOS alert is sent to your trusted contacts with your starting location.</p>
+            <button type="submit" class="btn-check" id="start-btn">Start trip</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let tripId = {{ trip.id if trip else 'null' }};
+    let etaAt = {{ ("new Date('" ~ trip.eta_at.isoformat() ~ "Z')")|safe if trip else 'null' }};
+    let graceMs = {{ (trip.grace_minutes * 60000) if trip else 0 }};
+    let pollTimer = null;
+
+    function showError(message) {
+        const box = document.getElementById('error-box');
+        box.textContent = message;
+        box.style.display = message ? 'block' : 'none';
+    }
+
+    function fmt(ms) {
+        const total = Math.floor(Math.abs(ms) / 1000);
+        const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
+        const pad = n => String(n).padStart(2, '0');
+        return (h ? h + ':' + pad(m) : pad(m)) + ':' + pad(s);
+    }
+
+    function tick() {
+        if (!etaAt) return;
+        const remaining = etaAt - Date.now();
+        const el = document.getElementById('countdown');
+        const note = document.getElementById('trip-note');
+        if (remaining >= 0) {
+            el.classList.remove('late');
+            el.textContent = fmt(remaining);
+            note.textContent = 'Time left until your expected arrival.';
+        } else {
+            const untilAlert = remaining + graceMs;
+            el.classList.add('late');
+            el.textContent = '+' + fmt(remaining);
+            note.textContent = untilAlert > 0
+                ? 'Past ETA. Contacts are alerted in ' + fmt(untilAlert) + ' unless you check in.'
+                : 'Checking whether an alert was sent…';
+        }
+    }
+
+    function showEnded(kind, text) {
+        document.getElementById('trip-panel').style.display = 'none';
+        document.getElementById('start-panel').style.display = '';
+        document.getElementById('ended-box').innerHTML = '<div class="ended ' + kind + '"></div>';
+        document.querySelector('#ended-box .ended').textContent = text;
+        etaAt = null; tripId = null;
+        clearInterval(pollTimer);
+    }
+
+    async function poll() {
+        if (!tripId) return;
+        try {
+            const data = await (await fetch('/trip-status/' + tripId)).json();
+            if (data.success && data.status === 'escalated') {
+                showEnded('bad', 'You did not check in in time, so an SOS alert was sent to your trusted contacts.');
+            } else if (data.success && data.status === 'arrived') {
+                showEnded('ok', 'Trip completed. Glad you arrived safely!');
+            }
+        } catch (e) { /* transient network error; retry on next poll */ }
+    }
+
+    function beginTracking(id, eta, grace) {
+        tripId = id; etaAt = eta; graceMs = grace * 60000;
+        document.getElementById('ended-box').innerHTML = '';
+        document.getElementById('trip-dest').textContent = document.getElementById('destination').value || document.getElementById('trip-dest').textContent;
+        document.getElementById('trip-panel').style.display = '';
+        document.getElementById('start-panel').style.display = 'none';
+        tick();
+        clearInterval(pollTimer);
+        pollTimer = setInterval(poll, 15000);
+    }
+
+    function getPosition() {
+        return new Promise(resolve => {
+            if (!navigator.geolocation) return resolve(null);
+            navigator.geolocation.getCurrentPosition(
+                p => resolve(p.coords), () => resolve(null), { enableHighAccuracy: true, timeout: 8000 });
+        });
+    }
+
+    async function startTrip(event) {
+        event.preventDefault();
+        showError('');
+        const btn = document.getElementById('start-btn');
+        btn.disabled = true;
+        btn.textContent = 'Starting…';
+        const body = new URLSearchParams({
+            destination: document.getElementById('destination').value,
+            eta_minutes: document.getElementById('eta_minutes').value,
+            grace_minutes: document.getElementById('grace_minutes').value
+        });
+        const pos = await getPosition();
+        if (pos) { body.set('latitude', pos.latitude); body.set('longitude', pos.longitude); }
+        try {
+            const data = await (await fetch('/start-trip', { method: 'POST', body })).json();
+            if (!data.success) { showError(data.message || 'Could not start trip.'); return; }
+            if (!pos) showError('Location unavailable: an alert would be sent without your position.');
+            beginTracking(data.trip_id, new Date(data.eta_at), data.grace_minutes);
+        } catch (e) {
+            showError('Network error. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Start trip';
+        }
+    }
+
+    async function markArrived() {
+        showError('');
+        const btn = document.getElementById('arrived-btn');
+        btn.disabled = true;
+        try {
+            const resp = await fetch('/trip-arrived/' + tripId, { method: 'POST' });
+            const data = await resp.json();
+            if (data.success) { showEnded('ok', data.message); }
+            else { showError(data.message || 'Could not update trip.'); poll(); }
+        } catch (e) {
+            showError('Network error. Tap again to confirm arrival.');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    if (tripId) { tick(); pollTimer = setInterval(poll, 15000); }
+    setInterval(tick, 1000);
+</script>
+{% endblock %}

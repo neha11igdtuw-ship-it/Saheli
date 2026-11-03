@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block title %}Safest Route - Saheli{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .navbar, footer { display: none; }
+    body { background: #f8f1ec; }
+    main.container { max-width: none; padding: 0; margin: 0; }
+    .page-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 3rem 1.5rem; }
+
+    .page-header {
+        background: linear-gradient(160deg, #3d1b26 0%, #5c2a3a 55%, #7a3540 100%);
+        border-radius: 16px; padding: 2.25rem 2rem; margin-bottom: 1.5rem;
+        text-align: center; color: #fdf3ee;
+    }
+    .page-header .page-icon {
+        width: 52px; height: 52px; border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;
+    }
+    .page-header h1 { font-family: Georgia, 'Times New Roman', serif; color: #fff; font-size: 1.9rem; margin: 0 0 0.5rem 0; }
+    .page-header p { color: rgba(253, 243, 238, 0.85); font-size: 1rem; margin: 0; }
+
+    .route-card, .results-card {
+        background: #fff; border-radius: 16px; padding: 1.75rem;
+        margin-bottom: 1.5rem; border: 1px solid #ece0d8;
+    }
+    .route-card h2 { font-family: Georgia, 'Times New Roman', serif; color: #2b1a1c; margin: 0 0 1.25rem 0; font-size: 1.3rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; color: #4a3a38; font-weight: 650; }
+    .form-group input, .form-group select {
+        width: 100%; padding: 0.75rem; border: 1px solid #e7d6cf; border-radius: 12px;
+        font-size: 1rem; color: #2b1a1c; background: #fff;
+    }
+    .form-group input:focus, .form-group select:focus {
+        outline: none; border-color: #b9544a; box-shadow: 0 0 0 4px rgba(185, 84, 74, 0.15);
+    }
+    .actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-check {
+        padding: 0.8rem 2rem; background: #b9544a; color: #fff; border: none; border-radius: 12px;
+        font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+    }
+    .btn-check:hover { background: #a2473e; transform: translateY(-2px); }
+    .btn-check:disabled { opacity: 0.6; cursor: wait; transform: none; }
+    .btn-location {
+        padding: 0.75rem 1.5rem; background: rgba(185, 84, 74, 0.1); color: #b9544a;
+        border: 1px solid rgba(185, 84, 74, 0.45); border-radius: 12px; cursor: pointer; font-weight: 700;
+    }
+    .btn-location:hover { background: rgba(185, 84, 74, 0.18); }
+
+    #map { width: 100%; height: 420px; border-radius: 16px; border: 1px solid #ece0d8; margin-bottom: 1.5rem; z-index: 1; }
+    .error-box {
+        display: none; background: #fdecea; color: #8a2d26; border: 1px solid #f3c6c1;
+        border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1rem; font-weight: 600;
+    }
+
+    .route-item {
+        border: 2px solid #ece0d8; border-radius: 14px; padding: 1.1rem 1.25rem;
+        margin-bottom: 0.85rem; cursor: pointer; transition: all 0.2s ease; background: #fff;
+    }
+    .route-item:hover { border-color: #d9b5ad; }
+    .route-item.active { border-color: #b9544a; background: #fdf6f3; }
+    .route-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .route-name { font-weight: 700; color: #2b1a1c; }
+    .badge {
+        display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.55rem;
+        border-radius: 999px; margin-left: 0.4rem; background: #f6efe9; color: #5c2a3a;
+    }
+    .badge.best { background: #e3f4e8; color: #226b3a; }
+    .score-pill { font-weight: 800; font-size: 1.25rem; }
+    .score-pill.safe { color: #226b3a; }
+    .score-pill.moderate { color: #a7741a; }
+    .score-pill.unsafe { color: #b3342b; }
+    .route-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; color: #6b5a57; font-size: 0.92rem; }
+    .tradeoff { margin-top: 0.5rem; font-size: 0.9rem; color: #4a3a38; }
+    .tradeoff .warn { color: #b3342b; font-weight: 650; }
+    .results-hint { color: #6b5a57; font-size: 0.9rem; margin: 0 0 1rem 0; }
+
+    .btn-save-route {
+        margin-top: 0.6rem; padding: 0.4rem 0.9rem; border-radius: 999px; font-size: 0.85rem; font-weight: 700;
+        border: 1px solid rgba(185, 84, 74, 0.45); background: rgba(185, 84, 74, 0.08); color: #b9544a; cursor: pointer;
+    }
+    .btn-save-route:hover { background: rgba(185, 84, 74, 0.16); }
+    .btn-save-route:disabled { opacity: 0.6; cursor: default; }
+    .saved-row {
+        display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+        padding: 0.75rem 0; border-top: 1px solid #f0e6e0;
+    }
+    .saved-row:first-of-type { border-top: none; }
+    .saved-name { font-weight: 700; color: #2b1a1c; cursor: pointer; background: none; border: none; padding: 0; font-size: 1rem; text-align: left; }
+    .saved-name:hover { color: #b9544a; }
+    .saved-sub { color: #6b5a57; font-size: 0.85rem; }
+    .btn-remove { background: none; border: none; color: #b3342b; font-weight: 700; cursor: pointer; }
+    @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div class="page-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8 18h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h5.8"/></svg></div>
+        <h1>Safest Route</h1>
+        <p>Compare route options by safety, not just speed.</p>
+    </div>
+
+    <div class="route-card">
+        <h2>Plan your trip</h2>
+        <form id="route-form" onsubmit="checkRoute(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="origin">From</label>
+                    <input type="text" id="origin" maxlength="200" placeholder="Address, place, or use current location" required>
+                </div>
+                <div class="form-group">
+                    <label for="destination">To</label>
+                    <input type="text" id="destination" maxlength="200" placeholder="Where are you headed?" required>
+                </div>
+            </div>
+            <div class="form-group" style="max-width: 240px;">
+                <label for="mode">Travelling by</label>
+                <select id="mode">
+                    <option value="walking">Walking</option>
+                    <option value="driving">Driving</option>
+                </select>
+            </div>
+            <div class="actions">
+                <button type="button" class="btn-location" onclick="useCurrentLocation()">Use my current location</button>
+                <button type="submit" class="btn-check" id="submit-btn">Find safest route</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="route-card" id="saved-card">
+        <h2>My commute routes</h2>
+        <p class="results-hint" id="saved-hint">Save up to 2 regular routes. We'll email you if someone reports an unsafe spot near one.</p>
+        <div id="saved-list"></div>
+    </div>
+
+    <div id="error-box" class="error-box" role="alert"></div>
+    <div id="map"></div>
+
+    <div class="results-card" id="results" style="display:none;">
+        <h2 style="font-family: Georgia, serif; color:#2b1a1c; margin:0 0 0.35rem 0; font-size:1.3rem;">Routes, safest first</h2>
+        <p class="results-hint" id="results-hint"></p>
+        <div id="route-list"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const COLORS = { safe: '#2f9e57', moderate: '#d9a021', unsafe: '#c9413a' };
+    const map = L.map('map').setView([28.6139, 77.2090], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors', maxZoom: 19
+    }).addTo(map);
+
+    let routes = [];
+    let searched = null;
+    let layers = [];
+    let activeIndex = 0;
+
+    function showError(message) {
+        const box = document.getElementById('error-box');
+        box.textContent = message;
+        box.style.display = message ? 'block' : 'none';
+    }
+
+    function useCurrentLocation() {
+        if (!navigator.geolocation) { showError('Geolocation is not supported by this browser.'); return; }
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                document.getElementById('origin').value =
+                    pos.coords.latitude.toFixed(6) + ',' + pos.coords.longitude.toFixed(6);
+                showError('');
+            },
+            () => showError('Could not get your location. Please type it in.'),
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+
+    async function checkRoute(event) {
+        event.preventDefault();
+        showError('');
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.textContent = 'Analysing routes…';
+
+        const body = new URLSearchParams({
+            origin: document.getElementById('origin').value,
+            destination: document.getElementById('destination').value,
+            mode: document.getElementById('mode').value
+        });
+
+        try {
+            const resp = await fetch('/check-route-safety', { method: 'POST', body });
+            const data = await resp.json();
+            if (!data.success) { showError(data.message || 'Something went wrong.'); return; }
+            routes = data.routes;
+            searched = { origin: body.get('origin'), destination: body.get('destination'), mode: body.get('mode') };
+            renderResults(data.time_bucket);
+        } catch (e) {
+            showError('Network error. Please check your connection and try again.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Find safest route';
+        }
+    }
+
+    function formatDelta(seconds) {
+        const mins = Math.round(Math.abs(seconds) / 60);
+        return mins === 0 ? 'same time' : mins + ' min ' + (seconds > 0 ? 'longer' : 'shorter');
+    }
+
+    function renderResults(timeBucket) {
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('results-hint').textContent =
+            'Scores reflect ' + timeBucket + ' conditions. Click a route to view it on the map.';
+
+        const list = document.getElementById('route-list');
+        list.innerHTML = '';
+        routes.forEach((r, i) => {
+            const item = document.createElement('div');
+            item.className = 'route-item';
+            item.dataset.index = i;
+
+            const top = document.createElement('div');
+            top.className = 'route-top';
+            const name = document.createElement('span');
+            name.className = 'route-name';
+            name.textContent = 'Route ' + r.rank + ' · via ' + r.summary;
+            if (r.rank === 1) name.insertAdjacentHTML('beforeend', '<span class="badge best">Safest</span>');
+            if (r.is_fastest) name.insertAdjacentHTML('beforeend', '<span class="badge">Fastest</span>');
+            const score = document.createElement('span');
+            score.className = 'score-pill ' + r.safety_level;
+            score.textContent = r.safety_score + '/100';
+            top.append(name, score);
+
+            const meta = document.createElement('div');
+            meta.className = 'route-meta';
+            meta.textContent = r.duration_text + ' · ' + r.distance_text;
+
+            const trade = document.createElement('div');
+            trade.className = 'tradeoff';
+            if (r.is_fastest) {
+                trade.textContent = 'Quickest option.';
+            } else {
+                const dir = r.safety_delta >= 0 ? '+' : '';
+                trade.textContent = formatDelta(r.extra_time_s) + ' than the fastest, ' +
+                    dir + r.safety_delta + ' safety points.';
+            }
+            if (r.risky_stretches.length) {
+                const total = r.risky_stretches.reduce((a, s) => a + s.length_m, 0);
+                const warn = document.createElement('div');
+                warn.className = 'warn';
+                warn.textContent = r.risky_stretches.length + ' isolated or poorly lit stretch(es), about ' +
+                    (total / 1000).toFixed(1) + ' km in total.';
+                trade.appendChild(warn);
+            }
+
+            const saveBtn = document.createElement('button');
+            saveBtn.type = 'button';
+            saveBtn.className = 'btn-save-route';
+            saveBtn.textContent = 'Save as commute route';
+            saveBtn.addEventListener('click', e => { e.stopPropagation(); saveRoute(i, saveBtn); });
+
+            item.append(top, meta, trade, saveBtn);
+            item.addEventListener('click', () => selectRoute(i));
+            list.appendChild(item);
+        });
+        selectRoute(0);
+    }
+
+    async function saveRoute(index, button) {
+        showError('');
+        button.disabled = true;
+        const r = routes[index];
+        const body = new URLSearchParams({
+            origin: searched.origin, destination: searched.destination, mode: searched.mode,
+            name: searched.origin + ' to ' + searched.destination + ' (via ' + r.summary + ')',
+            path: JSON.stringify(r.path)
+        });
+        try {
+            const data = await (await fetch('/save-route', { method: 'POST', body })).json();
+            if (data.success) { button.textContent = 'Saved'; loadSavedRoutes(); }
+            else { showError(data.message || 'Could not save route.'); button.disabled = false; }
+        } catch (e) {
+            showError('Network error. Please try again.');
+            button.disabled = false;
+        }
+    }
+
+    async function loadSavedRoutes() {
+        let data;
+        try { data = await (await fetch('/saved-routes')).json(); } catch (e) { return; }
+        if (!data.success) return;
+
+        const list = document.getElementById('saved-list');
+        list.replaceChildren();
+        document.getElementById('saved-hint').textContent =
+            'Saved ' + data.routes.length + ' of ' + data.max + '. We\'ll email you if someone reports an unsafe spot within ' +
+            data.alert_radius_m + ' m of a saved route.';
+        data.routes.forEach(route => {
+            const row = document.createElement('div');
+            row.className = 'saved-row';
+
+            const info = document.createElement('div');
+            const name = document.createElement('button');
+            name.type = 'button';
+            name.className = 'saved-name';
+            name.textContent = route.name;
+            name.title = 'Fill the form to re-check this route';
+            name.addEventListener('click', () => {
+                document.getElementById('origin').value = route.origin;
+                document.getElementById('destination').value = route.destination;
+                document.getElementById('mode').value = route.mode;
+            });
+            const sub = document.createElement('div');
+            sub.className = 'saved-sub';
+            sub.textContent = route.mode === 'walking' ? 'Walking' : 'Driving';
+            info.append(name, sub);
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'btn-remove';
+            remove.textContent = 'Remove';
+            remove.addEventListener('click', async () => {
+                remove.disabled = true;
+                try { await fetch('/delete-saved-route/' + route.id, { method: 'POST' }); } catch (e) { showError('Network error. Please try again.'); }
+                loadSavedRoutes();
+            });
+
+            row.append(info, remove);
+            list.appendChild(row);
+        });
+    }
+    loadSavedRoutes();
+
+    function selectRoute(index) {
+        activeIndex = index;
+        layers.forEach(l => map.removeLayer(l));
+        layers = [];
+        document.querySelectorAll('.route-item').forEach((el, i) =>
+            el.classList.toggle('active', i === index));
+
+        // Draw the unselected routes first so the selected one stays on top.
+        const order = routes.map((_, i) => i).filter(i => i !== index).concat(index);
+        order.forEach(i => {
+            const r = routes[i];
+            const selected = i === index;
+            layers.push(L.polyline(r.path, {
+                color: selected ? COLORS[r.safety_level] : '#b8aaa6',
+                weight: selected ? 6 : 4, opacity: selected ? 0.95 : 0.6
+            }).addTo(map));
+        });
+
+        const r = routes[index];
+        r.risky_stretches.forEach(s => {
+            layers.push(L.polyline([s.start, s.end], { color: '#7a1f1a', weight: 8, opacity: 0.8, dashArray: '2 10' })
+                .bindTooltip('Isolated / poorly lit · ' + s.length_m + ' m').addTo(map));
+        });
+        const first = r.path[0], last = r.path[r.path.length - 1];
+        layers.push(L.circleMarker(first, { radius: 7, color: '#fff', weight: 2, fillColor: '#5c2a3a', fillOpacity: 1 }).addTo(map));
+        layers.push(L.circleMarker(last, { radius: 7, color: '#fff', weight: 2, fillColor: '#b9544a', fillOpacity: 1 }).addTo(map));
+        map.fitBounds(L.polyline(r.path).getBounds(), { padding: [30, 30] });
+    }
+</script>
+{% endblock %}

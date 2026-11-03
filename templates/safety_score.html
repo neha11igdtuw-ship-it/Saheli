@@ -609,6 +609,9 @@
         </form>
     </div>
 
+    <div id="saved-areas" style="display:none; margin-bottom: 1.5rem;"></div>
+    <div id="offline-note" role="status" style="display:none; margin-bottom: 1rem; padding: 0.85rem 1rem; border-radius: 12px; background: #fff7e6; border: 1px solid #f0d9a8; color: #6b4a12; font-weight: 600;"></div>
+
     <div id="result-card" class="result-card">
         <div class="safety-score-display">
             <div id="score-circle" class="score-circle safe">
@@ -661,7 +664,7 @@
                             Crime: {{ zone.crime_rate|title if zone.crime_rate else 'N/A' }}
                         </div>
                         <div class="zone-details" style="margin-top: 0.25rem;">
-                            Updated: {{ zone.last_updated.strftime('%b %d, %I:%M %p') }}
+                            Updated: {{ (zone.last_updated | ist).strftime('%b %d, %I:%M %p') }} IST
                         </div>
                     </div>
                     <div class="zone-score">{{ zone.safety_score|round(0)|int }}</div>
@@ -1759,16 +1762,127 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                saveScoreToCache(areaNameFrom(formData), parseFloat(lat), parseFloat(lng), data);
+                showOfflineNote('');
                 displaySafetyResult(data, formData.get('area_name'));
             } else {
                 alert(' Error: ' + data.message);
             }
         })
         .catch(error => {
-            alert(' Error checking safety. Please try again.');
-            console.error('Error:', error);
+            // fetch() rejects with a TypeError only when the server can't be reached at all
+            // (same signal the offline SOS fallback in sos.html relies on). Any other
+            // failure (e.g. a malformed response) is a real error, not a connectivity gap.
+            if (error instanceof TypeError) {
+                showCachedScoreOffline(areaNameFrom(formData), parseFloat(lat), parseFloat(lng));
+            } else {
+                alert(' Error checking safety. Please try again.');
+                console.error('Error:', error);
+            }
         });
     }
+
+    // ==================== OFFLINE SCORE CACHE (localStorage) ====================
+    // Scores are cached per device so a previously checked area can still be shown
+    // with no connectivity. Keyed by user id because localStorage is shared by every
+    // account on the same browser. Scores are time-of-day dependent, so a cached score
+    // is always labelled with when it was calculated and is never presented as live.
+    const SCORE_CACHE_KEY = 'saheli_score_cache_{{ user.id }}';
+    const SCORE_CACHE_MAX = 10;
+    const SCORE_CACHE_MATCH_M = 500;
+
+    function areaNameFrom(formData) { return formData.get('area_name') || 'Unknown Area'; }
+
+    function readScoreCache() {
+        try {
+            const parsed = JSON.parse(localStorage.getItem(SCORE_CACHE_KEY) || '[]');
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveScoreToCache(name, lat, lng, data) {
+        try {
+            // One entry per ~100 m cell; newest first, oldest dropped past the cap.
+            const sameSpot = e => Math.abs(e.lat - lat) < 0.001 && Math.abs(e.lng - lng) < 0.001;
+            const cache = readScoreCache().filter(e => !sameSpot(e));
+            cache.unshift({ name, lat, lng, data, cachedAt: Date.now() });
+            localStorage.setItem(SCORE_CACHE_KEY, JSON.stringify(cache.slice(0, SCORE_CACHE_MAX)));
+        } catch (e) {
+            // localStorage unavailable (private mode, quota) — online checks still work.
+        }
+        renderSavedAreas();
+    }
+
+    function distanceMeters(lat1, lng1, lat2, lng2) {
+        const rad = d => d * Math.PI / 180;
+        const a = Math.sin(rad(lat2 - lat1) / 2) ** 2 +
+            Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(rad(lng2 - lng1) / 2) ** 2;
+        return 6371000 * 2 * Math.asin(Math.sqrt(a));
+    }
+
+    function describeAge(timestamp) {
+        const minutes = Math.round((Date.now() - timestamp) / 60000);
+        if (minutes < 1) return 'just now';
+        if (minutes < 60) return minutes + ' min ago';
+        const hours = Math.round(minutes / 60);
+        return hours < 24 ? hours + ' h ago' : Math.round(hours / 24) + ' day(s) ago';
+    }
+
+    function showOfflineNote(text) {
+        const note = document.getElementById('offline-note');
+        note.textContent = text;
+        note.style.display = text ? 'block' : 'none';
+    }
+
+    function showCachedEntry(entry, distanceNote) {
+        showOfflineNote('Offline: showing the last saved score for ' + entry.name +
+            ' (calculated ' + describeAge(entry.cachedAt) + (distanceNote || '') +
+            '). Conditions such as time of day may have changed.');
+        displaySafetyResult(entry.data, entry.name);
+    }
+
+    function showCachedScoreOffline(name, lat, lng) {
+        const nearest = readScoreCache()
+            .map(e => ({ entry: e, dist: distanceMeters(lat, lng, e.lat, e.lng) }))
+            .filter(x => x.dist <= SCORE_CACHE_MATCH_M)
+            .sort((a, b) => a.dist - b.dist)[0];
+
+        if (nearest) {
+            showCachedEntry(nearest.entry, nearest.dist > 100 ? ', about ' + Math.round(nearest.dist) + ' m away' : '');
+        } else {
+            document.getElementById('result-card').style.display = 'none';
+            showOfflineNote("You're offline and there's no saved score near this location. Scores you check while online are saved here for later.");
+        }
+    }
+
+    function renderSavedAreas() {
+        const box = document.getElementById('saved-areas');
+        const cache = readScoreCache();
+        box.replaceChildren();
+        if (!cache.length) { box.style.display = 'none'; return; }
+
+        const title = document.createElement('div');
+        title.textContent = 'Saved for offline';
+        title.style.cssText = 'font-weight: 700; color: #4a3a38; margin-bottom: 0.5rem;';
+        box.appendChild(title);
+
+        const chips = document.createElement('div');
+        chips.style.cssText = 'display: flex; flex-wrap: wrap; gap: 0.5rem;';
+        cache.forEach(entry => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.textContent = entry.name + ' · ' + Math.round(entry.data.safety_score);
+            chip.title = 'Calculated ' + describeAge(entry.cachedAt);
+            chip.style.cssText = 'padding: 0.45rem 0.9rem; border-radius: 999px; border: 1px solid #e7d6cf; background: #fff; color: #5c2a3a; font-weight: 600; cursor: pointer;';
+            chip.addEventListener('click', () => showCachedEntry(entry));
+            chips.appendChild(chip);
+        });
+        box.appendChild(chips);
+        box.style.display = 'block';
+    }
+    renderSavedAreas();
 
     function displaySafetyResult(data, areaName) {
         const resultCard = document.getElementById('result-card');

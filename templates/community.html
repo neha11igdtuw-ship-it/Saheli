@@ -377,7 +377,7 @@
                         <div>
                             <div class="report-title">{{ report.area_name }}</div>
                             <div class="report-meta">
-                                By {{ report.user.username }} &middot; {{ report.reported_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                By {{ report.user.username }} &middot; {{ (report.reported_at | ist).strftime('%B %d, %Y at %I:%M %p') }} IST
                             </div>
                         </div>
                         <span class="report-badge {{ report.report_type }}">

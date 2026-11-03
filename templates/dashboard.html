@@ -520,6 +520,8 @@
         <nav class="sidebar-nav">
             <a href="{{ url_for('dashboard') }}" class="active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg></span> Overview</a>
             <a href="{{ url_for('safety_score_page') }}"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11"/><path d="M12 20V4"/><path d="M20 20v-6"/></svg></span> Safety score</a>
+            <a href="{{ url_for('safe_route_page') }}"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8 18h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h5.8"/></svg></span> Safest route</a>
+            <a href="{{ url_for('tracked_trip_page') }}"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/></svg></span> Tracked trip</a>
             <a href="{{ url_for('safety_beacons_page') }}"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.4 7-12.4A7 7 0 0 0 5 8.6C5 13.6 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.4"/></svg></span> Safe places</a>
             <a href="{{ url_for('trusted_circle') }}"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 20c0-3.3 2.5-5.8 5.5-5.8s5.5 2.5 5.5 5.8"/><circle cx="17.5" cy="9.3" r="2.3"/><path d="M15.8 14.3c2.2.2 4.2 2.1 4.7 5.7"/></svg></span> Trusted circle</a>
             <a href="{{ url_for('community_page') }}"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 8.6 8.6 0 0 1-3.6-.8L3 20l1-4.6A8.4 8.4 0 1 1 21 11.5Z"/></svg></span> Community</a>
@@ -571,7 +573,7 @@
         </div>
 
         <div class="main-topbar">
-            <span>{{ user.created_at.strftime('%A, %B %d') if user.created_at else '' }}</span>
+            <span>{{ (user.created_at | ist).strftime('%A, %B %d') if user.created_at else '' }}</span>
             <div class="topbar-actions">
                 <span class="status-chip"><span class="dot"></span> Safety tools ready</span>
                 <button class="icon-btn" title="Notifications" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 6.5-2.5 8.5-2.5 8.5h17S18 14.5 18 8Z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg></button>
@@ -614,6 +616,18 @@
                 <span class="action-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11"/><path d="M12 20V4"/><path d="M20 20v-6"/></svg></span>
                 <strong>Safety Score</strong>
                 <span>Check how safe your area looks right now</span>
+            </a>
+
+            <a href="{{ url_for('safe_route_page') }}" class="action-card rose">
+                <span class="action-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8 18h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h5.8"/></svg></span>
+                <strong>Safest Route</strong>
+                <span>Compare routes by safety before you set out</span>
+            </a>
+
+            <a href="{{ url_for('tracked_trip_page') }}" class="action-card amber">
+                <span class="action-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/></svg></span>
+                <strong>Tracked Trip</strong>
+                <span>Auto-alert contacts if you don't arrive on time</span>
             </a>
 
             <a href="{{ url_for('trusted_circle') }}" class="action-card amber">

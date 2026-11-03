@@ -170,6 +170,43 @@
         transform: translateY(-2px);
     }
 
+    .btn-verify {
+        flex: 1;
+        padding: 0.6rem;
+        background: #b9544a;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 650;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-verify:hover { background: #a2473e; transform: translateY(-2px); }
+    .btn-verify:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .verified-badge {
+        flex: 1;
+        padding: 0.6rem;
+        text-align: center;
+        background: #eaf6ec;
+        color: #1e7a37;
+        border-radius: 10px;
+        font-weight: 650;
+        font-size: 0.9rem;
+    }
+
+    .verify-instructions {
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        background: #fdf6e8;
+        border: 1px solid #f0dca8;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        color: #6b5a37;
+        display: none;
+    }
+
     .form-row {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -348,17 +385,26 @@
                         {% endif %}
                         <div class="contact-detail-item">
                             <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></span>
-                            <span><strong>Added:</strong> {{ contact.added_at.strftime('%b %d, %Y') }}</span>
+                            <span><strong>Added:</strong> {{ (contact.added_at | ist).strftime('%b %d, %Y') }}</span>
                         </div>
                     </div>
 
                     <div class="contact-actions">
+                        {% if contact.phone_verified %}
+                            <span class="verified-badge">✓ Phone Verified</span>
+                        {% else %}
+                            <button type="button" class="btn-verify" id="verify-btn-{{ contact.id }}"
+                                    onclick="startVerification({{ contact.id }}, '{{ contact.name }}')">
+                                Verify Phone
+                            </button>
+                        {% endif %}
                         <form method="POST" action="{{ url_for('delete_trusted_contact', contact_id=contact.id) }}" style="flex: 1;">
                             <button type="submit" class="btn-delete" onclick="return confirm('Remove {{ contact.name }} from trusted circle?')">
                                 Remove
                             </button>
                         </form>
                     </div>
+                    <div class="verify-instructions" id="verify-instructions-{{ contact.id }}"></div>
                 </div>
             {% endfor %}
         </div>
@@ -372,5 +418,82 @@
         </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const verifyPollTimers = {};
+
+    function showInstructions(contactId, text) {
+        const box = document.getElementById(`verify-instructions-${contactId}`);
+        if (!box) return;
+        box.textContent = text;
+        box.style.display = 'block';
+    }
+
+    function markVerified(contactId) {
+        const btn = document.getElementById(`verify-btn-${contactId}`);
+        if (!btn) return;
+        const badge = document.createElement('span');
+        badge.className = 'verified-badge';
+        badge.textContent = '✓ Phone Verified';
+        btn.replaceWith(badge);
+        if (verifyPollTimers[contactId]) {
+            clearInterval(verifyPollTimers[contactId]);
+            delete verifyPollTimers[contactId];
+        }
+    }
+
+    function pollVerification(contactId) {
+        if (verifyPollTimers[contactId]) return;  // already polling
+        let attempts = 0;
+        verifyPollTimers[contactId] = setInterval(async () => {
+            attempts += 1;
+            try {
+                const res = await fetch(`/check-contact-verification/${contactId}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success && data.verified) {
+                    markVerified(contactId);
+                    showInstructions(contactId, 'Verified! This number can now receive real SOS calls and texts.');
+                }
+            } catch (e) {
+                // Network hiccup - just try again next tick.
+            }
+            if (attempts >= 24 && verifyPollTimers[contactId]) {  // ~2 minutes at 5s intervals
+                clearInterval(verifyPollTimers[contactId]);
+                delete verifyPollTimers[contactId];
+            }
+        }, 5000);
+    }
+
+    async function startVerification(contactId, contactName) {
+        const btn = document.getElementById(`verify-btn-${contactId}`);
+        if (btn) { btn.disabled = true; btn.textContent = 'Calling...'; }
+
+        try {
+            const res = await fetch(`/verify-trusted-contact/${contactId}`, { method: 'POST' });
+            const data = await res.json();
+
+            if (!data.success) {
+                showInstructions(contactId, data.message || 'Could not start verification.');
+                if (btn) { btn.disabled = false; btn.textContent = 'Verify Phone'; }
+                return;
+            }
+
+            if (data.already_verified) {
+                markVerified(contactId);
+                showInstructions(contactId, data.message);
+                return;
+            }
+
+            showInstructions(contactId, data.message);
+            if (btn) { btn.textContent = 'Waiting for call...'; }
+            pollVerification(contactId);
+        } catch (e) {
+            showInstructions(contactId, 'Network error starting verification. Please try again.');
+            if (btn) { btn.disabled = false; btn.textContent = 'Verify Phone'; }
+        }
+    }
+</script>
 {% endblock %}
 
